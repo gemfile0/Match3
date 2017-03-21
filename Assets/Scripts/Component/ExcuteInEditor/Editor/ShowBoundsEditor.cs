@@ -6,7 +6,7 @@ class ShowBoundsEditor: Editor {
 	void OnSceneGUI() {
 		ShowBounds t = target as ShowBounds;
 
-		if(t == null || t.edges == null)
+		if(t == null || t.edges == null || t.edges.Length == 0)
 			return;
 
 		Handles.color = Color.white;

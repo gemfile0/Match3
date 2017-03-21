@@ -120,8 +120,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Model:
-    rows: 4
-    cols: 4
+    rows: 9
+    cols: 9
 --- !u!4 &497718673
 Transform:
   m_ObjectHideFlags: 0

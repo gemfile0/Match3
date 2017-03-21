@@ -1,30 +1,99 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class GameController<M>: BaseController<M>
 	where M: GameModel {
-	public void Set() {
-		Position.Cols = Model.rows;
-		Position.Cols = Model.rows;
-		MakeGems();
+	public void Init() {
+		SetSize();
+		MakeField();
+		PutGems();
 	}
 
-	void MakeGems() {
+	public void SetSize() {
+		Position.Cols = Model.cols;
+		Position.Rows = Model.rows;
+	}
+
+	public void MakeField() {
 		var rows = Model.rows;
 		var cols = Model.rows;
-		var random = new Random();
-		var gemNames = new List<string> {"RedGem", "BlueGem", "GreenGem", "PurpleGem", "CyanGem", "YellowGem"};
+		
 		var gemModels = new Dictionary<int, GemModel>();
 
 		var count = 0;
 		for(var row = 0; row < rows; row++) {
 			for(var col = 0; col < cols; col++) {
-				int index = random.Next(gemNames.Count);
-				gemModels.Add(count, new GemModel(gemNames[index], new Position(count)));
+				gemModels.Add(count, new GemModel(GemType.Empty, new Position(count)));
 				count++;
 			}
 		}
 
 		Model.gemModels = gemModels;
+	}
+
+	public void PutGems() {
+		var matchingTypes = new List<GemType> {
+			GemType.RedGem, GemType.GreenGem, GemType.BlueGem, 
+			GemType.CyanGem, GemType.PurpleGem, GemType.YellowGem
+		};
+		
+		var emtpyGems = Model.gemModels
+				.Where(gemModel => gemModel.Value.Type == GemType.Empty)
+				.ToDictionary(p => p.Key, p => p.Value);
+		var matchLineModels = Model.matchLineModels;
+
+		var random = new System.Random();
+		emtpyGems.ForEach(gemModel => {
+			var sourceIndex = gemModel.Key;
+			var gemsCantPutIn = new List<GemType>();
+			matchLineModels.ForEach(matchLineModel => {
+				matchingTypes.ForEach(matchingType => {
+					if (ExistAnyMatches(sourceIndex, matchLineModel, matchingType)) {
+						gemsCantPutIn.Add(matchingType);
+					}
+				});
+			});
+
+			if (gemsCantPutIn.Count == matchingTypes.Count) {
+				throw new InvalidOperationException("That should not happen.");
+			}
+
+			var gemsCanPutIn = matchingTypes.Except(gemsCantPutIn).ToList();
+
+			int index = random.Next(gemsCanPutIn.Count);
+			var gemTypeChoosen = gemsCanPutIn[index];
+			gemModel.Value.Type = gemTypeChoosen;
+		});
+	}
+
+	public bool ExistAnyMatches(int sourceIndex, MatchLineModel matchLineModel, GemType matchingType) {
+		foreach(var whereCanMatch in matchLineModel.wheresCanMatch) {
+			var matchCount = 0;
+			foreach(var matchOffset in whereCanMatch.matchOffsets) {
+				var matchPosition = new Position(sourceIndex, matchOffset[0], matchOffset[1]);
+				if (matchPosition.IsAcceptableIndex() 
+					&& (sourceIndex == matchPosition.index
+						|| matchingType == GetGemModel(matchPosition.index).Type)) {
+					matchCount++;
+				} else {
+					break;
+				}
+			}
+			
+			if (matchCount == whereCanMatch.matchOffsets.Count) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public GemModel GetGemModel(int index) {
+		if (index >= 0 && index < Model.gemModels.Count) {
+			return Model.gemModels[index];
+		} else {
+			return null;
+		}
 	}
 }

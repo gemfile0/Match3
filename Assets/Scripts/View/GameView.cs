@@ -5,7 +5,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 	void Start() {
 		ResourceCache.LoadAll("");
 		
-		Controller.Set();
+		Controller.Init();
 		MakeField();
 		AlignField();
 	}
