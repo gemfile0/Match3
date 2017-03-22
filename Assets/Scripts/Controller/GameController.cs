@@ -15,6 +15,10 @@ public class GameController<M>: BaseController<M>
 		Position.Rows = Model.rows;
 	}
 
+	public void Update() {
+		
+	}
+
 	public void MakeField() {
 		var rows = Model.rows;
 		var cols = Model.rows;
@@ -67,7 +71,7 @@ public class GameController<M>: BaseController<M>
 		});
 	}
 
-	public bool ExistAnyMatches(int sourceIndex, MatchLineModel matchLineModel, GemType matchingType) {
+    public bool ExistAnyMatches(int sourceIndex, MatchLineModel matchLineModel, GemType matchingType) {
 		foreach(var whereCanMatch in matchLineModel.wheresCanMatch) {
 			var matchCount = 0;
 			foreach(var matchOffset in whereCanMatch.matchOffsets) {
@@ -87,6 +91,41 @@ public class GameController<M>: BaseController<M>
 		}
 
 		return false;
+	}
+
+	public List<GemModel> Swap(Position sourcePosition, Position nearPosition) {
+		var gemModels = Model.gemModels;
+		var swappingGemModels = new List<GemModel>();
+		if (nearPosition.IsAcceptableIndex()) {
+			var sourceGemModel = GetGemModel(sourcePosition.index);
+			var nearGemModel = GetGemModel(nearPosition.index);
+			nearGemModel.position = sourcePosition;
+			sourceGemModel.position = nearPosition;
+
+			gemModels[nearGemModel.position.index] = nearGemModel;
+			gemModels[sourceGemModel.position.index] = sourceGemModel;
+
+			swappingGemModels = new List<GemModel>{ sourceGemModel, nearGemModel };
+		}
+
+		return swappingGemModels;
+    }
+
+	public List<GemModel> Match() {
+		var gemModels = Model.gemModels;
+		var matchedGemModels = new List<GemModel>();
+		Model.gemModels.Values.ForEach(gemModel => {
+			Model.matchLineModels.ForEach(matchLineModel => {
+				if (ExistAnyMatches(gemModel.position.index, matchLineModel, gemModel.Type)) {
+					matchedGemModels.Add(gemModel);
+				}
+			});
+		});
+
+		matchedGemModels.ForEach(matchedGemModel => {
+			gemModels[matchedGemModel.position.index] = new GemModel(GemType.Empty, matchedGemModel.position);
+		});
+		return matchedGemModels;
 	}
 
 	public GemModel GetGemModel(int index) {

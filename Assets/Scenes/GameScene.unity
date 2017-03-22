@@ -101,6 +101,7 @@ GameObject:
   - component: {fileID: 497718673}
   - component: {fileID: 497718672}
   - component: {fileID: 497718674}
+  - component: {fileID: 497718675}
   m_Layer: 0
   m_Name: GameView
   m_TagString: Untagged
@@ -120,8 +121,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Model:
-    rows: 9
-    cols: 9
+    rows: 5
+    cols: 5
 --- !u!4 &497718673
 Transform:
   m_ObjectHideFlags: 0
@@ -150,6 +151,17 @@ MonoBehaviour:
   latestBounds:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 0, y: 0, z: 0}
+--- !u!114 &497718675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 497718671}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 216598d58f2934d068aed654e9e91620, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1988267236
 GameObject:
   m_ObjectHideFlags: 0
