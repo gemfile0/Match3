@@ -19,11 +19,18 @@ public class TestGameController {
 	public void MakeField() {
 		//1. Arrange
 		var gameModel = GetGameModel();
+		var gameController = GetGameController(gameModel);
 		//2. Act
-		GetGameController(gameModel).MakeField();
+		gameController.MakeField();
 		//3. Assert
-		Assert.AreEqual(25, gameModel.gemModels.Count);
-		Assert.AreEqual(25, gameModel.gemModels.Values.Count(gemModel => gemModel.Type == GemType.Empty));
+		var gemModels = gameModel.GemModels;
+		Assert.AreEqual(25, gemModels.GetLength(0) * gemModels.GetLength(1));
+
+		var emtpyGemModels = 
+			from GemModel gemModel in gemModels
+			where gemModel.Type == GemType.Empty
+			select gemModel;
+		Assert.AreEqual(25, emtpyGemModels.Count());
 	}
 
 	[Test]
@@ -37,8 +44,14 @@ public class TestGameController {
 		gameController.PutGems();
 
 		//3. Assert
-		Assert.AreEqual(25, gameModel.gemModels.Count);
-		Assert.AreEqual(0, gameModel.gemModels.Values.Count(gemModel => gemModel.Type == GemType.Empty));
+		var gemModels = gameModel.GemModels;
+		Assert.AreEqual(25, gemModels.GetLength(0) * gemModels.GetLength(1));
+		
+		var emtpyGemModels = 
+			from GemModel gemModel in gemModels
+			where gemModel.Type == GemType.Empty
+			select gemModel;
+		Assert.AreEqual(0, emtpyGemModels.Count());
 	}
 
 	[Test]
@@ -49,25 +62,27 @@ public class TestGameController {
 		gameController.SetSize();
 		gameController.MakeField();
 
-		var emtpyGems = gameModel.gemModels
-				.Where(gemModel => gemModel.Value.Type == GemType.Empty)
-				.ToDictionary(p => p.Key, p => p.Value);
-			
-		//2. Act
-		emtpyGems[1].Type = GemType.RedGem;
-		emtpyGems[2].Type = GemType.RedGem;
-		
-		emtpyGems[3].Type = GemType.RedGem;
-		emtpyGems[4].Type = GemType.RedGem;
-		emtpyGems[5].Type = GemType.GreenGem;
+		var gemModels = gameModel.GemModels;
+		var emtpyGemModels = 
+			(from GemModel gemModel in gemModels
+			where gemModel.Type == GemType.Empty
+			select gemModel).ToList();
 
-		emtpyGems[6].Type = GemType.RedGem;
-		emtpyGems[7].Type = GemType.GreenGem;
-		emtpyGems[8].Type = GemType.GreenGem;
+		//2. Act
+		emtpyGemModels[1].Type = GemType.RedGem;
+		emtpyGemModels[2].Type = GemType.RedGem;
+		
+		emtpyGemModels[3].Type = GemType.RedGem;
+		emtpyGemModels[4].Type = GemType.RedGem;
+		emtpyGemModels[5].Type = GemType.GreenGem;
+
+		emtpyGemModels[6].Type = GemType.RedGem;
+		emtpyGemModels[7].Type = GemType.GreenGem;
+		emtpyGemModels[8].Type = GemType.GreenGem;
 
 		//3. Assert
-		Assert.AreEqual(GemType.Empty, gameController.GetGemModel(0).Type);
-		Assert.AreEqual(GemType.RedGem, gameController.GetGemModel(1).Type);
+		Assert.AreEqual(GemType.Empty, gameController.GetGemModel(new Position(0, 0)).Type);
+		Assert.AreEqual(GemType.RedGem, gameController.GetGemModel(new Position(0, 1)).Type);
 
 		//1. Arrange
 		var horizontalMatch = new MatchLineModel(3, 1);

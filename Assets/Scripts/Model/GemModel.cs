@@ -5,8 +5,9 @@ public interface IGemModel
     GemType Type { get; set; }
 }
 
+[System.Serializable]
 public enum GemType {
-    Empty = 0, RedGem, BlueGem, GreenGem, PurpleGem, CyanGem, YellowGem
+    Empty = 0, RedGem, BlueGem, GreenGem, PurpleGem, OrangeGem, YellowGem
 }
 
 [System.Serializable]

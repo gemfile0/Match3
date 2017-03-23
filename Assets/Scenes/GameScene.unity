@@ -121,8 +121,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Model:
-    rows: 5
-    cols: 5
+    rows: 7
+    cols: 7
+    matchLineModels:
+    - cols: 3
+      rows: 1
+    - cols: 1
+      rows: 3
+    - cols: 2
+      rows: 2
 --- !u!4 &497718673
 Transform:
   m_ObjectHideFlags: 0

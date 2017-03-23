@@ -69,6 +69,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Model:
     name: 
+    id: 0
 --- !u!212 &212112620664597046
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -100,7 +101,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 354a32a640aa84792b350fa775eacf4e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8d9d26032c946d949a741e51ed74d475, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

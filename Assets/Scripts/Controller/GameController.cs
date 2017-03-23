@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class GameController<M>: BaseController<M>
 	where M: GameModel {
+		
 	public void Init() {
 		SetSize();
 		MakeField();
@@ -21,54 +23,46 @@ public class GameController<M>: BaseController<M>
 
 	public void MakeField() {
 		var rows = Model.rows;
-		var cols = Model.rows;
-		
-		var gemModels = new Dictionary<int, GemModel>();
+		var cols = Model.cols;
+		var gemModels = Model.GemModels = new GemModel[rows, cols];
 
-		var count = 0;
 		for(var row = 0; row < rows; row++) {
 			for(var col = 0; col < cols; col++) {
-				gemModels.Add(count, new GemModel(GemType.Empty, new Position(count)));
-				count++;
+				gemModels[row, col] = new GemModel(GemType.Empty, new Position(col, row));
 			}
 		}
-
-		Model.gemModels = gemModels;
 	}
 
 	public void PutGems() {
-		var matchingTypes = new List<GemType> {
-			GemType.RedGem, GemType.GreenGem, GemType.BlueGem, 
-			GemType.CyanGem, GemType.PurpleGem, GemType.YellowGem
-		};
-		
-		var emtpyGems = Model.gemModels
-				.Where(gemModel => gemModel.Value.Type == GemType.Empty)
-				.ToDictionary(p => p.Key, p => p.Value);
 		var matchLineModels = Model.matchLineModels;
+		var matchingTypes = Model.MatchingTypes;
+		Debug.Log("PutGems : " + matchingTypes.Count);
+		
+		var emtpyGemModels = 
+			from GemModel gemModel in Model.GemModels
+			where gemModel.Type == GemType.Empty
+			select gemModel;
+
 
 		var random = new System.Random();
-		emtpyGems.ForEach(gemModel => {
-			var sourceIndex = gemModel.Key;
+		foreach(var emptyGemModel in emtpyGemModels) {
 			var gemsCantPutIn = new List<GemType>();
-			matchLineModels.ForEach(matchLineModel => {
-				matchingTypes.ForEach(matchingType => {
-					if (ExistAnyMatches(sourceIndex, matchLineModel, matchingType)) {
+
+			foreach(var matchLineModel in matchLineModels) {
+				foreach(var matchingType in matchingTypes) {
+					if (ExistAnyMatches(emptyGemModel.position.index, matchLineModel, matchingType)) {
 						gemsCantPutIn.Add(matchingType);
 					}
-				});
-			});
+				}
+			}
 
 			if (gemsCantPutIn.Count == matchingTypes.Count) {
 				throw new InvalidOperationException("That should not happen.");
 			}
 
 			var gemsCanPutIn = matchingTypes.Except(gemsCantPutIn).ToList();
-
-			int index = random.Next(gemsCanPutIn.Count);
-			var gemTypeChoosen = gemsCanPutIn[index];
-			gemModel.Value.Type = gemTypeChoosen;
-		});
+			emptyGemModel.Type = gemsCanPutIn[random.Next(gemsCanPutIn.Count)];
+		}
 	}
 
     public bool ExistAnyMatches(int sourceIndex, MatchLineModel matchLineModel, GemType matchingType) {
@@ -78,7 +72,7 @@ public class GameController<M>: BaseController<M>
 				var matchPosition = new Position(sourceIndex, matchOffset[0], matchOffset[1]);
 				if (matchPosition.IsAcceptableIndex() 
 					&& (sourceIndex == matchPosition.index
-						|| matchingType == GetGemModel(matchPosition.index).Type)) {
+						|| matchingType == GetGemModel(matchPosition).Type)) {
 					matchCount++;
 				} else {
 					break;
@@ -94,16 +88,16 @@ public class GameController<M>: BaseController<M>
 	}
 
 	public List<GemModel> Swap(Position sourcePosition, Position nearPosition) {
-		var gemModels = Model.gemModels;
+		var gemModels = Model.GemModels;
 		var swappingGemModels = new List<GemModel>();
 		if (nearPosition.IsAcceptableIndex()) {
-			var sourceGemModel = GetGemModel(sourcePosition.index);
-			var nearGemModel = GetGemModel(nearPosition.index);
+			var sourceGemModel = GetGemModel(sourcePosition);
+			var nearGemModel = GetGemModel(nearPosition);
 			nearGemModel.position = sourcePosition;
 			sourceGemModel.position = nearPosition;
 
-			gemModels[nearGemModel.position.index] = nearGemModel;
-			gemModels[sourceGemModel.position.index] = sourceGemModel;
+			gemModels[nearGemModel.position.row, nearGemModel.position.col] = nearGemModel;
+			gemModels[sourceGemModel.position.row, sourceGemModel.position.col] = sourceGemModel;
 
 			swappingGemModels = new List<GemModel>{ sourceGemModel, nearGemModel };
 		}
@@ -111,28 +105,81 @@ public class GameController<M>: BaseController<M>
 		return swappingGemModels;
     }
 
-	public List<GemModel> Match() {
-		var gemModels = Model.gemModels;
+    internal Queue<List<GemModel>> Feed() {
+		var feedingListQueue = new Queue<List<GemModel>>();
+
+		var matchingTypes = Model.MatchingTypes;
+		var gemModels = Model.GemModels;
+		var random = new System.Random();
+
+		for(var row = 0; row < gemModels.GetLength(0); row++) {
+			var feedingList = new List<GemModel>();
+			for(var col = 0; col < gemModels.GetLength(1); col++) {
+				var gemModel = gemModels[row, col];
+				if (gemModel.Type == GemType.Empty) {
+					gemModel.Type = matchingTypes[random.Next(matchingTypes.Count)];
+
+					feedingList.Add(gemModel);
+				}
+			}
+			if (feedingList.Count > 0) {
+				feedingListQueue.Enqueue(feedingList);
+			}
+		}
+		
+		return feedingListQueue;
+    }
+
+    public List<GemModel> Drop() {
+		var droppedGemModels = new List<GemModel>();
+		
+		var gemModels = Model.GemModels;
+		var emptyGemModels = Model.EmtpyGemModels;
+        
+		foreach(var emptyGemModel in emptyGemModels) {
+			while (true) {
+				var emptyGemPosition = emptyGemModel.position;
+				var nearPosition = new Position(emptyGemPosition.index, 0, 1);
+				if (!nearPosition.IsAcceptableIndex()) {
+					break;
+				}
+
+				droppedGemModels.AddRange(Swap(emptyGemPosition, nearPosition));
+			}
+		}
+
+		return droppedGemModels
+			.Distinct()
+			.Where(gemModel => gemModel.Type != GemType.Empty).ToList();
+    }
+
+    public List<GemModel> Match() {
 		var matchedGemModels = new List<GemModel>();
-		Model.gemModels.Values.ForEach(gemModel => {
-			Model.matchLineModels.ForEach(matchLineModel => {
+		
+		var gemModels = Model.GemModels;
+		var emptyGemModels = Model.EmtpyGemModels;
+		var matchLineModels = Model.matchLineModels;
+
+		foreach(var gemModel in gemModels) {
+			foreach(var matchLineModel in matchLineModels) {
 				if (ExistAnyMatches(gemModel.position.index, matchLineModel, gemModel.Type)) {
 					matchedGemModels.Add(gemModel);
 				}
-			});
-		});
+			}
+		}
+		
+		emptyGemModels = new List<GemModel>();
+		foreach(var matchedGemModel in matchedGemModels) {
+			var newGemModel = new GemModel(GemType.Empty, matchedGemModel.position);
+			gemModels[matchedGemModel.position.row, matchedGemModel.position.col] = newGemModel;
+			emptyGemModels.Add(newGemModel);
+		}
 
-		matchedGemModels.ForEach(matchedGemModel => {
-			gemModels[matchedGemModel.position.index] = new GemModel(GemType.Empty, matchedGemModel.position);
-		});
+		Model.EmtpyGemModels = emptyGemModels;
 		return matchedGemModels;
 	}
 
-	public GemModel GetGemModel(int index) {
-		if (index >= 0 && index < Model.gemModels.Count) {
-			return Model.gemModels[index];
-		} else {
-			return null;
-		}
+	public GemModel GetGemModel(Position position) {
+		return Model.GemModels[position.row, position.col];
 	}
 }

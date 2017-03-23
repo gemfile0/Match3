@@ -6,18 +6,21 @@
 	public static int Cols = 0;
 	public static int Rows = 0;
 
-	public Position(int index) 
+	public Position(int col, int row)
 	{
-        UnityEngine.Assertions.Assert.AreNotEqual(0, Cols);
+		UnityEngine.Assertions.Assert.AreNotEqual(0, Cols);
 		UnityEngine.Assertions.Assert.AreNotEqual(0, Rows);
 		
-		this.index = index;
-		row = index / Position.Cols;
-		col = index % Position.Cols;
+		this.col = col;
+		this.row = row;
+		this.index = row * Position.Cols + col;
 	}
 
 	public Position(int pivotIndex, int colOffset, int rowOffset)
 	{
+		UnityEngine.Assertions.Assert.AreNotEqual(0, Cols);
+		UnityEngine.Assertions.Assert.AreNotEqual(0, Rows);
+		
 		row = (pivotIndex / Position.Cols) + rowOffset;
 		col = (pivotIndex % Position.Cols) + colOffset;
 		index = row * Position.Cols + col;

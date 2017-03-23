@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 
+[System.Serializable]
 public class MatchLineModel {
     public int cols;
     public int rows;
