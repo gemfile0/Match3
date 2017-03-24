@@ -155,6 +155,7 @@ public class GameController<M>: BaseController<M>
 
     public List<GemModel> Match() {
 		var matchedGemModels = new List<GemModel>();
+		var matchedLineModels = new List<MatchLineModel>();
 		
 		var gemModels = Model.GemModels;
 		var emptyGemModels = Model.EmtpyGemModels;
@@ -164,12 +165,15 @@ public class GameController<M>: BaseController<M>
 			foreach(var matchLineModel in matchLineModels) {
 				if (ExistAnyMatches(gemModel.position.index, matchLineModel, gemModel.Type)) {
 					matchedGemModels.Add(gemModel);
+					matchedLineModels.Add(matchLineModel);
 				}
 			}
 		}
 		
+		matchedGemModels = matchedGemModels.Distinct().ToList();
 		emptyGemModels = new List<GemModel>();
 		foreach(var matchedGemModel in matchedGemModels) {
+			// Debug.Log("matchedGemModel : " + matchedGemModel.position.index + ", " + matchedGemModel.name);
 			var newGemModel = new GemModel(GemType.Empty, matchedGemModel.position);
 			gemModels[matchedGemModel.position.row, matchedGemModel.position.col] = newGemModel;
 			emptyGemModels.Add(newGemModel);
