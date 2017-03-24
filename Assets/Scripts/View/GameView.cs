@@ -10,7 +10,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 	SwipeInput swipeInput;
 	GemView gemSelected;
 	Dictionary<Int64, GemView> gemViews = new Dictionary<Int64, GemView>();
-	
+
 	void Start() {
 		ResourceCache.LoadAll("");
 		
@@ -110,7 +110,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 			feedingList.ForEach(gemModel => {
 				var gemView = MakeGemView(gemModel);
 				var position = gemModel.position;
-				gemView.transform.localPosition = new Vector2(position.col * gemSize.x, (Model.rows + count) * gemSize.y);
+				gemView.transform.localPosition = new Vector2(position.col * gemSize.x, (Model.Rows + count) * gemSize.y);
 			});
 			count++;
 			var duration = DropGems(feedingList);

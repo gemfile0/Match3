@@ -4,8 +4,20 @@ using System.Linq;
 public class TestGameController {
 	GameModel GetGameModel(int cols = 5, int rows = 5) {
 		var gameModel = new GameModel();
-		gameModel.rows = rows;
-		gameModel.cols = cols;
+		gameModel.levelModel = new LevelModel() { 
+			moves = 10,
+			cols = 5,
+			rows = 7,
+			tiles = new int[] {
+				0, 1, 1, 1, 0,
+				0, 1, 1, 1, 0,
+				0, 1, 1, 1, 0,
+				1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1,
+				1, 1, 1, 1, 1
+			}
+		};
 		return gameModel;
 	}
 

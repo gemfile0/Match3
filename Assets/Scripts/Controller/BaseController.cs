@@ -5,5 +5,6 @@
     
     public virtual void Setup(M model) {
         Model = model;
+        Model.Setup();
     }
 }

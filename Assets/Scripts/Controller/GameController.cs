@@ -13,8 +13,8 @@ public class GameController<M>: BaseController<M>
 	}
 
 	public void SetSize() {
-		Position.Cols = Model.cols;
-		Position.Rows = Model.rows;
+		Position.Cols = Model.Cols;
+		Position.Rows = Model.Rows;
 	}
 
 	public void Update() {
@@ -22,8 +22,8 @@ public class GameController<M>: BaseController<M>
 	}
 
 	public void MakeField() {
-		var rows = Model.rows;
-		var cols = Model.cols;
+		var rows = Model.Rows;
+		var cols = Model.Cols;
 		var gemModels = Model.GemModels = new GemModel[rows, cols];
 
 		for(var row = 0; row < rows; row++) {

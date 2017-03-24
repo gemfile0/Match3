@@ -1,7 +1,6 @@
 ﻿using System;
 
-public interface IGemModel
-{
+public interface IGemModel {
     GemType Type { get; set; }
 }
 
