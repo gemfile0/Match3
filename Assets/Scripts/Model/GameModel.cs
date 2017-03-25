@@ -4,7 +4,7 @@ using UnityEngine;
 public interface IGameModel {
     GemModel[,] GemModels { get; set; }
     List<GemType> MatchingTypes { get; }
-    List<GemModel> EmtpyGemModels { get; set; }
+    List<GemModel> BlockedGemModels { get; set; }
     int Rows { get; }
     int Cols { get; }
 }
@@ -22,11 +22,11 @@ public class GameModel: BaseModel, IGameModel {
     }
     GemModel[,] gemModels;
     public List<MatchLineModel> matchLineModels;
-    public List<GemModel> EmtpyGemModels { 
-        get { return emtpyGemModels; }
-        set { emtpyGemModels = value; }
+    public List<GemModel> BlockedGemModels {
+        get { return blockedGemModels; }
+        set { blockedGemModels = value; }
     }
-    List<GemModel> emtpyGemModels;
+    List<GemModel> blockedGemModels;
     public List<GemType> MatchingTypes {
         get { return matchingTypes; }   
     }
@@ -68,11 +68,14 @@ public class GameModel: BaseModel, IGameModel {
         var tiles = levelModel.tiles;
 
         tileModels = new TileModel[Rows, Cols];
+        var count = 0;
         for(var row = Rows-1 ; row >= 0; row -= 1) {
             for(var col = 0; col < Cols; col += 1) {
-                Debug.Log(row + ", " + col);
-                var index = row + col;
-                tileModels[row, col] = new TileModel(tiles[index]);
+                var tileIndex = row * Cols + col;
+                var colByCount = count % Cols;
+                var rowByCount = count / Cols;
+                tileModels[rowByCount, colByCount] = new TileModel(tiles[tileIndex]);
+                count++;
             }
         }
     }

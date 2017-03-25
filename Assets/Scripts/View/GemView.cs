@@ -24,12 +24,11 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     }
     
     internal void Highlight() {
-        var duration = 0.295f;
+        var duration = 0.395f;
 
         MaterialPropertyBlock mpb = new MaterialPropertyBlock();
         spriteRenderer.GetPropertyBlock(mpb);
 
-        var sequence = DOTween.Sequence();
         DOTween.To(
             () => mpb.GetFloat("_FlashAmount"),
             value => {
@@ -40,9 +39,8 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     }
 
     internal void Squash() {
-        var duration = 0.295f;
-        transform.DOScale(
-            new Vector3(1.08f, 0.92f, 1), duration
-        ).SetLoops(2, LoopType.Yoyo).SetEase(Ease.InOutSine);
+        var sequence = DOTween.Sequence();
+        sequence.Append(transform.DOScale(new Vector3(1.1f, 0.9f, 1), 0.09f));
+        sequence.Append(transform.DOScale(new Vector3(1, 1, 1), 0.7f).SetEase(Ease.OutElastic));
     }
 }

@@ -6,7 +6,7 @@ public interface IGemModel {
 
 [System.Serializable]
 public enum GemType {
-    Empty = 0, RedGem, BlueGem, GreenGem, PurpleGem, OrangeGem, YellowGem
+    Blocked = 0, Empty = 1, RedGem, BlueGem, GreenGem, PurpleGem, OrangeGem, YellowGem
 }
 
 [System.Serializable]
@@ -29,4 +29,9 @@ public class GemModel: BaseModel {
         this.position = position;
         id = GEM_ID++;
     }
+}
+
+public class GemInfo {
+    public Position position;
+    public Int64 id;
 }

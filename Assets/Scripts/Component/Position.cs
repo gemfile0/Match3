@@ -30,4 +30,9 @@
 	{
 		return col >= 0 && col < Position.Cols && row >= 0 && row < Position.Rows;
 	}
+
+	public override string ToString()
+	{
+		return string.Format("({0}, {1})", col, row);
+	}
 }
