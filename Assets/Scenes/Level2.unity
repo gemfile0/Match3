@@ -128,11 +128,13 @@ MonoBehaviour:
       rows: 3
     - cols: 2
       rows: 2
+    levelData: {fileID: 4900000, guid: 1773a1334a0554999ab71a9d5f8d7dab, type: 3}
     levelModel:
       tiles: 
       moves: 0
       cols: 0
       rows: 0
+      gravity: 
 --- !u!4 &497718673
 Transform:
   m_ObjectHideFlags: 0

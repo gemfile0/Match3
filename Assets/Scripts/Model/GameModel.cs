@@ -38,6 +38,7 @@ public class GameModel: BaseModel, IGameModel {
             return levelModel.cols; 
         }
     }
+    public TextAsset levelData;
     public LevelModel levelModel;
     public TileModel[,] tileModels;
 
@@ -57,8 +58,8 @@ public class GameModel: BaseModel, IGameModel {
 			GemType.OrangeGem, GemType.PurpleGem, GemType.YellowGem
 		};
         
-        var textAsset = Resources.Load<TextAsset>("level_1");
-        levelModel = JsonUtility.FromJson<LevelModel>(textAsset.text);
+        System.Console.WriteLine(levelData.text);
+        levelModel = JsonUtility.FromJson<LevelModel>(levelData.text);
         var tiles = levelModel.tiles;
 
         tileModels = new TileModel[Rows, Cols];
