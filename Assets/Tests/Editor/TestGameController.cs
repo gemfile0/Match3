@@ -22,14 +22,14 @@ public class TestGameController {
 		//1. Arrange
 		var gameModel = GetGameModel();
 		//2. Act
-		var gameController = GetGameController(gameModel);
+		GetGameController(gameModel);
 		//3. Assert
 		var gemModels = gameModel.GemModels;
 		Assert.AreEqual(15, gemModels.GetLength(0) * gemModels.GetLength(1));
 
 		var normalGemModels = 
 			from GemModel gemModel in gemModels
-			where gemModel is NormalGemModel
+			where gemModel is EmptyGemModel
 			select gemModel;
 		Assert.AreEqual(9, normalGemModels.Count());
 	}
@@ -63,7 +63,7 @@ public class TestGameController {
 		var gemModels = gameModel.GemModels;
 		var normalGemModels = 
 			(from GemModel gemModel in gemModels
-			where gemModel is NormalGemModel
+			where gemModel is EmptyGemModel
 			select gemModel).ToList();
 
 		//2. Act
@@ -84,32 +84,33 @@ public class TestGameController {
 		Assert.AreEqual(GemType.RedGem, gameController.GetGemModel(new Position(0, 1)).Type);
 
 		//1. Arrange
-		var horizontalMatch = new MatchLineModel(3, 1);
-		var verticalMatch = new MatchLineModel(1, 3);
-		var sqaureMatch = new MatchLineModel(2, 2);
+		var horizontalMatch = new MatchLineModel(-2, 0, 3, 1);
+		var verticalMatch = new MatchLineModel(-2, 0, 1, 3);
+		var sqaureMatch = new MatchLineModel(-1, -1, 2, 2);
 
 		//2. Act & Assert
 		Assert.AreEqual(3, horizontalMatch.wheresCanMatch[0].matchOffsets.Count);
 
-		Assert.AreEqual(true, gameController.ExistAnyMatches(0, horizontalMatch, GemType.RedGem));
-		Assert.AreEqual(true, gameController.ExistAnyMatches(0, verticalMatch, GemType.RedGem));
-		Assert.AreEqual(true, gameController.ExistAnyMatches(0, sqaureMatch, GemType.RedGem));
+		var position = new Position(0, 0);
+		Assert.AreEqual(true, gameController.ExistAnyMatches(position, horizontalMatch, GemType.RedGem));
+		Assert.AreEqual(true, gameController.ExistAnyMatches(position, verticalMatch, GemType.RedGem));
+		Assert.AreEqual(true, gameController.ExistAnyMatches(position, sqaureMatch, GemType.RedGem));
 
-		Assert.AreEqual(false, gameController.ExistAnyMatches(0, horizontalMatch, GemType.GreenGem));
-		Assert.AreEqual(false, gameController.ExistAnyMatches(0, verticalMatch, GemType.PurpleGem));
-		Assert.AreEqual(false, gameController.ExistAnyMatches(0, sqaureMatch, GemType.BlueGem));
+		Assert.AreEqual(false, gameController.ExistAnyMatches(position, horizontalMatch, GemType.GreenGem));
+		Assert.AreEqual(false, gameController.ExistAnyMatches(position, verticalMatch, GemType.PurpleGem));
+		Assert.AreEqual(false, gameController.ExistAnyMatches(position, sqaureMatch, GemType.BlueGem));
 	}
 
 	[Test]
 	public void Swap() {
 		//1. Arrange
 		var gameModel = GetGameModel();
-		var gameController = GetGameController(gameModel);
+		GetGameController(gameModel);
 
 		var gemModels = gameModel.GemModels;
 		var normalGemModels = 
 			(from GemModel gemModel in gemModels
-			where gemModel is NormalGemModel
+			where gemModel is EmptyGemModel
 			select gemModel).ToList();
 
 		var sampleGemTypes = new GemType[] {

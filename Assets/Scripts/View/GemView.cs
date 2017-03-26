@@ -16,7 +16,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     }
 
     internal Position Position { 
-        get { return Model.position; } 
+        get { return Model.Position; } 
     }
 
     internal void UpdateModel(GemModel gemModel) {

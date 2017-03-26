@@ -30,13 +30,13 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 		var gemModels = Model.GemModels;
 		foreach(var gemModel in gemModels) {
 			var gemView = MakeGemView(gemModel);
-			var position = gemModel.position;
+			var position = gemModel.Position;
 			gemView.transform.localPosition = new Vector2(position.col * gemSize.x, position.row * gemSize.y);
 		}
 	}
 
 	GemView MakeGemView(GemModel gemModel) {
-		var gemView = ResourceCache.Instantiate(gemModel.name, transform).GetComponent<GemView>();
+		var gemView = ResourceCache.Instantiate(gemModel.Name, transform).GetComponent<GemView>();
 		gemView.UpdateModel(gemModel);
 		gemViews.Add(gemModel.id, gemView);
 		return gemView;
@@ -74,7 +74,9 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 
 	IEnumerator StartSwap(GemView gemSelected, Vector2 direction) {
 		var sourcePosition = gemSelected.Position;
-		var nearPosition = new Position(sourcePosition.index, (int)direction.x, (int)direction.y);
+		var colOffset = (int)direction.x;
+		var rowOffset = (int)direction.y;
+		var nearPosition = new Position(sourcePosition.index, colOffset, rowOffset);
 
 		// 1. 
 		yield return SwapGems(Controller.Swap(sourcePosition, nearPosition));
@@ -82,11 +84,11 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 		// 2.
 		var hasAnyMatch = false;
 		while(true) {
-			var matchedGemModels = Controller.Match();
+			var matchedGemModels = Controller.Match(colOffset, rowOffset);
 			if (matchedGemModels.Count > 0) {
 				hasAnyMatch = true;
 				yield return MatchGems(matchedGemModels);
-				yield return FallAndFeed();
+				yield return FeedAndFall();
 			} else {
 				break;
 			}
@@ -98,19 +100,20 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 		}
 	}
 
-	IEnumerator FallAndFeed() {
+	IEnumerator FeedAndFall() {
 		var fallingGemInfosList = new List<List<GemInfo>>();
 		while(true) {
 			FeedGems(Controller.Feed());
 			var fallingGemModels = Controller.Fall();
 			fallingGemInfosList.Add(
 				fallingGemModels.Select(fallingGemModel => new GemInfo(){ 
-					position = fallingGemModel.position, 
+					position = fallingGemModel.Position, 
 					id = fallingGemModel.id
 				}).ToList()
 			);
 			
 			if (fallingGemModels.Count == 0) {
+				FeedGems(Controller.StopFeed());
 				break;
 			}
 		}
@@ -139,18 +142,25 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 	void FeedGems(List<GemModel> feedingGemModels) {
 		feedingGemModels.ForEach(gemModel =>  {
 			var gemView = MakeGemView(gemModel);
-			var position = gemModel.position;
+			var position = gemModel.Position;
 			gemView.transform.localPosition = new Vector2(position.col * gemSize.x, position.row * gemSize.y);
 			gemView.gameObject.SetActive(false);
 		});
 	}
 
-	IEnumerator MatchGems(List<GemModel> matchedGemModels) {
-		matchedGemModels.ForEach(gemModel => {
-			var gemObject = gemViews[gemModel.id].gameObject;
-			gemObject.SetActive(false);
-			Destroy(gemObject);
-			gemViews.Remove(gemModel.id);
+	IEnumerator MatchGems(List<MatchedLineInfo> matchedLineInfos) {
+		matchedLineInfos.ForEach(matchedLineInfo => {
+			matchedLineInfo.gemModels.ForEach(gemModel => {
+				var gemObject = gemViews[gemModel.id].gameObject;
+				gemObject.SetActive(false);
+				Destroy(gemObject);
+				gemViews.Remove(gemModel.id);
+			});
+			if (matchedLineInfo.gemModelNewAdded != null) {
+				var gemView = MakeGemView(matchedLineInfo.gemModelNewAdded);
+				var position = matchedLineInfo.gemModelNewAdded.Position;
+				gemView.transform.localPosition = new Vector2(position.col * gemSize.x, position.row * gemSize.y);
+			}
 		});
 		yield return null;
 	}
@@ -170,7 +180,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 		var duration = 0f;
 		swappingGemModels.ForEach(gemModel => {
 			var gemView = gemViews[gemModel.id];
-			var position = gemModel.position;
+			var position = gemModel.Position;
 			var nextPosition = new Vector3(position.col * gemSize.x, position.row * gemSize.y, 0);
 			duration = 0.395f * (nextPosition - gemView.transform.localPosition).magnitude / gemSize.y;
 			gemView.gameObject.transform.DOLocalMove(

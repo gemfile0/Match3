@@ -5,7 +5,7 @@ public class TestGameModel {
 	[Test]
 	public void MatchLineModel() {
 		//1. Arrange & 2. Act
-		var matchLineModel = new MatchLineModel(3, 1);
+		var matchLineModel = new MatchLineModel(-2, 0, 3, 1);
 
 		//3. Assert
 		var whereCanMatch = matchLineModel.wheresCanMatch[0];
@@ -27,7 +27,7 @@ public class TestGameModel {
 		Assert.AreEqual( new int[2]{2, 0}, whereCanMatch.matchOffsets[2]);
 
 		//1. Arrange & 2. Act
-		matchLineModel = new MatchLineModel(2, 2);
+		matchLineModel = new MatchLineModel(-1, -1, 2, 2);
 
 		//3. Assert
 		whereCanMatch = matchLineModel.wheresCanMatch[0];

@@ -1,6 +1,6 @@
 [System.Serializable]
 public enum TileType {
-    Nil = 0, Normal = 1, Spawnee = 7, Spawner = 8
+    Blocked = 0, Empty = 1, ChocoGem = 4, Spawnee = 7, Spawner = 8
 }
 
 [System.Serializable]

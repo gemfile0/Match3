@@ -20,7 +20,8 @@ public class GameModel: BaseModel, IGameModel {
         }
     }
     GemModel[,] gemModels;
-    public List<MatchLineModel> matchLineModels;
+    public List<MatchLineModel> allwayMatchLineModels;
+    public List<MatchLineModel> positiveMatchLineModels;
     public List<GemType> MatchingTypes {
         get { return matchingTypes; }   
     }
@@ -47,10 +48,20 @@ public class GameModel: BaseModel, IGameModel {
     }
 
     public override void Setup() {
-        matchLineModels = new List<MatchLineModel> {
-            new MatchLineModel(3, 1),
-            new MatchLineModel(1, 3),
-            new MatchLineModel(2, 2)
+        allwayMatchLineModels = new List<MatchLineModel> {
+            new MatchLineModel(-2, 0, 3, 1),
+            new MatchLineModel(0, -2, 1, 3),
+            new MatchLineModel(-1, -1, 2, 2)
+        };
+
+        positiveMatchLineModels = new List<MatchLineModel> {
+            new MatchLineModel(0, 0, 5, 1),
+            new MatchLineModel(0, 0, 1, 5),
+            new MatchLineModel(0, 0, 4, 1),
+            new MatchLineModel(0, 0, 1, 4),
+            new MatchLineModel(0, 0, 2, 2),
+            new MatchLineModel(0, 0, 3, 1),
+            new MatchLineModel(0, 0, 1, 3),
         };
 
         matchingTypes = new List<GemType> {
@@ -58,7 +69,6 @@ public class GameModel: BaseModel, IGameModel {
 			GemType.OrangeGem, GemType.PurpleGem, GemType.YellowGem
 		};
         
-        System.Console.WriteLine(levelData.text);
         levelModel = JsonUtility.FromJson<LevelModel>(levelData.text);
         var tiles = levelModel.tiles;
 

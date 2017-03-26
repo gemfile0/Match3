@@ -2,18 +2,21 @@
 
 public interface IGemModel {
     GemType Type { get; set; }
+    Position Position { get; set; }
+    string Name { get; }
 }
 
 [System.Serializable]
 public enum GemType {
-    Nothing = -1, Blocked = 0, Empty = 1, Spawner, Spawnee,
-    RedGem, BlueGem, GreenGem, PurpleGem, OrangeGem, YellowGem
+    Nil = -1, Blocked = 0, Empty = 1, ChocoGem = 4, SuperGem = 5, Spawnee = 7, Spawner = 8, 
+    RedGem, BlueGem, GreenGem, PurpleGem, OrangeGem, YellowGem, 
 }
 
 [System.Serializable]
 public class GemModel: BaseModel {
     static Int64 GEM_ID = 0;
-    public GemType Type { 
+    static Int64 SEQUENCE_ID = 0;
+    public GemType Type {
         set { 
             type = value; 
             name = type.ToString();
@@ -21,14 +24,30 @@ public class GemModel: BaseModel {
         get { return type; }
     }
     GemType type;
-    public string name;
-    public Position position;
+    public string Name { 
+        get { return name + specialKey; }
+    }
+    string name;
+    public Position Position { 
+        set { 
+            position = value; 
+            sequence = SEQUENCE_ID++;
+        }
+        get { return position; }
+    }
+    Position position;
     public Int64 id;
+    public Int64 sequence;
+    public string specialKey;
     
     public GemModel(GemType type, Position position) {
         Type = type;
-        this.position = position;
+        Position = position;
         id = GEM_ID++;
+    }
+
+    public override string ToString() {
+        return string.Format("{0}: {1}", type, position.ToString());
     }
 }
 
@@ -39,20 +58,24 @@ public class GemInfo {
 
 static class GemModelFactory {
     public static GemModel Get(TileType tileType, Position position) {
-        var gemType = GemType.Nothing;
+        var gemType = GemType.Nil;
         switch (tileType) {
-			case TileType.Normal:
+			case TileType.Empty:
             case TileType.Spawnee:
 				gemType = GemType.Empty;
 				break;
 
-			case TileType.Nil:
+			case TileType.Blocked:
 				gemType = GemType.Blocked;
 				break;
 
 			case TileType.Spawner:
 				gemType = GemType.Spawner;
 				break;
+
+            case TileType.ChocoGem:
+                gemType = GemType.ChocoGem;
+                break;
 		}
         
         var cardModel = (GemModel)Activator.CreateInstance(
@@ -66,14 +89,20 @@ static class GemModelFactory {
 
 public interface IBlockable {}
 public interface IMovable {}
-public class NilGemModel: GemModel, IBlockable {
-    public NilGemModel(GemType type, Position position): base(type, position) {
+public class BlockedGemModel: GemModel, IBlockable {
+    public BlockedGemModel(GemType type, Position position): base(type, position) {
         
     }
 }
 
-public class NormalGemModel: GemModel, IMovable {
-    public NormalGemModel(GemType type, Position position): base(type, position) {
+public class EmptyGemModel: GemModel, IMovable {
+    public EmptyGemModel(GemType type, Position position): base(type, position) {
+        
+    }
+}
+
+public class ChocoGemModel: EmptyGemModel {
+    public ChocoGemModel(GemType type, Position position): base(type, position) {
         
     }
 }
