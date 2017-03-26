@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 public class GameController<M>: BaseController<M>
 	where M: GameModel {
@@ -27,11 +26,9 @@ public class GameController<M>: BaseController<M>
 		var gemModels = Model.GemModels = new GemModel[rows, cols];
 		var tileModels = Model.tileModels;
 
-		for(var row = 0; row < rows; row++) {
-			for(var col = 0; col < cols; col++) {
-				var gemType = (tileModels[row, col].type == TileType.Normal) ? GemType.Empty : GemType.Blocked;
-				Debug.Log(row + ", " + col + ": " + gemType);
-				gemModels[row, col] = new GemModel(gemType, new Position(col, row));
+		for (var row = 0; row < rows; row++) {
+			for (var col = 0; col < cols; col++) {
+				gemModels[row, col] = GemModelFactory.Get(tileModels[row, col].type, new Position(col, row));
 			}
 		}
 	}
@@ -42,9 +39,8 @@ public class GameController<M>: BaseController<M>
 		
 		var emptyGemModels = 
 			from GemModel gemModel in Model.GemModels
-			where gemModel.Type == GemType.Empty
+			where gemModel is NormalGemModel
 			select gemModel;
-
 
 		var random = new System.Random();
 		foreach(var emptyGemModel in emptyGemModels) {
@@ -108,85 +104,33 @@ public class GameController<M>: BaseController<M>
 		return swappingGemModels;
     }
 
-    public Queue<List<GemModel>> Feed() {
-		var feedingListQueue = new Queue<List<GemModel>>();
-
+    public List<GemModel> Feed() {
+		var feedingGemModels = new List<GemModel>();
+		
+		var gemModels = Model.GemModels;
 		var matchingTypes = Model.MatchingTypes;
-		var gemModels = Model.GemModels;
+
 		var random = new System.Random();
+		var spawnerGemModels = 
+			from GemModel gemModel in Model.GemModels
+			where gemModel is SpawnerGemModel
+			select gemModel;
 
-		var blockedGemModels = new List<GemModel>();
-		for(var row = 0; row < gemModels.GetLength(0); row++) {
-			var feedingList = new List<GemModel>();
-			for(var col = 0; col < gemModels.GetLength(1); col++) {
-				var gemModel = gemModels[row, col];
-				if (gemModel.Type == GemType.Empty) {
-					if (!IsFeedingBlocked(row, col)) {
-						gemModel.Type = matchingTypes[random.Next(matchingTypes.Count)];
-						feedingList.Add(gemModel);
-					} else {
-						blockedGemModels.Add(gemModel);
-					}
-				}
-			}
-			if (feedingList.Count > 0) {
-				feedingListQueue.Enqueue(feedingList);
+		foreach(SpawnerGemModel spawnerGemModel in spawnerGemModels) {
+			var spawnTo = spawnerGemModel.spawnTo;
+			var spawneePosition = new Position(spawnerGemModel.position.index, spawnTo[0], spawnTo[1]);
+			if (GetGemModel(spawneePosition).Type == GemType.Empty) {
+				var spawneeGemModel 
+					= gemModels[spawneePosition.row, spawneePosition.col] 
+					= GemModelFactory.Get(TileType.Normal, spawneePosition);
+
+				spawneeGemModel.Type = matchingTypes[random.Next(matchingTypes.Count)];
+				feedingGemModels.Add(spawneeGemModel);
 			}
 		}
 
-		Model.BlockedGemModels = blockedGemModels;
-		
-		return feedingListQueue;
+		return feedingGemModels;
     }
-
-	public List<GemModel> DropDiagonally() {
-		var droppedGemModels = new List<GemModel>();
-		
-		var blockedGemModels = Model.BlockedGemModels;
-        var colOffsets = new int[]{ 0, -1, 1 };
-		foreach(var blockedGemModel in blockedGemModels) {
-			while (true) {
-				var blockedGemPosition = blockedGemModel.position;
-				var failCount = 0;
-
-				foreach(var colOffset in colOffsets) {
-					var nearPosition = new Position(blockedGemPosition.index, colOffset, 1);
-					if (nearPosition.IsAcceptableIndex() && GetGemModel(nearPosition).Type != GemType.Blocked) {
-						droppedGemModels.AddRange(Swap(blockedGemPosition, nearPosition));
-					} else {
-						failCount++;
-					}
-				}
-
-				if (failCount == colOffsets.Length) {
-					break;
-				}
-			}
-		}
-
-		return droppedGemModels
-			.Distinct()
-			.Where(gemModel => gemModel.Type != GemType.Empty).ToList();
-	}
-
-	bool IsFeedingBlocked(int sourceRow, int sourceCol) {
-		var gemModels = Model.GemModels;
-		
-		while(true) {
-			sourceRow += 1;
-			var position = new Position(sourceCol, sourceRow);
-			
-			if (position.IsAcceptableIndex()) {
-				if (GetGemModel(position).Type == GemType.Blocked) {
-					return true;
-				}
-			} else {
-				break;
-			}
-		}
-
-		return false;
-	}
 
     public List<GemModel> Fall() {
 		var fallingGemModels = new List<GemModel>();
@@ -198,13 +142,14 @@ public class GameController<M>: BaseController<M>
 			where gemModel.Type == GemType.Empty
 			select gemModel;
         
-		// Vertical
+		// Only one of them will be executed between a and b.
+		// A: Vertical comparing as bottom up
 		foreach(var emptyGemModel in emptyGemModels) {
 			var emptyGemPosition = emptyGemModel.position;
 			var nearPosition = new Position(emptyGemPosition.index, 0, 1);
 
 			if (nearPosition.IsAcceptableIndex()) {
-				if (GetGemModel(nearPosition).Type != GemType.Blocked) {
+				if (GetGemModel(nearPosition) is IMovable) {
 					fallingGemModels.AddRange(Swap(emptyGemPosition, nearPosition));
 				} else {
 					blockedGemModels.Add(emptyGemModel);
@@ -212,7 +157,7 @@ public class GameController<M>: BaseController<M>
 			}
 		}
 
-		// Diagonal
+		// B: Diagonal comparing as bottom up
 		var setOfColOffsets = new int[][]{ new int[]{ -1, 1 }, new int[]{ 1, -1} };
 		var random = new System.Random();
 		foreach(var blockedGemModel in blockedGemModels) {
@@ -225,7 +170,7 @@ public class GameController<M>: BaseController<M>
 				if (nearPosition.IsAcceptableIndex()) {
 					var nearGemModel = GetGemModel(nearPosition);
 
-					if (nearGemModel.Type != GemType.Blocked
+					if (nearGemModel is IMovable
 						&& !fallingGemModels.Contains(nearGemModel)) {
 						fallingGemModels.AddRange(Swap(blockedGemPosition, nearPosition));
 					}
@@ -245,7 +190,7 @@ public class GameController<M>: BaseController<M>
 
 		var matchableGemModels = 
 			from GemModel gemModel in Model.GemModels
-			where gemModel.Type != GemType.Blocked && gemModel.Type != GemType.Empty
+			where gemModel is IMovable && gemModel.Type != GemType.Empty
 			select gemModel;
 
 		foreach(var matchbleGemModel in matchableGemModels) {
@@ -259,7 +204,7 @@ public class GameController<M>: BaseController<M>
 		
 		matchedGemModels = matchedGemModels.Distinct().ToList();
 		foreach(var matchedGemModel in matchedGemModels) {
-			var newGemModel = new GemModel(GemType.Empty, matchedGemModel.position);
+			var newGemModel = GemModelFactory.Get(TileType.Normal, matchedGemModel.position);
 			gemModels[matchedGemModel.position.row, matchedGemModel.position.col] = newGemModel;
 		}
 

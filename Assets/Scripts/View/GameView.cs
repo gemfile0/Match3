@@ -85,48 +85,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 			var matchedGemModels = Controller.Match();
 			if (matchedGemModels.Count > 0) {
 				hasAnyMatch = true;
-
 				yield return MatchGems(matchedGemModels);
-
-				var fallingGemInfosList = new List<List<GemInfo>>();
-				while(true) {
-					var fallingGemModels = Controller.Fall();
-					fallingGemInfosList.Add(
-						fallingGemModels.Select(fallingGemModel => new GemInfo(){ 
-							position = fallingGemModel.position, 
-							id = fallingGemModel.id
-						}).ToList()
-					);
-					
-					if (fallingGemModels.Count == 0) {
-						break;
-					} 
-				}
-
-				var index = 0;
-				var duration = 0.395f;
-				var sequence = DOTween.Sequence().SetEase(Ease.InOutQuad);
-				for(; index < fallingGemInfosList.Count; index++) {
-					var fallingGemInfos = fallingGemInfosList[index];
-					FallGems(sequence, fallingGemInfos, index * duration, duration);	
-
-					if (index < fallingGemInfosList.Count - 1) {
-						var nextFallingGemInfos = fallingGemInfosList[index + 1];
-						fallingGemInfos.ForEach(fallingGemInfo => {
-							if (!nextFallingGemInfos.Any(nextFallingGemInfo => nextFallingGemInfo.id == fallingGemInfo.id)) {
-								sequence.InsertCallback(index * duration + 0.36f, () => gemViews[fallingGemInfo.id].Squash());
-							}
-						});
-					}
-				}
-
-				yield return new WaitForSeconds(index * duration);
-				// yield return new WaitForSeconds(
-				// 	FeedGems(Controller.Feed())
-				// );
-				// yield return new WaitForSeconds(
-				// 	DropGems(Controller.DropDiagonally())
-				// );
+				yield return FallAndFeed();
 			} else {
 				break;
 			}
@@ -138,22 +98,51 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 		}
 	}
 
-	float FeedGems(Queue<List<GemModel>> feedingListQueue) {
-		// var count = 0;
-		var maxDuration = 0f;
-		// while(feedingListQueue.Count > 0) {
-		// 	var feedingList = feedingListQueue.Dequeue();
-		// 	feedingList.ForEach(gemModel => {
-		// 		var gemView = MakeGemView(gemModel);
-		// 		var position = gemModel.position;
-		// 		gemView.transform.localPosition = new Vector2(position.col * gemSize.x, (Model.Rows + count) * gemSize.y);
-		// 	});
-		// 	count++;
-		// 	var duration = DropGems(feedingList);
-		// 	maxDuration = Math.Max(maxDuration, duration);
-		// }
+	IEnumerator FallAndFeed() {
+		var fallingGemInfosList = new List<List<GemInfo>>();
+		while(true) {
+			FeedGems(Controller.Feed());
+			var fallingGemModels = Controller.Fall();
+			fallingGemInfosList.Add(
+				fallingGemModels.Select(fallingGemModel => new GemInfo(){ 
+					position = fallingGemModel.position, 
+					id = fallingGemModel.id
+				}).ToList()
+			);
+			
+			if (fallingGemModels.Count == 0) {
+				break;
+			}
+		}
 
-		return maxDuration;
+		var index = 0;
+		var duration = 0.395f;
+		var sequence = DOTween.Sequence().SetEase(Ease.InOutQuad);
+		for(; index < fallingGemInfosList.Count; index++) {
+			var fallingGemInfos = fallingGemInfosList[index];
+			FallGems(sequence, fallingGemInfos, index * duration, duration);	
+
+			// Fixed to bounce like jelly when tween finished on each gem.
+			if (index < fallingGemInfosList.Count - 1) {
+				var nextFallingGemInfos = fallingGemInfosList[index + 1];
+				fallingGemInfos.ForEach(fallingGemInfo => {
+					if (!nextFallingGemInfos.Any(nextFallingGemInfo => nextFallingGemInfo.id == fallingGemInfo.id)) {
+						sequence.InsertCallback(index * duration + 0.36f, () => gemViews[fallingGemInfo.id].Squash());
+					}
+				});
+			}
+		}
+
+		yield return new WaitForSeconds(index * duration);
+	}
+
+	void FeedGems(List<GemModel> feedingGemModels) {
+		feedingGemModels.ForEach(gemModel =>  {
+			var gemView = MakeGemView(gemModel);
+			var position = gemModel.position;
+			gemView.transform.localPosition = new Vector2(position.col * gemSize.x, position.row * gemSize.y);
+			gemView.gameObject.SetActive(false);
+		});
 	}
 
 	IEnumerator MatchGems(List<GemModel> matchedGemModels) {
@@ -168,10 +157,11 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 
 	void FallGems(Sequence sequence, List<GemInfo> fallingGemInfos, float timeAt, float duration) {
 		fallingGemInfos.ForEach(gemInfo => {
-			Debug.Log(gemInfo.id + ": " + gemInfo.position.ToString());
+			// Debug.Log(gemInfo.id + ": " + gemInfo.position.ToString());
 			var gemView = gemViews[gemInfo.id];
 			var position = gemInfo.position;
 			var nextPosition = new Vector3(position.col * gemSize.x, position.row * gemSize.y, 0);
+			sequence.InsertCallback(timeAt, ()=>gemView.gameObject.SetActive(true));
 			sequence.Insert(timeAt, gemView.gameObject.transform.DOLocalMove(nextPosition, duration).SetEase(Ease.Linear));
 		});
 	}

@@ -4,7 +4,6 @@ using UnityEngine;
 public interface IGameModel {
     GemModel[,] GemModels { get; set; }
     List<GemType> MatchingTypes { get; }
-    List<GemModel> BlockedGemModels { get; set; }
     int Rows { get; }
     int Cols { get; }
 }
@@ -22,11 +21,6 @@ public class GameModel: BaseModel, IGameModel {
     }
     GemModel[,] gemModels;
     public List<MatchLineModel> matchLineModels;
-    public List<GemModel> BlockedGemModels {
-        get { return blockedGemModels; }
-        set { blockedGemModels = value; }
-    }
-    List<GemModel> blockedGemModels;
     public List<GemType> MatchingTypes {
         get { return matchingTypes; }   
     }
