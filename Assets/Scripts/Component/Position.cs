@@ -26,7 +26,7 @@
 		index = row * Position.Cols + col;
 	}
 
-	public bool IsAcceptableIndex() 
+	public bool IsAcceptableIndex()
 	{
 		return col >= 0 && col < Position.Cols && row >= 0 && row < Position.Rows;
 	}

@@ -30,7 +30,7 @@ public class GemModel: BaseModel {
     string name;
     public Position Position { 
         set { 
-            position = value; 
+            position = value;
             sequence = SEQUENCE_ID++;
         }
         get { return position; }
@@ -39,6 +39,7 @@ public class GemModel: BaseModel {
     public Int64 id;
     public Int64 sequence;
     public string specialKey;
+    public int hp;
     
     public GemModel(GemType type, Position position) {
         Type = type;

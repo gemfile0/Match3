@@ -11,7 +11,7 @@ public class MatchedLineInfo {
     public List<MatchLineModel> matchLineModels;
     public List<GemModel> gemModels;
     public bool isMerged;
-    public GemModel gemModelNewAdded;
+    public GemModel newAdded;
 
     internal void Merge(MatchedLineInfo matchedLineInfo) {
         matchLineModels = matchLineModels.Union(matchedLineInfo.matchLineModels).ToList();

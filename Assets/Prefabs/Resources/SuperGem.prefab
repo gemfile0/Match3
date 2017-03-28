@@ -20,10 +20,10 @@ GameObject:
   m_Component:
   - component: {fileID: 4821219665819148}
   - component: {fileID: 212057809971503546}
-  - component: {fileID: 114152955960292848}
-  - component: {fileID: 61699891455916306}
+  - component: {fileID: 61841850560398878}
+  - component: {fileID: 114205113253585386}
   m_Layer: 0
-  m_Name: GreenGemSP
+  m_Name: SuperGem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -42,7 +42,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &61699891455916306
+--- !u!61 &61841850560398878
 BoxCollider2D:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -56,7 +56,7 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Size: {x: 1.28, y: 1.28}
---- !u!114 &114152955960292848
+--- !u!114 &114205113253585386
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}

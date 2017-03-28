@@ -3,12 +3,17 @@ using UnityEngine;
 
 public interface IGemView
 {
+    GemModel Model { get; }
     Position Position { get; }
     GemModel UpdateModel(GemModel gemModel);
 }
 
 public class GemView: BaseView<GemModel, GemController<GemModel>>
 {
+    public GemType Type { 
+        get { return Model.Type; } 
+    }
+
     private SpriteRenderer spriteRenderer;
 
     void OnEnable() {
