@@ -9,7 +9,7 @@ public interface IGemModel {
 [System.Serializable]
 public enum GemType {
     Nil = -1, Blocked = 0, Empty = 1, ChocoGem = 4, SuperGem = 5, Spawnee = 7, Spawner = 8, 
-    RedGem, BlueGem, GreenGem, PurpleGem, OrangeGem, YellowGem, 
+    RedGem = 10, BlueGem = 20, GreenGem = 30, PurpleGem = 40, OrangeGem = 50, YellowGem = 60, 
 }
 
 [System.Serializable]
@@ -58,29 +58,28 @@ public class GemInfo {
 }
 
 static class GemModelFactory {
-    public static GemModel Get(TileType tileType, Position position) {
-        var gemType = GemType.Nil;
-        switch (tileType) {
-			case TileType.Empty:
-            case TileType.Spawnee:
-				gemType = GemType.Empty;
-				break;
+    public static GemModel Get(GemType gemType, Position position) {
+        string gemName = gemType.ToString();
 
-			case TileType.Blocked:
-				gemType = GemType.Blocked;
-				break;
+        switch (gemType) {
+            case GemType.ChocoGem:
+            case GemType.SuperGem:
+            case GemType.RedGem:
+            case GemType.BlueGem:
+            case GemType.GreenGem:
+            case GemType.PurpleGem:
+            case GemType.OrangeGem:
+            case GemType.YellowGem:
+            gemName = GemType.Empty.ToString();
+            break;
 
-			case TileType.Spawner:
-				gemType = GemType.Spawner;
-				break;
-
-            case TileType.ChocoGem:
-                gemType = GemType.ChocoGem;
-                break;
-		}
+            case GemType.Spawnee:
+            gemType = GemType.Empty;
+            break;
+        }
         
         var cardModel = (GemModel)Activator.CreateInstance(
-            Type.GetType(tileType + "GemModel"),
+            Type.GetType(gemName + "GemModel"),
             gemType,
             position
         );
@@ -91,32 +90,18 @@ static class GemModelFactory {
 public interface IBlockable {}
 public interface IMovable {}
 public class BlockedGemModel: GemModel, IBlockable {
-    public BlockedGemModel(GemType type, Position position): base(type, position) {
-        
-    }
-}
-
-public class EmptyGemModel: GemModel, IMovable {
-    public EmptyGemModel(GemType type, Position position): base(type, position) {
-        
-    }
-}
-
-public class ChocoGemModel: EmptyGemModel {
-    public ChocoGemModel(GemType type, Position position): base(type, position) {
-        
-    }
-}
-
-public class SpawneeGemModel: GemModel {
-    public SpawneeGemModel(GemType type, Position position): base(type, position) {
-        
-    }
+    public BlockedGemModel(GemType type, Position position): base(type, position) {}
 }
 
 public class SpawnerGemModel: GemModel, IBlockable {
     public int[] spawnTo = new int[]{0, -1};
-    public SpawnerGemModel(GemType type, Position position): base(type, position) {
-        
-    }
+    public SpawnerGemModel(GemType type, Position position): base(type, position) {}
+}
+
+public class SpawneeGemModel: GemModel {
+    public SpawneeGemModel(GemType type, Position position): base(type, position) {}
+}
+
+public class EmptyGemModel: GemModel, IMovable {
+    public EmptyGemModel(GemType type, Position position): base(type, position) {}
 }

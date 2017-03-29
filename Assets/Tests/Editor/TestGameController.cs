@@ -12,8 +12,6 @@ public class TestGameController {
 	GameController<GameModel> GetGameController(GameModel gameModel) {
 		var gameController = new GameController<GameModel>();
 		gameController.Setup(gameModel);
-		gameController.SetSize();
-		gameController.MakeField();
 		return gameController;
 	}
 

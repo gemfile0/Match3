@@ -11,31 +11,7 @@ public class GameController<M>: BaseController<M>
 	where M: GameModel {
 		
 	public void Init() {
-		SetSize();
-		MakeField();
 		PutGems();
-	}
-
-	public void SetSize() {
-		Position.Cols = Model.Cols;
-		Position.Rows = Model.Rows;
-	}
-
-	public void Update() {
-		
-	}
-
-	public void MakeField() {
-		var rows = Model.Rows;
-		var cols = Model.Cols;
-		var gemModels = Model.GemModels = new GemModel[rows, cols];
-		var tileModels = Model.tileModels;
-
-		for (var row = 0; row < rows; row++) {
-			for (var col = 0; col < cols; col++) {
-				gemModels[row, col] = GemModelFactory.Get(tileModels[row, col].type, new Position(col, row));
-			}
-		}
 	}
 
 	public void PutGems() {
@@ -44,7 +20,7 @@ public class GameController<M>: BaseController<M>
 		
 		var emptyGemModels = 
 			from GemModel gemModel in Model.GemModels
-			where gemModel is EmptyGemModel
+			where gemModel is EmptyGemModel && gemModel.Type == GemType.Empty
 			select gemModel;
 
 		var random = new System.Random();
@@ -118,7 +94,7 @@ public class GameController<M>: BaseController<M>
 		var sourceGemModel = GetGemModel(sourcePosition);
 		crunchedGemInfo.source = sourceGemModel;
 
-		var newGemModel = GemModelFactory.Get(TileType.Empty, sourceGemModel.Position);
+		var newGemModel = GemModelFactory.Get(GemType.Empty, sourceGemModel.Position);
 		gemModels[sourceGemModel.Position.row, sourceGemModel.Position.col] = newGemModel;
 		
 		if (nearPosition.IsAcceptableIndex() && sourceGemModel.hp > 0) {
@@ -145,13 +121,13 @@ public class GameController<M>: BaseController<M>
 			where gemModel is SpawnerGemModel
 			select gemModel;
 
+		var gravity = Model.levelModel.gravity;
 		foreach(SpawnerGemModel spawnerGemModel in spawnerGemModels) {
-			var spawnTo = spawnerGemModel.spawnTo;
-			var spawneePosition = new Position(spawnerGemModel.Position.index, spawnTo[0], spawnTo[1]);
+			var spawneePosition = new Position(spawnerGemModel.Position.index, gravity[0], gravity[1]);
 			if (GetGemModel(spawneePosition).Type == GemType.Empty) {
 				var spawneeGemModel 
 					= gemModels[spawneePosition.row, spawneePosition.col] 
-					= GemModelFactory.Get(TileType.Empty, spawneePosition);
+					= GemModelFactory.Get(GemType.Empty, spawneePosition);
 
 				spawneeGemModel.Type = matchingTypes[random.Next(matchingTypes.Count)];
 				feedingGemModels.Add(spawneeGemModel);
@@ -177,7 +153,7 @@ public class GameController<M>: BaseController<M>
 			if (GetGemModel(spawneePosition).Type != GemType.Empty) {
 				var spawneeGemModel 
 					= gemModels[spawneePosition.row, spawneePosition.col] 
-					= GemModelFactory.Get(TileType.Spawnee, spawneePosition);
+					= GemModelFactory.Get(GemType.Spawnee, spawneePosition);
 
 				stoppingGemModels.Add(spawneeGemModel);
 			}
@@ -290,7 +266,7 @@ public class GameController<M>: BaseController<M>
 		foreach(var matchedLineInfo in matchedLineInfos) {
 			var latestGemModel = matchedLineInfo.gemModels.OrderByDescending(gemModel => gemModel.sequence).FirstOrDefault();
 			foreach(var matchedGemModel in matchedLineInfo.gemModels) {
-				var newGemModel = GemModelFactory.Get(TileType.Empty, matchedGemModel.Position);
+				var newGemModel = GemModelFactory.Get(GemType.Empty, matchedGemModel.Position);
 				gemModels[matchedGemModel.Position.row, matchedGemModel.Position.col] = newGemModel;
 				if (matchedGemModel == latestGemModel) {
 					var specialKey = ReadSpecialKey(matchedLineInfo.matchLineModels, colOffset, rowOffset);

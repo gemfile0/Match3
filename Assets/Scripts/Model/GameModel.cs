@@ -41,7 +41,6 @@ public class GameModel: BaseModel, IGameModel {
     }
     public TextAsset levelData;
     public LevelModel levelModel;
-    public TileModel[,] tileModels;
 
     public GameModel() {
         
@@ -72,16 +71,23 @@ public class GameModel: BaseModel, IGameModel {
         levelModel = JsonUtility.FromJson<LevelModel>(levelData.text);
         var tiles = levelModel.tiles;
 
-        tileModels = new TileModel[Rows, Cols];
+        Position.Cols = Cols;
+        Position.Rows = Rows;
+
         var count = 0;
+        gemModels = new GemModel[Rows, Cols];
         for(var row = Rows-1 ; row >= 0; row -= 1) {
             for(var col = 0; col < Cols; col += 1) {
                 var tileIndex = row * Cols + col;
+
                 var colByCount = count % Cols;
                 var rowByCount = count / Cols;
-                tileModels[rowByCount, colByCount] = new TileModel(tiles[tileIndex]);
+                gemModels[rowByCount, colByCount] = GemModelFactory.Get(
+                    (GemType)tiles[tileIndex], new Position(colByCount, rowByCount)
+                );
                 count++;
             }
         }
+
     }
 }
