@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 212227949593752252}
   - component: {fileID: 114269598853690038}
   m_Layer: 0
-  m_Name: Empty
+  m_Name: EmptyGem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -53,8 +53,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Model:
-    name: 
     id: 0
+    sequence: 0
+    specialKey: 
+    endurance: 0
 --- !u!212 &212227949593752252
 SpriteRenderer:
   m_ObjectHideFlags: 1

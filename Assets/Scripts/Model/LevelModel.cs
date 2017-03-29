@@ -5,4 +5,6 @@ public class LevelModel {
     public int cols;
     public int rows;
     public int[] gravity;
+    public int[] colBoundary;
+    public int[] rowBoundary;
 }

@@ -7,6 +7,10 @@ public class CrunchedGemInfo {
 	public GemModel source;
 }
 
+public class BrokenGemInfo {
+	public List<GemModel> gemModels;
+}
+
 public class GameController<M>: BaseController<M>
 	where M: GameModel {
 		
@@ -20,7 +24,7 @@ public class GameController<M>: BaseController<M>
 		
 		var emptyGemModels = 
 			from GemModel gemModel in Model.GemModels
-			where gemModel is EmptyGemModel && gemModel.Type == GemType.Empty
+			where gemModel is EmptyGemModel && gemModel.Type == GemType.EmptyGem
 			select gemModel;
 
 		var random = new System.Random();
@@ -49,7 +53,7 @@ public class GameController<M>: BaseController<M>
 			var matchCount = 0;
 			foreach(var matchOffset in whereCanMatch.matchOffsets) {
 				var matchPosition = new Position(sourcePosition.index, matchOffset[0], matchOffset[1]);
-				if (matchPosition.IsAcceptableIndex() 
+				if (matchPosition.IsBoundaryIndex() 
 					&& (sourcePosition.index == matchPosition.index
 						|| matchingType == GetGemModel(matchPosition).Type)) {
 					matchCount++;
@@ -70,7 +74,7 @@ public class GameController<M>: BaseController<M>
 		var swappingGemModels = new List<GemModel>();
 
 		var gemModels = Model.GemModels;
-		if (nearPosition.IsAcceptableIndex()) {
+		if (nearPosition.IsMovableIndex()) {
 			var sourceGemModel = GetGemModel(sourcePosition);
 			var nearGemModel = GetGemModel(nearPosition);
 
@@ -86,24 +90,69 @@ public class GameController<M>: BaseController<M>
 		return swappingGemModels;
     }
 
-    internal CrunchedGemInfo Crunch(Position sourcePosition, Position nearPosition)
+	internal BrokenGemInfo Break(Position targetPosition) {
+		BrokenGemInfo brokenGemInfo = new BrokenGemInfo();
+
+		var gemModels = Model.GemModels;
+		if (targetPosition.IsBoundaryIndex()) {
+			var targetGemModel = GetGemModel(targetPosition);
+			var newGemModel = GemModelFactory.Get(GemType.EmptyGem, targetGemModel.Position);
+			gemModels[targetGemModel.Position.row, targetGemModel.Position.col] = newGemModel;
+
+			brokenGemInfo.gemModels = new List<GemModel>{ targetGemModel };
+		}
+
+		return brokenGemInfo;
+	}
+
+    internal List<GemModel> MakeBlock(Position sourcePosition, Position nearPosition)
     {
+		List<GemModel> blockedGemModels = new List<GemModel>();
+		
+		var gemModels = Model.GemModels;
+		var sourceGemModel = GetGemModel(sourcePosition);
+		if (sourceGemModel.Type != GemType.BlockedGem) {
+			var newGemModel = GemModelFactory.Get(GemType.BlockedGem, sourcePosition);
+			newGemModel.id = sourceGemModel.id;
+			newGemModel.endurance = sourceGemModel.endurance;
+			newGemModel.enduranceForBlock = sourceGemModel.enduranceForBlock;
+			
+			gemModels[newGemModel.Position.row, newGemModel.Position.col] = newGemModel;
+			blockedGemModels.Add(newGemModel);
+
+			UnityEngine.Assertions.Assert.AreEqual(4, sourceGemModel.enduranceForBlock);
+		}
+
+		if (nearPosition.IsBoundaryIndex() && sourceGemModel.enduranceForBlock > 0) {
+			var nearGemModel = GetGemModel(nearPosition);
+			var newGemModel = GemModelFactory.Get(GemType.BlockedGem, nearPosition);
+			newGemModel.id = nearGemModel.id;
+			gemModels[newGemModel.Position.row, newGemModel.Position.col] = newGemModel;
+			blockedGemModels.Add(newGemModel);
+
+			sourceGemModel.enduranceForBlock -= 1;
+		}
+		
+        return blockedGemModels;
+    }
+
+    internal CrunchedGemInfo Crunch(Position sourcePosition, Position nearPosition) {
         CrunchedGemInfo crunchedGemInfo = new CrunchedGemInfo();
 
 		var gemModels = Model.GemModels;
 		var sourceGemModel = GetGemModel(sourcePosition);
 		crunchedGemInfo.source = sourceGemModel;
 
-		var newGemModel = GemModelFactory.Get(GemType.Empty, sourceGemModel.Position);
+		var newGemModel = GemModelFactory.Get(GemType.EmptyGem, sourceGemModel.Position);
 		gemModels[sourceGemModel.Position.row, sourceGemModel.Position.col] = newGemModel;
 		
-		if (nearPosition.IsAcceptableIndex() && sourceGemModel.hp > 0) {
+		if (nearPosition.IsBoundaryIndex() && sourceGemModel.endurance > 0) {
 			var nearGemModel = GetGemModel(nearPosition);
 			sourceGemModel.Position = nearPosition;
 			gemModels[sourceGemModel.Position.row, sourceGemModel.Position.col] = sourceGemModel;
 
 			crunchedGemInfo.gemModels = new List<GemModel>{ nearGemModel };
-			sourceGemModel.hp -= 1;
+			sourceGemModel.endurance -= 1;
 		}
 
 		return crunchedGemInfo;
@@ -124,10 +173,10 @@ public class GameController<M>: BaseController<M>
 		var gravity = Model.levelModel.gravity;
 		foreach(SpawnerGemModel spawnerGemModel in spawnerGemModels) {
 			var spawneePosition = new Position(spawnerGemModel.Position.index, gravity[0], gravity[1]);
-			if (GetGemModel(spawneePosition).Type == GemType.Empty) {
+			if (GetGemModel(spawneePosition).Type == GemType.EmptyGem) {
 				var spawneeGemModel 
 					= gemModels[spawneePosition.row, spawneePosition.col] 
-					= GemModelFactory.Get(GemType.Empty, spawneePosition);
+					= GemModelFactory.Get(GemType.EmptyGem, spawneePosition);
 
 				spawneeGemModel.Type = matchingTypes[random.Next(matchingTypes.Count)];
 				feedingGemModels.Add(spawneeGemModel);
@@ -150,10 +199,10 @@ public class GameController<M>: BaseController<M>
 		foreach(SpawnerGemModel spawnerGemModel in spawnerGemModels) {
 			var spawnTo = spawnerGemModel.spawnTo;
 			var spawneePosition = new Position(spawnerGemModel.Position.index, spawnTo[0], spawnTo[1]);
-			if (GetGemModel(spawneePosition).Type != GemType.Empty) {
+			if (GetGemModel(spawneePosition).Type != GemType.EmptyGem) {
 				var spawneeGemModel 
 					= gemModels[spawneePosition.row, spawneePosition.col] 
-					= GemModelFactory.Get(GemType.Spawnee, spawneePosition);
+					= GemModelFactory.Get(GemType.SpawneeGem, spawneePosition);
 
 				stoppingGemModels.Add(spawneeGemModel);
 			}
@@ -169,7 +218,7 @@ public class GameController<M>: BaseController<M>
 		var gemModels = Model.GemModels;
 		var emptyGemModels = 
 			from GemModel gemModel in Model.GemModels
-			where gemModel.Type == GemType.Empty
+			where gemModel.Type == GemType.EmptyGem
 			select gemModel;
         
 		// Only one of them will be executed between a and b.
@@ -179,7 +228,7 @@ public class GameController<M>: BaseController<M>
 			var emptyGemPosition = emptyGemModel.Position;
 			var nearPosition = new Position(emptyGemPosition.index, 0, -gravity[1]);
 
-			if (nearPosition.IsAcceptableIndex()) {
+			if (nearPosition.IsMovableIndex()) {
 				if (GetGemModel(nearPosition) is IMovable) {
 					fallingGemModels.AddRange(Swap(emptyGemPosition, nearPosition));
 				} else {
@@ -198,7 +247,7 @@ public class GameController<M>: BaseController<M>
 			foreach(var colOffset in colOffsets) {
 				var nearPosition = new Position(blockedGemPosition.index, colOffset, -gravity[1]);
 
-				if (nearPosition.IsAcceptableIndex()) {
+				if (nearPosition.IsMovableIndex()) {
 					var nearGemModel = GetGemModel(nearPosition);
 
 					if (nearGemModel is IMovable
@@ -210,14 +259,14 @@ public class GameController<M>: BaseController<M>
 		}
 
 		return fallingGemModels
-			.Where(gemModel => gemModel.Type != GemType.Empty)
+			.Where(gemModel => gemModel.Type != GemType.EmptyGem)
 			.Select(fallingGemModel => new GemInfo { 
 				position = fallingGemModel.Position, 
 				id = fallingGemModel.id })
 			.ToList();
     }
 
-    public List<MatchedLineInfo> Match(int colOffset, int rowOffset) {
+    public List<MatchedLineInfo> Match(int colOffset = 0, int rowOffset = 0) {
 		var matchedLineInfos = new List<MatchedLineInfo>();
 		
 		var gemModels = Model.GemModels;
@@ -225,7 +274,7 @@ public class GameController<M>: BaseController<M>
 
 		var matchableGemModels = 
 			from GemModel gemModel in Model.GemModels
-			where gemModel is IMovable && gemModel.Type != GemType.Empty
+			where gemModel is IMovable && gemModel.Type != GemType.EmptyGem && !gemModel.isMoving
 			select gemModel;
 
 		foreach(var matchableGemModel in matchableGemModels) {
@@ -266,7 +315,7 @@ public class GameController<M>: BaseController<M>
 		foreach(var matchedLineInfo in matchedLineInfos) {
 			var latestGemModel = matchedLineInfo.gemModels.OrderByDescending(gemModel => gemModel.sequence).FirstOrDefault();
 			foreach(var matchedGemModel in matchedLineInfo.gemModels) {
-				var newGemModel = GemModelFactory.Get(GemType.Empty, matchedGemModel.Position);
+				var newGemModel = GemModelFactory.Get(GemType.EmptyGem, matchedGemModel.Position);
 				gemModels[matchedGemModel.Position.row, matchedGemModel.Position.col] = newGemModel;
 				if (matchedGemModel == latestGemModel) {
 					var specialKey = ReadSpecialKey(matchedLineInfo.matchLineModels, colOffset, rowOffset);
@@ -289,7 +338,7 @@ public class GameController<M>: BaseController<M>
 
 			case "SQ": 
 				newGemType = GemType.ChocoGem; 
-				newGemModel.hp = 4;
+				newGemModel.endurance = newGemModel.enduranceForBlock = 4;
 				specialKey = ""; 
 				break;
 		}
@@ -310,7 +359,6 @@ public class GameController<M>: BaseController<M>
 		if (matchLineModels.Count > 1) {
 			var matchLineModelA = matchLineModels[0].type;
 			var matchLineModelB = matchLineModels[1].type;
-			UnityEngine.Debug.Log("match line types : " + matchLineModelA + ", " + matchLineModelB);
 			if (matchLineModelA == MatchLineType.V && matchLineModelB == MatchLineType.H
 				|| matchLineModelA == MatchLineType.H && matchLineModelB == MatchLineType.V) {
 				specialKey = "C";
@@ -325,7 +373,9 @@ public class GameController<M>: BaseController<M>
 		foreach(var whereCanMatch in matchLineModel.wheresCanMatch) {
 			foreach(var matchOffset in whereCanMatch.matchOffsets) {
 				var matchingPosition = new Position(sourceGemModel.Position.index, matchOffset[0], matchOffset[1]);
-				if (matchingPosition.IsAcceptableIndex() && sourceGemModel.Type == GetGemModel(matchingPosition).Type) {
+				if (matchingPosition.IsBoundaryIndex() 
+					&& sourceGemModel.Type == GetGemModel(matchingPosition).Type 
+					&& !GetGemModel(matchingPosition).isMoving) {
 					matchedGemModels.Add(GetGemModel(matchingPosition));
 				} else {
 					break;

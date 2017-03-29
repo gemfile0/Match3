@@ -1,34 +1,42 @@
-﻿public class Position
+﻿[System.Serializable]
+public class Position
 {
 	public int index;
 	public int row;
 	public int col;
-	public static int Cols = 0;
-	public static int Rows = 0;
-
+	public static LevelModel levelModel;
 	public Position(int col, int row)
 	{
-		UnityEngine.Assertions.Assert.AreNotEqual(0, Cols);
-		UnityEngine.Assertions.Assert.AreNotEqual(0, Rows);
+		UnityEngine.Assertions.Assert.IsNotNull(levelModel);
 		
 		this.col = col;
 		this.row = row;
-		this.index = row * Position.Cols + col;
+		this.index = row * Position.levelModel.cols + col;
 	}
 
 	public Position(int pivotIndex, int colOffset, int rowOffset)
 	{
-		UnityEngine.Assertions.Assert.AreNotEqual(0, Cols);
-		UnityEngine.Assertions.Assert.AreNotEqual(0, Rows);
+		UnityEngine.Assertions.Assert.IsNotNull(levelModel);
 		
-		row = (pivotIndex / Position.Cols) + rowOffset;
-		col = (pivotIndex % Position.Cols) + colOffset;
-		index = row * Position.Cols + col;
+		row = (pivotIndex / Position.levelModel.cols) + rowOffset;
+		col = (pivotIndex % Position.levelModel.cols) + colOffset;
+		index = row * Position.levelModel.cols + col;
 	}
 
-	public bool IsAcceptableIndex()
+	public bool IsBoundaryIndex()
 	{
-		return col >= 0 && col < Position.Cols && row >= 0 && row < Position.Rows;
+		return col >= Position.levelModel.colBoundary[0]
+			&& col <= Position.levelModel.colBoundary[1]
+			&& row >= Position.levelModel.rowBoundary[0]
+			&& row <= Position.levelModel.rowBoundary[1];
+	}
+
+	public bool IsMovableIndex()
+	{
+		return col >= 0
+			&& col <  Position.levelModel.cols
+			&& row >= 0
+			&& row <  Position.levelModel.rows;
 	}
 
 	public override string ToString()

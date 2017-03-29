@@ -1,4 +1,5 @@
-﻿using DG.Tweening;
+﻿using System;
+using DG.Tweening;
 using UnityEngine;
 
 public interface IGemView
@@ -44,8 +45,32 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     }
 
     internal void Squash() {
+        Controller.Stop();
+
         var sequence = DOTween.Sequence();
         sequence.Append(transform.DOScale(new Vector3(1.1f, 0.9f, 1), 0.09f));
         sequence.Append(transform.DOScale(new Vector3(1, 1, 1), 0.7f).SetEase(Ease.OutElastic));
+
+        MaterialPropertyBlock mpb = new MaterialPropertyBlock();
+        spriteRenderer.GetPropertyBlock(mpb);
+        mpb.SetFloat("_FlashAmount", 0.0f);
+        spriteRenderer.SetPropertyBlock(mpb);
+    }
+
+    internal void Open() {
+        Controller.Start();
+        gameObject.SetActive(true);
+
+        MaterialPropertyBlock mpb = new MaterialPropertyBlock();
+        spriteRenderer.GetPropertyBlock(mpb);
+        mpb.SetFloat("_FlashAmount", 0.4f);
+        spriteRenderer.SetPropertyBlock(mpb);
+    }
+
+    internal void SetBlock() {
+        MaterialPropertyBlock mpb = new MaterialPropertyBlock();
+        spriteRenderer.GetPropertyBlock(mpb);
+        mpb.SetFloat("_FlashAmount", 0.4f);
+        spriteRenderer.SetPropertyBlock(mpb);
     }
 }

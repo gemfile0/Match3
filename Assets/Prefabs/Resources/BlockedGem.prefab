@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 114296095670658166}
   - component: {fileID: 61156720945484560}
   m_Layer: 0
-  m_Name: Spawner
+  m_Name: BlockedGem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -67,5 +67,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Model:
-    name: 
     id: 0
+    sequence: 0
+    specialKey: 
+    endurance: 0

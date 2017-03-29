@@ -47,7 +47,7 @@ public class TestGameController {
 		
 		var emtpyGemModels = 
 			from GemModel gemModel in gemModels
-			where gemModel.Type == GemType.Empty
+			where gemModel.Type == GemType.EmptyGem
 			select gemModel;
 		Assert.AreEqual(3, emtpyGemModels.Count());
 	}
@@ -78,7 +78,7 @@ public class TestGameController {
 		}
 
 		//3. Assert
-		Assert.AreEqual(GemType.Empty, gameController.GetGemModel(new Position(0, 0)).Type);
+		Assert.AreEqual(GemType.EmptyGem, gameController.GetGemModel(new Position(0, 0)).Type);
 		Assert.AreEqual(GemType.RedGem, gameController.GetGemModel(new Position(0, 1)).Type);
 
 		//1. Arrange

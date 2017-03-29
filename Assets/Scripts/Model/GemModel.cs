@@ -8,8 +8,13 @@ public interface IGemModel {
 
 [System.Serializable]
 public enum GemType {
-    Nil = -1, Blocked = 0, Empty = 1, ChocoGem = 4, SuperGem = 5, Spawnee = 7, Spawner = 8, 
-    RedGem = 10, BlueGem = 20, GreenGem = 30, PurpleGem = 40, OrangeGem = 50, YellowGem = 60, 
+    Nil = -1, BlockedGem = 0, EmptyGem = 1, ChocoGem = 4, SuperGem = 5, SpawneeGem = 7, SpawnerGem = 8, 
+    RedGem = 10,    RedGemC = 11,   RedGemH = 12,   RedGemV = 13,
+    BlueGem = 20,   BlueGemC= 21,   BlueGemH= 22,   BlueGemV= 23,
+    GreenGem = 30,  GreenGemC=31,   GreenGemH=32,   GreenGemV=33,
+    PurpleGem = 40, PurpleGemC=41,  PurpleGemH=42,  PurpleGemV=43,
+    OrangeGem = 50, OrangeGemC=51,  OrangeGemH=52,  OrangeGemV=53,
+    YellowGem = 60, YellowGemC=61,  YellowGemH=62,  YellowGemV=63
 }
 
 [System.Serializable]
@@ -35,12 +40,15 @@ public class GemModel: BaseModel {
         }
         get { return position; }
     }
+    [UnityEngine.SerializeField]
     Position position;
     public Int64 id;
     public Int64 sequence;
     public string specialKey;
-    public int hp;
-    
+    public int endurance;
+    public int enduranceForBlock;
+    public bool isMoving;
+
     public GemModel(GemType type, Position position) {
         Type = type;
         Position = position;
@@ -59,10 +67,17 @@ public class GemInfo {
 
 static class GemModelFactory {
     public static GemModel Get(GemType gemType, Position position) {
-        string gemName = gemType.ToString();
+        string className = gemType.ToString();
+        var specialKey = "";
+
+        int rawGemType = (int)gemType;
+        if (rawGemType >= 10) {
+            var originalGemType = (GemType)(rawGemType - (rawGemType % 10));
+            specialKey = gemType.ToString().Replace(originalGemType.ToString(), "");
+            gemType = originalGemType;
+        }
 
         switch (gemType) {
-            case GemType.ChocoGem:
             case GemType.SuperGem:
             case GemType.RedGem:
             case GemType.BlueGem:
@@ -70,20 +85,21 @@ static class GemModelFactory {
             case GemType.PurpleGem:
             case GemType.OrangeGem:
             case GemType.YellowGem:
-            gemName = GemType.Empty.ToString();
+            className = GemType.EmptyGem.ToString();
             break;
 
-            case GemType.Spawnee:
-            gemType = GemType.Empty;
+            case GemType.SpawneeGem:
+            gemType = GemType.EmptyGem;
             break;
         }
         
-        var cardModel = (GemModel)Activator.CreateInstance(
-            Type.GetType(gemName + "GemModel"),
+        var gemModel = (GemModel)Activator.CreateInstance(
+            Type.GetType(className + "Model"),
             gemType,
             position
         );
-        return cardModel;
+        gemModel.specialKey = specialKey;
+        return gemModel;
     }
 }
 
@@ -104,4 +120,10 @@ public class SpawneeGemModel: GemModel {
 
 public class EmptyGemModel: GemModel, IMovable {
     public EmptyGemModel(GemType type, Position position): base(type, position) {}
+}
+
+public class ChocoGemModel: EmptyGemModel {
+    public ChocoGemModel(GemType type, Position position): base(type, position) {
+        enduranceForBlock = endurance = 4;
+    }
 }

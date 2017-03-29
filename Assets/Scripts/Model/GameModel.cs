@@ -71,9 +71,8 @@ public class GameModel: BaseModel, IGameModel {
         levelModel = JsonUtility.FromJson<LevelModel>(levelData.text);
         var tiles = levelModel.tiles;
 
-        Position.Cols = Cols;
-        Position.Rows = Rows;
-
+        Position.levelModel = levelModel;
+        
         var count = 0;
         gemModels = new GemModel[Rows, Cols];
         for(var row = Rows-1 ; row >= 0; row -= 1) {
