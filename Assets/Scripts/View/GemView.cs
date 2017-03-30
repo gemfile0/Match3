@@ -1,5 +1,4 @@
-﻿using System;
-using DG.Tweening;
+﻿using DG.Tweening;
 using UnityEngine;
 
 public interface IGemView
@@ -71,6 +70,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         MaterialPropertyBlock mpb = new MaterialPropertyBlock();
         spriteRenderer.GetPropertyBlock(mpb);
         mpb.SetFloat("_FlashAmount", 0.4f);
+        mpb.SetColor("_FlashColor", new Color32(255, 0, 0, 1));
         spriteRenderer.SetPropertyBlock(mpb);
     }
 }

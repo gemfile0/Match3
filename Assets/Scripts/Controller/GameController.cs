@@ -253,6 +253,7 @@ public class GameController<M>: BaseController<M>
 					if (nearGemModel is IMovable
 						&& !fallingGemModels.Contains(nearGemModel)) {
 						fallingGemModels.AddRange(Swap(blockedGemPosition, nearPosition));
+						break;
 					}
 				}
 			}
