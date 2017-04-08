@@ -1,9 +1,10 @@
 ﻿using NUnit.Framework;
 
-public class TestGameModel {
-
+public class TestGameModel 
+{
 	[Test]
-	public void MatchLineModel() {
+	public void MatchLineModel() 
+	{
 		//1. Arrange & 2. Act
 		var matchLineModel = new MatchLineModel(-2, 0, 3, 1);
 

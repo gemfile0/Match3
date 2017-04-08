@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 
-public interface IGemModel {
+public interface IGemModel 
+{
     GemType Type { get; set; }
     Position Position { get; set; }
     string Name { get; }
+    bool IsFalling { set; }
 }
 
 [System.Serializable]
-public enum GemType {
+public enum GemType 
+{
     Nil = -1, BlockedGem = 0, EmptyGem = 1, ChocoGem = 4, SuperGem = 5, SpawneeGem = 7, SpawnerGem = 8, 
     RedGem = 10,    RedGemC = 11,   RedGemH = 12,   RedGemV = 13,
     BlueGem = 20,   BlueGemC= 21,   BlueGemH= 22,   BlueGemV= 23,
@@ -18,10 +22,12 @@ public enum GemType {
 }
 
 [System.Serializable]
-public class GemModel: BaseModel {
+public class GemModel: BaseModel 
+{
     static Int64 GEM_ID = 0;
     static Int64 SEQUENCE_ID = 0;
-    public GemType Type {
+    public GemType Type 
+    {
         set { 
             type = value; 
             name = type.ToString();
@@ -29,11 +35,13 @@ public class GemModel: BaseModel {
         get { return type; }
     }
     GemType type;
-    public string Name { 
+    public string Name 
+    { 
         get { return name + specialKey; }
     }
     string name;
-    public Position Position { 
+    public Position Position 
+    { 
         set { 
             position = value;
             sequence = SEQUENCE_ID++;
@@ -43,20 +51,40 @@ public class GemModel: BaseModel {
     [UnityEngine.SerializeField]
     Position position;
     public Int64 id;
+    public Int64 markedBy;
     public Int64 sequence;
     public string specialKey;
     public int endurance;
-    public int enduranceForBlock;
-    public bool isMoving;
+    public bool IsFalling 
+    {
+        set { 
+            if (isFalling != value) {
+                callbacksOnFalling.ForEach(callback => {
+                    callback(value);
+                });
+            }
+            isFalling = value; 
+        }
+    }
+    bool isFalling;
+    List<Action<bool>> callbacksOnFalling;
 
-    public GemModel(GemType type, Position position) {
+    public GemModel(GemType type, Position position) 
+    {
         Type = type;
         Position = position;
         id = GEM_ID++;
+        callbacksOnFalling = new List<Action<bool>>();
     }
 
-    public override string ToString() {
-        return string.Format("{0}: {1}", type, position.ToString());
+    public override string ToString() 
+    {
+        return string.Format("{0}: {1}: {2}", id, type, position.ToString());
+    }
+
+    public void SubscribeFalling(Action<bool> callback)
+    {
+        callbacksOnFalling.Add(callback);
     }
 }
 
@@ -72,13 +100,14 @@ static class GemModelFactory {
 
         int rawGemType = (int)gemType;
         if (rawGemType >= 10) {
-            var originalGemType = (GemType)(rawGemType - (rawGemType % 10));
-            specialKey = gemType.ToString().Replace(originalGemType.ToString(), "");
-            gemType = originalGemType;
+            var baseGemType = (GemType)(rawGemType - (rawGemType % 10));
+            specialKey = gemType.ToString().Replace(baseGemType.ToString(), "");
+            gemType = baseGemType;
         }
 
         switch (gemType) {
             case GemType.SuperGem:
+            case GemType.ChocoGem:
             case GemType.RedGem:
             case GemType.BlueGem:
             case GemType.GreenGem:
@@ -99,7 +128,27 @@ static class GemModelFactory {
             position
         );
         gemModel.specialKey = specialKey;
+        SetEndurance(gemModel);
+
         return gemModel;
+    }
+
+    static void SetEndurance(GemModel gemModel) {
+        int endurance = 0;
+        switch(gemModel.Type) {
+            case GemType.ChocoGem:
+            endurance = 4;
+            break;
+        }
+        
+        switch(gemModel.specialKey) {
+            case "H":
+            case "V":
+            endurance = int.MaxValue;
+            break;
+        }
+        
+        gemModel.endurance = endurance;
     }
 }
 
@@ -120,10 +169,4 @@ public class SpawneeGemModel: GemModel {
 
 public class EmptyGemModel: GemModel, IMovable {
     public EmptyGemModel(GemType type, Position position): base(type, position) {}
-}
-
-public class ChocoGemModel: EmptyGemModel {
-    public ChocoGemModel(GemType type, Position position): base(type, position) {
-        enduranceForBlock = endurance = 4;
-    }
 }

@@ -3,36 +3,42 @@ using System.Collections.Generic;
 using System.Linq;
 
 [System.Serializable]
-public enum MatchLineType {
+public enum MatchLineType 
+{
     V = 0, H, S
 }
 
-public class MatchedLineInfo {
+public class MatchedLineInfo 
+{
     public List<MatchLineModel> matchLineModels;
     public List<GemModel> gemModels;
     public bool isMerged;
     public GemModel newAdded;
 
-    internal void Merge(MatchedLineInfo matchedLineInfo) {
+    internal void Merge(MatchedLineInfo matchedLineInfo) 
+    {
         matchLineModels = matchLineModels.Union(matchedLineInfo.matchLineModels).ToList();
         gemModels = gemModels.Union(matchedLineInfo.gemModels).ToList();
         matchedLineInfo.isMerged = true;
     }
 
-    public override string ToString() {
+    public override string ToString() 
+    {
         return string.Format("MatchLineInfo : {0}, {1}\n", matchLineModels.Count, gemModels.Count);
     }
 }
 
 [System.Serializable]
-public class MatchLineModel {
+public class MatchLineModel 
+{
     public int cols;
     public int rows;
     public MatchLineType type;
     public int magnitude;
     public List<WhereCanMatch> wheresCanMatch;
 
-    public MatchLineModel(int startCol, int startRow, int cols, int rows) {
+    public MatchLineModel(int startCol, int startRow, int cols, int rows) 
+    {
         this.cols = cols;
         this.rows = rows;
         
@@ -42,9 +48,10 @@ public class MatchLineModel {
         wheresCanMatch = new List<WhereCanMatch>();
         
         var rowPivot = startRow;
-        for(var row = 0; row < rows; row++) {
+        for (var row = 0; row < rows; row++) 
+        {
             var colPivot = startCol;
-            for(var col = 0; col < cols; col++) {
+            for (var col = 0; col < cols; col++) {
                 wheresCanMatch.Add(new WhereCanMatch(colPivot, cols, rowPivot, rows));
                 colPivot++;
             }
@@ -52,18 +59,22 @@ public class MatchLineModel {
         }
     }
 
-    public override string ToString() {
+    public override string ToString() 
+    {
         return string.Format("{1} {0} MatchLine", type, magnitude);
     }
 }
 
-public class WhereCanMatch {
+public class WhereCanMatch 
+{
     public List<int[]> matchOffsets;
 
-    public WhereCanMatch(int startCol, int cols, int startRow, int rows) {
+    public WhereCanMatch(int startCol, int cols, int startRow, int rows) 
+    {
         matchOffsets = new List<int[]>();
-        for(var row = 0; row < rows; row++) {
-            for(var col = 0; col < cols; col++) {
+        for (var row = 0; row < rows; row++) 
+        {
+            for (var col = 0; col < cols; col++) {
                 matchOffsets.Add(new int[2]{ startCol + col, startRow + row });
             }
         }

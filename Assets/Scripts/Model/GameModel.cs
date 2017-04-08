@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public interface IGameModel {
+public interface IGameModel 
+{
     GemModel[,] GemModels { get; set; }
     List<GemType> MatchingTypes { get; }
     int Rows { get; }
@@ -9,8 +10,10 @@ public interface IGameModel {
 }
 
 [System.Serializable]
-public class GameModel: BaseModel, IGameModel {
-    public GemModel[,] GemModels { 
+public class GameModel: BaseModel, IGameModel 
+{
+    public GemModel[,] GemModels 
+    { 
         get {
             UnityEngine.Assertions.Assert.IsNotNull(gemModels);
             return gemModels; 
@@ -22,18 +25,21 @@ public class GameModel: BaseModel, IGameModel {
     GemModel[,] gemModels;
     public List<MatchLineModel> allwayMatchLineModels;
     public List<MatchLineModel> positiveMatchLineModels;
-    public List<GemType> MatchingTypes {
+    public List<GemType> MatchingTypes 
+    {
         get { return matchingTypes; }   
     }
     List<GemType> matchingTypes;
 
-    public int Rows {
+    public int Rows 
+    {
         get { 
             UnityEngine.Assertions.Assert.IsNotNull(levelModel);
             return levelModel.rows; 
         }
     }
-    public int Cols {
+    public int Cols 
+    {
         get { 
             UnityEngine.Assertions.Assert.IsNotNull(levelModel);
             return levelModel.cols; 
@@ -42,11 +48,13 @@ public class GameModel: BaseModel, IGameModel {
     public TextAsset levelData;
     public LevelModel levelModel;
 
-    public GameModel() {
+    public GameModel() 
+    {
         
     }
 
-    public override void Setup() {
+    public override void Setup() 
+    {
         allwayMatchLineModels = new List<MatchLineModel> {
             new MatchLineModel(-2, 0, 3, 1),
             new MatchLineModel(0, -2, 1, 3),
@@ -75,8 +83,9 @@ public class GameModel: BaseModel, IGameModel {
         
         var count = 0;
         gemModels = new GemModel[Rows, Cols];
-        for(var row = Rows-1 ; row >= 0; row -= 1) {
-            for(var col = 0; col < Cols; col += 1) {
+        for (var row = Rows-1 ; row >= 0; row -= 1) 
+        {
+            for (var col = 0; col < Cols; col += 1) {
                 var tileIndex = row * Cols + col;
 
                 var colByCount = count % Cols;

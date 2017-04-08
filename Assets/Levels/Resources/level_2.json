@@ -10,6 +10,8 @@
        40,10,10,60,30,
        60,30,10,40,30
     ],
+    "colBoundary": [0, 4],
+    "rowBoundary":[0, 6],
     "cols": 5,
     "rows": 9,
     "gravity": [0, -1],

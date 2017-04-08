@@ -1,66 +1,144 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using DG.Tweening;
 using System.Collections;
-using System.Linq;
 
-public class GameView: BaseView<GameModel, GameController<GameModel>> {
+class WatcherStatus
+{
+	Queue<Action<bool>> callbacks;
+
+	public WatcherStatus() 
+	{
+		callbacks = new Queue<Action<bool>>();	
+	}
+
+	public void AddOnce(Action<bool> callback) 
+	{
+		callbacks.Enqueue(callback);
+	}
+
+	public void Update(bool succeed) 
+	{
+		while (callbacks.Count > 0) 
+		{
+			callbacks.Dequeue().Invoke(succeed);
+		}
+	}
+}
+
+public class GameView: BaseView<GameModel, GameController<GameModel>> 
+{
 	Bounds sampleBounds;
 	Vector3 gemSize;
 	SwipeInput swipeInput;
 	GemView gemSelected;
 	Dictionary<Int64, GemView> gemViews = new Dictionary<Int64, GemView>();
+	Dictionary<string, WatcherStatus> watcherStatuses = new Dictionary<string, WatcherStatus>();
+	Queue<Action> syncedAction = new Queue<Action>();
+	const float BASE_DURATION = 0.3f;
 
-	public override void Awake() {
+	public override void Awake() 
+	{
 		base.Awake();
 	}
 
-	void Start() {
+	void Start() 
+	{
 		ResourceCache.LoadAll("");
 		
 		Controller.Init();
 		MakeField();
 		AlignField();
 		ReadInput();
+		Watch();
+		Hello();
 	}
 
-	void MakeField() {
+	void Watch() 
+	{
+		watcherStatuses.Add("match", new WatcherStatus());
+		watcherStatuses.Add("feed", new WatcherStatus());
+		watcherStatuses.Add("fall", new WatcherStatus());
+
+		StartCoroutine(StartWatch());
+	}
+
+	void Hello()
+	{
+		StartCoroutine(StartHello());
+	}
+
+	IEnumerator StartHello() 
+	{
+		yield return new WaitForSeconds(BASE_DURATION/8);
+		Controller.GetAll().ForEach(gemModel => {
+			gemViews[gemModel.id].Squash();
+		});
+	}
+
+	IEnumerator StartWatch() 
+	{
+		while (true) 
+		{
+			UpdateWatcher("match", MatchGems(Controller.Match()));
+			UpdateWatcher("feed", FeedGems(Controller.Feed()));
+			UpdateWatcher("fall", FallGems(Controller.Fall()));
+			while(syncedAction.Count > 0) {
+				syncedAction.Dequeue().Invoke();
+			}
+			yield return new WaitForSeconds(BASE_DURATION);
+		}
+	}
+
+	void UpdateWatcher(string act, bool succeed) 
+	{
+		var watcherStatus = watcherStatuses[act];
+		watcherStatus.Update(succeed);
+	}
+
+	void MakeField() 
+	{
 		var sampleGem = ResourceCache.Instantiate("RedGem");
 		sampleBounds = sampleGem.GetBounds();
 		gemSize = sampleBounds.size;
 		Destroy(sampleGem);
 
 		var gemModels = Model.GemModels;
-		foreach(var gemModel in gemModels) {
+		foreach (var gemModel in gemModels) 
+		{
 			var gemView = MakeGemView(gemModel);
 			var position = gemModel.Position;
-			gemView.transform.localPosition = new Vector2(position.col * gemSize.x, position.row * gemSize.y);
+			gemView.SetLocalPosition(new Vector2(position.col * gemSize.x, position.row * gemSize.y));
 		}
 	}
 
-	void RemoveGemView(GemModel gemModel) {
+	void RemoveGemView(GemModel gemModel) 
+	{
 		GemView gemView;
-		if (gemViews.TryGetValue(gemModel.id, out gemView)) {
+		if (gemViews.TryGetValue(gemModel.id, out gemView)) 
+		{
 			var gemObject = gemView.gameObject;
 			gemObject.SetActive(false);
 			Destroy(gemObject);
 			gemViews.Remove(gemModel.id);
 		}
 		
-		if (gemModel.specialKey != "") {
+		if (gemModel.specialKey != "") 
+		{
 			ActBySpecialType(gemModel);
 		}
 	}
 
-	GemView MakeGemView(GemModel gemModel) {
+	GemView MakeGemView(GemModel gemModel) 
+	{
 		var gemView = ResourceCache.Instantiate(gemModel.Name, transform).GetComponent<GemView>();
 		gemView.UpdateModel(gemModel);
 		gemViews.Add(gemModel.id, gemView);
 		return gemView;
 	}
 
-	void AlignField() {
+	void AlignField() 
+	{
 		var sizeOfField = gameObject.GetBounds();
 		transform.localPosition = new Vector2(
 			sampleBounds.extents.x-sizeOfField.extents.x, 
@@ -68,7 +146,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 		);
 	}
 
-	void ReadInput() {
+	void ReadInput() 
+	{
 		swipeInput = GetComponent<SwipeInput>();
 		swipeInput.OnSwipeStart.AddListener(swipeInfo => {
 			Vector3 pos = Camera.main.ScreenToWorldPoint(swipeInfo.touchBegin);
@@ -90,14 +169,15 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 		});
 	}
 
-	void ActByGemType(GemType gemType, Vector2 direction) {
-		switch(gemType) {
+	void ActByGemType(GemType gemType, Vector2 direction) 
+	{
+		switch (gemType) 
+		{
 			case GemType.ChocoGem:
-			StartCoroutine(StartCrunch(gemSelected.Position, direction));
+			StartCoroutine(StartCrunch(gemSelected.Position, direction, gemSelected.Endurance, gemSelected.ID));
 			break;
 
 			case GemType.SuperGem:
-			
 			break;
 
 			default:
@@ -106,8 +186,10 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 		}
 	}
 
-	void ActBySpecialType(GemModel gemModel) {
-		switch(gemModel.Type) {
+	void ActBySpecialType(GemModel gemModel) 
+	{
+		switch (gemModel.Type) 
+		{
 			case GemType.SuperGem:
 			break;
 
@@ -115,15 +197,16 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 			break;
 		}
 		
-		switch(gemModel.specialKey) {
+		switch (gemModel.specialKey) 
+		{
 			case "H":
-			StartCoroutine(StartSpread(gemModel.Position, new Vector2{ x = -1, y = 0 }));
-			StartCoroutine(StartSpread(gemModel.Position, new Vector2{ x = 1, y = 0 }));
+			StartCoroutine(StartSpread(gemModel.Position, new Vector2{ x = -1, y = 0 }, gemModel.endurance, gemModel.id));
+			StartCoroutine(StartSpread(gemModel.Position, new Vector2{ x = 1, y = 0 }, gemModel.endurance, gemModel.id));
 			break;
 
 			case "V":
-			StartCoroutine(StartSpread(gemModel.Position, new Vector2{ x = 0, y = -1 }));
-			StartCoroutine(StartSpread(gemModel.Position, new Vector2{ x = 0, y = 1 }));
+			StartCoroutine(StartSpread(gemModel.Position, new Vector2{ x = 0, y = -1 }, gemModel.endurance, gemModel.id));
+			StartCoroutine(StartSpread(gemModel.Position, new Vector2{ x = 0, y = 1 }, gemModel.endurance, gemModel.id));
 			break;
 
 			case "C":
@@ -131,93 +214,96 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 		}
 	}
 
-	IEnumerator StartSpread(Position sourcePosition, Vector2 direction) {
+	IEnumerator StartSpread(Position sourcePosition, Vector2 direction, int repeat, Int64 markerID) 
+	{
 		var colOffset = (int)direction.x;
 		var rowOffset = (int)direction.y;
 
-		var gravity = Model.levelModel.gravity;
+		SetBlock(sourcePosition, colOffset, rowOffset, repeat, markerID);
 		
-		while(true) {
+		while (repeat > 0) 
+		{
 			var nearPosition = new Position(sourcePosition.index, colOffset, rowOffset);
-			var brokenGemInfo = Controller.Break(nearPosition);
+			var brokenGemInfo = Controller.Break(sourcePosition, markerID);
 			if (brokenGemInfo.gemModels != null) {
 				BreakGems(brokenGemInfo);
-			} else {
+			} else if (!brokenGemInfo.hasNext) {
 				break;
 			}
 
 			sourcePosition = nearPosition;
+			repeat--;
+			yield return new WaitForSeconds(BASE_DURATION/4);
 		}
 		
 		yield return null;
 	}
 
-	IEnumerator StartCrunch(Position sourcePosition, Vector2 direction) {
+	IEnumerator StartCrunch(Position sourcePosition, Vector2 direction, int repeat, Int64 markerID) 
+	{
 		var colOffset = (int)direction.x;
 		var rowOffset = (int)direction.y;
 		
 		var count = 0;
-		var gravity = Model.levelModel.gravity;
-		var sequence = DOTween.Sequence().SetEase(Ease.Linear);
-
-		SetBlock(sourcePosition, colOffset, rowOffset);
+		SetBlock(sourcePosition, colOffset, rowOffset, repeat, markerID);
 		
 		// 1.
-		var waiting = true;
-		while(waiting) {
+		while (true) 
+		{
 			var nearPosition = new Position(sourcePosition.index, colOffset, rowOffset);
-			var crunchedGemInfo = Controller.Crunch(sourcePosition, nearPosition);
+			var crunchedGemInfo = Controller.Crunch(sourcePosition, nearPosition, repeat);
 
 			if (crunchedGemInfo.gemModels != null) {
-				CrunchGems(sequence, count, crunchedGemInfo);
-				yield return FeedAndFall(0.36f);
-			} else {
+				CrunchGems(crunchedGemInfo);
+			} else if (!crunchedGemInfo.hasNext) {
 				RemoveGemView(crunchedGemInfo.source);
 				break;
 			}
-			
+
 			sourcePosition = nearPosition;
 			count++;
-		}
-
-		// 2.
-		waiting = true;
-		while(waiting) {
-			waiting = Match();
-			yield return FeedAndFall();
+			repeat--;
+			yield return new WaitForSeconds(BASE_DURATION);
 		}
 	}
 
-	void SetBlock(Position sourcePosition, int colOffset, int rowOffset) {
+	void SetBlock(Position sourcePosition, int colOffset, int rowOffset, int repeat, Int64 markerID) 
+	{
 		var nextCol = colOffset;
 		var nextRow = rowOffset;
-		while(true) {
+		while (repeat > 0) 
+		{
 			var nearPosition = new Position(sourcePosition.index, nextCol, nextRow);
-			var blockedGemModels = Controller.MakeBlock(sourcePosition, nearPosition);
-			if (blockedGemModels.Count > 0) {
-				blockedGemModels.ForEach(gemModel => {
-					var gemView = gemViews[gemModel.id];
-					gemView.UpdateModel(gemModel);
-					gemView.SetBlock();
+			var blockedGemInfo = Controller.MarkAsBlock(sourcePosition, nearPosition, markerID);
+			
+			if (blockedGemInfo.gemModels.Count > 0) {
+				blockedGemInfo.gemModels.ForEach(gemModel => {
+					GemView gemView;
+					if (gemViews.TryGetValue(gemModel.id, out gemView)) {
+						gemView.UpdateModel(gemModel);
+						gemView.SetBlock();
+					} 
 				});
-			} else {
+			} 
+			else if (!blockedGemInfo.hasNext) {
 				break;
 			}
 			
+			repeat--;
 			nextCol += colOffset;
 			nextRow += rowOffset;
 		}
 	}
 	
-	void BreakGems(BrokenGemInfo brokenGemInfo) {
+	void BreakGems(BrokenGemInfo brokenGemInfo) 
+	{
 		brokenGemInfo.gemModels.ForEach(brokenGemModel => {
 			RemoveGemView(brokenGemModel);
 		});
 	}
 
-	void CrunchGems(Sequence sequence, int count, CrunchedGemInfo crunchedGemInfo) {
-		var duration = 0f;
-		
+	bool CrunchGems(CrunchedGemInfo crunchedGemInfo) 
+	{
 		crunchedGemInfo.gemModels.ForEach(crunchedGemModel => {
 			var gemObject = gemViews[crunchedGemModel.id].gameObject;
 			gemObject.SetActive(false);
@@ -229,131 +315,103 @@ public class GameView: BaseView<GameModel, GameController<GameModel>> {
 		var gemView = gemViews[gemModel.id];
 		var position = gemModel.Position;
 		var nextPosition = new Vector3(position.col * gemSize.x, position.row * gemSize.y, 0);
-		duration = 0.36f * (nextPosition - gemView.transform.localPosition).magnitude / gemSize.y;
-		sequence.Insert(duration * count, gemView.gameObject.transform.DOLocalMove(
-			nextPosition,
-			duration
-		).SetEase(Ease.Linear));
+		gemView.DoLocalMove(
+			nextPosition, 
+			BASE_DURATION * (nextPosition - gemView.transform.localPosition).magnitude / gemSize.y
+		);
+
+		return crunchedGemInfo.gemModels.Count > 0;
 	}
 
-	IEnumerator StartSwap(Position sourcePosition, Vector2 direction) {
+	IEnumerator StartSwap(Position sourcePosition, Vector2 direction) 
+	{
 		var colOffset = (int)direction.x;
 		var rowOffset = (int)direction.y;
 		var nearPosition = new Position(sourcePosition.index, colOffset, rowOffset);
 
 		// 1. 
-		var waiting = true;
-		var hasAnyMatch = false;
-		yield return SwapGems(Controller.Swap(sourcePosition, nearPosition));
-
-		while(waiting) {
-			if (Match()) {
-				hasAnyMatch = true;
-				yield return FeedAndFall();
-			} else {
-				waiting = false;
-			}
-		}
-
-		if (!hasAnyMatch) {
-			yield return SwapGems(Controller.Swap(nearPosition, sourcePosition));
-		}
+		AddSyncedAction(() => {
+			SwapGems(Controller.Swap(sourcePosition, nearPosition));
+			SubscribeWatcher("match", succeed => {
+				if (!succeed) {
+					SwapGems(Controller.Swap(nearPosition, sourcePosition));
+				}
+			});
+		});
+		yield return null;
 	}
 
-	IEnumerator FeedAndFall(float waitForSeconds = 0f) {
-		var fallingGemInfosList = new List<List<GemInfo>>();
-		while(true) {
-			FeedGems(Controller.Feed());
-
-			var fallingGemModels = Controller.Fall();
-			fallingGemInfosList.Add(fallingGemModels);
-
-			if (fallingGemModels.Count == 0) {
-				FeedGems(Controller.StopFeed());
-				break;
-			}
-		}
-
-		var index = 0;
-		var duration = 0.36f;
-		var sequence = DOTween.Sequence().SetEase(Ease.InOutQuad);
-		for(; index < fallingGemInfosList.Count; index++) {
-			var fallingGemInfos = fallingGemInfosList[index];
-			FallGems(sequence, fallingGemInfos, index * duration, duration);	
-
-			// Fixed to bounce like jelly when tween finished on each gem.
-			if (index < fallingGemInfosList.Count - 1) {
-				var nextFallingGemInfos = fallingGemInfosList[index + 1];
-				fallingGemInfos.ForEach(fallingGemInfo => {
-					if (!nextFallingGemInfos.Any(nextFallingGemInfo => nextFallingGemInfo.id == fallingGemInfo.id)) {
-						sequence.InsertCallback(index * duration + duration, () => {
-							gemViews[fallingGemInfo.id].Squash();
-						});
-					}
-				});
-			}
-		}
-
-		yield return new WaitForSeconds((waitForSeconds != 0) ? waitForSeconds : index * duration);
+	void SubscribeWatcher(string act, Action<bool> action) 
+	{
+		watcherStatuses[act].AddOnce(action);
 	}
 
-	void FeedGems(List<GemModel> feedingGemModels) {
-		feedingGemModels.ForEach(gemModel =>  {
+	bool FeedGems(List<GemModel> feedingGemModels) 
+	{
+		feedingGemModels.ForEach(gemModel => {
 			var gemView = MakeGemView(gemModel);
 			var position = gemModel.Position;
-			gemView.transform.localPosition = new Vector2(position.col * gemSize.x, position.row * gemSize.y);
-			gemView.gameObject.SetActive(false);
+			gemView.SetLocalPosition(new Vector2(position.col * gemSize.x, position.row * gemSize.y));
+			gemView.SetActive(false);
 		});
+
+		return feedingGemModels.Count > 0;
 	}
 
-	void MatchGems(List<MatchedLineInfo> matchedLineInfos) {
+	bool MatchGems(List<MatchedLineInfo> matchedLineInfos) 
+	{
 		matchedLineInfos.ForEach(matchedLineInfo => {
 			matchedLineInfo.gemModels.ForEach(gemModel => {
 				RemoveGemView(gemModel);
 			});
+			
 			if (matchedLineInfo.newAdded != null) {
 				var gemView = MakeGemView(matchedLineInfo.newAdded);
 				var position = matchedLineInfo.newAdded.Position;
-				gemView.transform.localPosition = new Vector2(position.col * gemSize.x, position.row * gemSize.y);
+				gemView.SetLocalPosition(new Vector2(position.col * gemSize.x, position.row * gemSize.y));
 			}
 		});
+
+		return matchedLineInfos.Count > 0;
 	}
 
-	void FallGems(Sequence sequence, List<GemInfo> fallingGemInfos, float timeAt, float duration) {
+	bool FallGems(List<GemInfo> fallingGemInfos) 
+	{
 		fallingGemInfos.ForEach(gemInfo => {
 			var gemView = gemViews[gemInfo.id];
 			var position = gemInfo.position;
 			var nextPosition = new Vector3(position.col * gemSize.x, position.row * gemSize.y, 0);
-			sequence.InsertCallback(timeAt, ()=>gemView.Open());
-			sequence.Insert(timeAt, gemView.gameObject.transform.DOLocalMove(nextPosition, duration).SetEase(Ease.Linear));
+			gemView.Open();
+			gemView.DoLocalMove(nextPosition, BASE_DURATION);
 		});
+
+		return fallingGemInfos.Count > 0;
 	}
 
-	IEnumerator SwapGems(List<GemModel> swappingGemModels) {
-		var duration = 0f;
+	bool SwapGems(List<GemModel> swappingGemModels) 
+	{
 		swappingGemModels.ForEach(gemModel => {
 			var gemView = gemViews[gemModel.id];
 			var position = gemModel.Position;
 			var nextPosition = new Vector3(position.col * gemSize.x, position.row * gemSize.y, 0);
-			duration = 0.36f * (nextPosition - gemView.transform.localPosition).magnitude / gemSize.y;
-			gemView.gameObject.transform.DOLocalMove(
+			gemView.DoLocalMove(
 				nextPosition,
-				duration
+				BASE_DURATION * (nextPosition - gemView.transform.localPosition).magnitude / gemSize.y
 			);
 		});
-		yield return new WaitForSeconds(duration);
+
+		return swappingGemModels.Count > 0;
 	}
 
-	void Destroy() {
+	void AddSyncedAction(Action action) 
+	{
+		syncedAction.Enqueue(action);
+	}
+
+	void Destroy() 
+	{
 		swipeInput.OnSwipeStart.RemoveAllListeners();
-	}
-
-	bool Match() {
-		var matchedGemModels = Controller.Match();
-		if (matchedGemModels.Count > 0) {
-			MatchGems(matchedGemModels);
-		}
-
-		return matchedGemModels.Count > 0;
+		swipeInput.OnSwipeCancel.RemoveAllListeners();
+		swipeInput.OnSwipeEnd.RemoveAllListeners();
 	}
 }

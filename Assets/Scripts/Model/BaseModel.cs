@@ -1,6 +1,8 @@
 ﻿[System.Serializable]
-public class BaseModel {
-	public virtual void Setup() {
+public class BaseModel 
+{
+	public virtual void Setup() 
+    {
 
     }
 }

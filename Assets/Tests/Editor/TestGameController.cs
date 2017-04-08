@@ -2,21 +2,25 @@
 using System.Linq;
 using UnityEngine;
 
-public class TestGameController {
-	GameModel GetGameModel() {
+public class TestGameController 
+{
+	GameModel GetGameModel() 
+	{
 		var gameModel = new GameModel();
 		gameModel.levelData = Resources.Load<TextAsset>("level_test");
 		return gameModel;
 	}
 
-	GameController<GameModel> GetGameController(GameModel gameModel) {
+	GameController<GameModel> GetGameController(GameModel gameModel) 
+	{
 		var gameController = new GameController<GameModel>();
 		gameController.Setup(gameModel);
 		return gameController;
 	}
 
 	[Test]
-	public void MakeField() {
+	public void MakeField() 
+	{
 		//1. Arrange
 		var gameModel = GetGameModel();
 		//2. Act
@@ -33,7 +37,8 @@ public class TestGameController {
 	}
 
 	[Test]
-	public void PutGems() {
+	public void PutGems() 
+	{
 		//1. Arrange
 		var gameModel = GetGameModel();
 		var gameController = GetGameController(gameModel);
@@ -53,7 +58,8 @@ public class TestGameController {
 	}
 
 	[Test]
-	public void ExistAnyMatches() {
+	public void ExistAnyMatches() 
+	{
 		//1. Arrange
 		var gameModel = GetGameModel();
 		var gameController = GetGameController(gameModel);
@@ -100,7 +106,8 @@ public class TestGameController {
 	}
 
 	[Test]
-	public void Swap() {
+	public void Swap() 
+	{
 		//1. Arrange
 		var gameModel = GetGameModel();
 		GetGameController(gameModel);
@@ -128,17 +135,20 @@ public class TestGameController {
 	}
 
 	[Test]
-	public void Match() {
+	public void Match() 
+	{
 
 	}
 
 	[Test]
-	public void Feed() {
+	public void Feed() 
+	{
 
 	}
 
 	[Test]
-	public void Fall() {
+	public void Fall() 
+	{
 		
 	}
 }
