@@ -41,7 +41,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         get { return Model.id; }
     }
 
-    bool showID = false;
+    bool showID = true;
     Sequence movingSequence;
 
     internal void UpdateModel(GemModel gemModel) 

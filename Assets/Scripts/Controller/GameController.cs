@@ -5,7 +5,6 @@ using System.Linq;
 public class CrunchedGemInfo 
 {
 	public List<GemModel> gemModels;
-	public GemModel source;
 	public bool hasNext;
 }
 
@@ -125,39 +124,41 @@ public class GameController<M>: BaseController<M>
 		
 		var sourceGemModel = GetGemModel(sourcePosition);
 
-		if (sourceGemModel.Type != GemType.EmptyGem && sourceGemModel.Type != GemType.BlockedGem) 
+		if (sourceGemModel.Type != GemType.EmptyGem && !(sourceGemModel is IBlockable)) 
 		{
-			var newGemModel = GemModelFactory.Get(GemType.BlockedGem, sourceGemModel.Position);
-			newGemModel.id = sourceGemModel.id;
-			newGemModel.markedBy = markerID;
-			newGemModel.endurance = sourceGemModel.endurance;
-			SetGemModel(newGemModel);
-			blockedGemInfo.gemModels.Add(newGemModel);
+			blockedGemInfo.gemModels.Add(CopyAsBlock(markerID, sourceGemModel));
 		}
 
-		if (nearPosition.IsBoundaryIndex()) 
+		if (nearPosition.IsBoundaryIndex())
 		{
 			blockedGemInfo.hasNext = true;
 			var nearGemModel = GetGemModel(nearPosition);
 			
-			if (nearGemModel.Type != GemType.EmptyGem && nearGemModel.Type != GemType.BlockedGem) {
-				var newGemModel = GemModelFactory.Get(GemType.BlockedGem, nearPosition);
-				newGemModel.id = nearGemModel.id;
-				newGemModel.markedBy = markerID;
-				newGemModel.endurance = nearGemModel.endurance;
-				SetGemModel(newGemModel);
-				blockedGemInfo.gemModels.Add(newGemModel);
+			if (nearGemModel.Type != GemType.EmptyGem && !(nearGemModel is IBlockable)) {
+				blockedGemInfo.gemModels.Add(CopyAsBlock(markerID, nearGemModel));
 			}
 		}
 
         return blockedGemInfo;
     }
 
-	internal BrokenGemInfo Break(Position targetPosition, Int64 markerID) 
+	GemModel CopyAsBlock(Int64 markerID, GemModel targetGemModel)
+	{
+		var copiedGemModel = GemModelFactory.Get(GemType.BlockedGem, targetGemModel.Position);
+		copiedGemModel.id = targetGemModel.id;
+		copiedGemModel.markedBy = markerID;
+		copiedGemModel.Type = targetGemModel.Type;
+		copiedGemModel.specialKey = targetGemModel.specialKey;
+		copiedGemModel.endurance = targetGemModel.endurance;
+		SetGemModel(copiedGemModel);
+		return copiedGemModel;
+	}
+
+	internal BrokenGemInfo Break(Position targetPosition, Int64 markerID, int repeat) 
 	{
 		BrokenGemInfo brokenGemInfo = new BrokenGemInfo();
 
-		if (targetPosition.IsBoundaryIndex()) 
+		if (targetPosition.IsBoundaryIndex() && repeat > 0) 
 		{
 			brokenGemInfo.hasNext = true;
 			
@@ -173,32 +174,7 @@ public class GameController<M>: BaseController<M>
 		return brokenGemInfo;
 	}
 
-    internal CrunchedGemInfo Crunch(Position sourcePosition, Position nearPosition, int repeat) 
-	{
-        CrunchedGemInfo crunchedGemInfo = new CrunchedGemInfo();
-
-		var sourceGemModel = GetGemModel(sourcePosition);
-		crunchedGemInfo.source = sourceGemModel;
-
-		var newGemModel = GemModelFactory.Get(GemType.EmptyGem, sourceGemModel.Position);
-		SetGemModel(newGemModel);
-
-		if (nearPosition.IsBoundaryIndex() && repeat > 0) 
-		{
-			var nearGemModel = GetGemModel(nearPosition);
-			if (nearGemModel.markedBy == sourceGemModel.id) {
-				sourceGemModel.Position = nearPosition;
-				SetGemModel(sourceGemModel);
-
-				crunchedGemInfo.hasNext = true;
-				crunchedGemInfo.gemModels = new List<GemModel>{ nearGemModel };
-			}
-		}
-
-		return crunchedGemInfo;
-    }
-
-    public List<GemModel> Feed() 
+    public List<GemModel> Feed()
 	{
 		var feedingGemModels = new List<GemModel>();
 		
@@ -211,7 +187,7 @@ public class GameController<M>: BaseController<M>
 			select gemModel;
 
 		var gravity = Model.levelModel.gravity;
-		foreach (SpawnerGemModel spawnerGemModel in spawnerGemModels) 
+		foreach (SpawnerGemModel spawnerGemModel in spawnerGemModels)
 		{
 			var spawneePosition = new Position(spawnerGemModel.Position.index, gravity[0], gravity[1]);
 			if (GetGemModel(spawneePosition).Type == GemType.EmptyGem) {
@@ -291,7 +267,6 @@ public class GameController<M>: BaseController<M>
 					if (nearGemModel is IMovable
 						&& !fallingGemModels.Contains(nearGemModel)) {
 						fallingGemModels.AddRange(Swap(blockedGemPosition, nearPosition));
-						UnityEngine.Debug.Log(nearPosition.ToString() + " <=> "+ blockedGemPosition);
 						break;
 					}
 				}
@@ -409,7 +384,7 @@ public class GameController<M>: BaseController<M>
 				gemType = GemType.SuperGem; 
 				break;
 
-			case "SQ": 
+			case "SQ":
 				gemType = GemType.ChocoGem; 
 				break;
 
@@ -451,6 +426,8 @@ public class GameController<M>: BaseController<M>
 			if (matchLineModelA == MatchLineType.V && matchLineModelB == MatchLineType.H
 				|| matchLineModelA == MatchLineType.H && matchLineModelB == MatchLineType.V) {
 				specialKey = "C";
+			} else if (matchLineModels[0].magnitude == 2 || matchLineModels[1].magnitude == 2) {
+				specialKey = "SQ";
 			}
 		}
 

@@ -93,19 +93,23 @@ public class GemInfo {
     public Int64 id;
 }
 
-static class GemModelFactory {
-    public static GemModel Get(GemType gemType, Position position) {
+static class GemModelFactory 
+{
+    public static GemModel Get(GemType gemType, Position position) 
+    {
         string className = gemType.ToString();
         var specialKey = "";
 
         int rawGemType = (int)gemType;
-        if (rawGemType >= 10) {
+        if (rawGemType >= 10)
+        {
             var baseGemType = (GemType)(rawGemType - (rawGemType % 10));
             specialKey = gemType.ToString().Replace(baseGemType.ToString(), "");
             gemType = baseGemType;
         }
 
-        switch (gemType) {
+        switch (gemType)
+        {
             case GemType.SuperGem:
             case GemType.ChocoGem:
             case GemType.RedGem:
@@ -133,15 +137,18 @@ static class GemModelFactory {
         return gemModel;
     }
 
-    static void SetEndurance(GemModel gemModel) {
+    static void SetEndurance(GemModel gemModel) 
+    {
         int endurance = 0;
-        switch(gemModel.Type) {
+        switch(gemModel.Type) 
+        {
             case GemType.ChocoGem:
             endurance = 4;
             break;
         }
         
-        switch(gemModel.specialKey) {
+        switch(gemModel.specialKey) 
+        {
             case "H":
             case "V":
             endurance = int.MaxValue;
@@ -154,19 +161,23 @@ static class GemModelFactory {
 
 public interface IBlockable {}
 public interface IMovable {}
-public class BlockedGemModel: GemModel, IBlockable {
+public class BlockedGemModel: GemModel, IBlockable 
+{
     public BlockedGemModel(GemType type, Position position): base(type, position) {}
 }
 
-public class SpawnerGemModel: GemModel, IBlockable {
+public class SpawnerGemModel: GemModel, IBlockable 
+{
     public int[] spawnTo = new int[]{0, -1};
     public SpawnerGemModel(GemType type, Position position): base(type, position) {}
 }
 
-public class SpawneeGemModel: GemModel {
+public class SpawneeGemModel: GemModel 
+{
     public SpawneeGemModel(GemType type, Position position): base(type, position) {}
 }
 
-public class EmptyGemModel: GemModel, IMovable {
+public class EmptyGemModel: GemModel, IMovable 
+{
     public EmptyGemModel(GemType type, Position position): base(type, position) {}
 }

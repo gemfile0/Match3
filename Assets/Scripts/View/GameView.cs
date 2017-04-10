@@ -112,18 +112,22 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		}
 	}
 
-	void RemoveGemView(GemModel gemModel) 
+	void RemoveGemView(GemModel gemModel, bool needToChaining) 
 	{
 		GemView gemView;
 		if (gemViews.TryGetValue(gemModel.id, out gemView)) 
 		{
+			gemViews.Remove(gemModel.id);
 			var gemObject = gemView.gameObject;
 			gemObject.SetActive(false);
 			Destroy(gemObject);
-			gemViews.Remove(gemModel.id);
 		}
-		
-		if (gemModel.specialKey != "") 
+		else
+		{
+			Debug.Log("Can't remove the gem! " + gemModel.ToString());
+		}
+
+		if (needToChaining)
 		{
 			ActBySpecialType(gemModel);
 		}
@@ -171,10 +175,10 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	void ActByGemType(GemType gemType, Vector2 direction) 
 	{
-		switch (gemType) 
+		switch (gemType)
 		{
 			case GemType.ChocoGem:
-			StartCoroutine(StartCrunch(gemSelected.Position, direction, gemSelected.Endurance, gemSelected.ID));
+			StartCoroutine(StartBreak(gemSelected.Position, direction, gemSelected.Endurance, gemSelected.ID, BASE_DURATION, false));
 			break;
 
 			case GemType.SuperGem:
@@ -186,27 +190,75 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		}
 	}
 
-	void ActBySpecialType(GemModel gemModel) 
+	Vector2 GetRandomDirection()
 	{
-		switch (gemModel.Type) 
+		var random = new System.Random();
+		var allDirections = new Vector2[] {
+			new Vector2{ x = 1,  y = 0 }, 
+			new Vector2{ x = -1, y = 0 }, 
+			new Vector2{ x = 0,  y = 1 }, 
+			new Vector2{ x = 0,  y = -1 }
+		};
+		return allDirections[random.Next(allDirections.Length)];
+	}
+
+	/* needToProtect */void ActBySpecialType(GemModel gemModel) 
+	{
+		switch (gemModel.Type)
 		{
 			case GemType.SuperGem:
 			break;
 
 			case GemType.ChocoGem:
+			StartCoroutine(StartBreak(
+				gemModel.Position, 
+				GetRandomDirection(), 
+				gemModel.endurance, 
+				gemModel.id, 
+				BASE_DURATION, 
+				isChaining: false
+			));
 			break;
 		}
 		
-		switch (gemModel.specialKey) 
+		switch (gemModel.specialKey)
 		{
 			case "H":
-			StartCoroutine(StartSpread(gemModel.Position, new Vector2{ x = -1, y = 0 }, gemModel.endurance, gemModel.id));
-			StartCoroutine(StartSpread(gemModel.Position, new Vector2{ x = 1, y = 0 }, gemModel.endurance, gemModel.id));
+			StartCoroutine(StartBreak(
+				gemModel.Position, 
+				new Vector2{ x = -1, y = 0 }, 
+				gemModel.endurance, 
+				gemModel.id, 
+				BASE_DURATION/4,
+				isChaining: true
+			));
+			StartCoroutine(StartBreak(
+				gemModel.Position, 
+				new Vector2{ x = 1, y = 0 }, 
+				gemModel.endurance, 
+				gemModel.id,
+				BASE_DURATION/4,
+				isChaining: true
+			));
 			break;
 
 			case "V":
-			StartCoroutine(StartSpread(gemModel.Position, new Vector2{ x = 0, y = -1 }, gemModel.endurance, gemModel.id));
-			StartCoroutine(StartSpread(gemModel.Position, new Vector2{ x = 0, y = 1 }, gemModel.endurance, gemModel.id));
+			StartCoroutine(StartBreak(
+				gemModel.Position, 
+				new Vector2{ x = 0, y = -1 }, 
+				gemModel.endurance, 
+				gemModel.id,
+				BASE_DURATION/4,
+				isChaining: true
+			));
+			StartCoroutine(StartBreak(
+				gemModel.Position, 
+				new Vector2{ x = 0, y = 1 }, 
+				gemModel.endurance, 
+				gemModel.id,
+				BASE_DURATION/4,
+				isChaining: true
+			));
 			break;
 
 			case "C":
@@ -214,57 +266,29 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		}
 	}
 
-	IEnumerator StartSpread(Position sourcePosition, Vector2 direction, int repeat, Int64 markerID) 
+	IEnumerator StartBreak(Position sourcePosition, Vector2 direction, int repeat, Int64 markerID, float duration, bool isChaining) 
 	{
 		var colOffset = (int)direction.x;
 		var rowOffset = (int)direction.y;
 
+		var initialPosition = sourcePosition;
 		SetBlock(sourcePosition, colOffset, rowOffset, repeat, markerID);
 		
 		while (repeat > 0) 
 		{
-			var nearPosition = new Position(sourcePosition.index, colOffset, rowOffset);
-			var brokenGemInfo = Controller.Break(sourcePosition, markerID);
+			var brokenGemInfo = Controller.Break(sourcePosition, markerID, repeat);
 			if (brokenGemInfo.gemModels != null) {
-				BreakGems(brokenGemInfo);
+				BreakGems(brokenGemInfo, isChaining || initialPosition != sourcePosition);
 			} else if (!brokenGemInfo.hasNext) {
 				break;
 			}
 
-			sourcePosition = nearPosition;
+			sourcePosition = new Position(sourcePosition.index, colOffset, rowOffset);;
 			repeat--;
-			yield return new WaitForSeconds(BASE_DURATION/4);
+			yield return new WaitForSeconds(duration);
 		}
 		
 		yield return null;
-	}
-
-	IEnumerator StartCrunch(Position sourcePosition, Vector2 direction, int repeat, Int64 markerID) 
-	{
-		var colOffset = (int)direction.x;
-		var rowOffset = (int)direction.y;
-		
-		var count = 0;
-		SetBlock(sourcePosition, colOffset, rowOffset, repeat, markerID);
-		
-		// 1.
-		while (true) 
-		{
-			var nearPosition = new Position(sourcePosition.index, colOffset, rowOffset);
-			var crunchedGemInfo = Controller.Crunch(sourcePosition, nearPosition, repeat);
-
-			if (crunchedGemInfo.gemModels != null) {
-				CrunchGems(crunchedGemInfo);
-			} else if (!crunchedGemInfo.hasNext) {
-				RemoveGemView(crunchedGemInfo.source);
-				break;
-			}
-
-			sourcePosition = nearPosition;
-			count++;
-			repeat--;
-			yield return new WaitForSeconds(BASE_DURATION);
-		}
 	}
 
 	void SetBlock(Position sourcePosition, int colOffset, int rowOffset, int repeat, Int64 markerID) 
@@ -295,32 +319,11 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		}
 	}
 	
-	void BreakGems(BrokenGemInfo brokenGemInfo) 
+	void BreakGems(BrokenGemInfo brokenGemInfo, bool needToChaining) 
 	{
 		brokenGemInfo.gemModels.ForEach(brokenGemModel => {
-			RemoveGemView(brokenGemModel);
+			RemoveGemView(brokenGemModel, needToChaining);
 		});
-	}
-
-	bool CrunchGems(CrunchedGemInfo crunchedGemInfo) 
-	{
-		crunchedGemInfo.gemModels.ForEach(crunchedGemModel => {
-			var gemObject = gemViews[crunchedGemModel.id].gameObject;
-			gemObject.SetActive(false);
-			Destroy(gemObject);
-			gemViews.Remove(crunchedGemModel.id);
-		});
-
-		var gemModel = crunchedGemInfo.source;
-		var gemView = gemViews[gemModel.id];
-		var position = gemModel.Position;
-		var nextPosition = new Vector3(position.col * gemSize.x, position.row * gemSize.y, 0);
-		gemView.DoLocalMove(
-			nextPosition, 
-			BASE_DURATION * (nextPosition - gemView.transform.localPosition).magnitude / gemSize.y
-		);
-
-		return crunchedGemInfo.gemModels.Count > 0;
 	}
 
 	IEnumerator StartSwap(Position sourcePosition, Vector2 direction) 
@@ -362,7 +365,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	{
 		matchedLineInfos.ForEach(matchedLineInfo => {
 			matchedLineInfo.gemModels.ForEach(gemModel => {
-				RemoveGemView(gemModel);
+				RemoveGemView(gemModel, true);
 			});
 			
 			if (matchedLineInfo.newAdded != null) {
