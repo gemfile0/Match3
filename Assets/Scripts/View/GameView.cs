@@ -179,7 +179,14 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		switch (gemType)
 		{
 			case GemType.ChocoGem:
-			StartCoroutine(StartChain(gemSelected.Position, direction, gemSelected.Endurance, gemSelected.ID, BASE_DURATION, false));
+			StartCoroutine(StartLinedBreaking(
+				gemSelected.Position, 
+				direction, 
+				gemSelected.Endurance, 
+				gemSelected.ID, 
+				BASE_DURATION, 
+				needToChaining: false
+			));
 			break;
 
 			case GemType.SuperGem:
@@ -211,13 +218,13 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			break;
 
 			case GemType.ChocoGem:
-			StartCoroutine(StartChain(
+			StartCoroutine(StartLinedBreaking(
 				gemModel.Position, 
 				GetRandomDirection(), 
 				gemModel.endurance, 
 				gemModel.id, 
 				BASE_DURATION, 
-				isChaining: false
+				needToChaining: false
 			));
 			break;
 		}
@@ -225,102 +232,149 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		switch (gemModel.specialKey)
 		{
 			case "H":
-			StartCoroutine(StartChain(
+			StartCoroutine(StartLinedBreaking(
 				gemModel.Position, 
 				new Vector2{ x = -1, y = 0 }, 
 				gemModel.endurance, 
 				gemModel.id, 
 				BASE_DURATION/4,
-				isChaining: true
+				needToChaining: true
 			));
-			StartCoroutine(StartChain(
+			StartCoroutine(StartLinedBreaking(
 				gemModel.Position, 
 				new Vector2{ x = 1, y = 0 }, 
 				gemModel.endurance, 
 				gemModel.id,
 				BASE_DURATION/4,
-				isChaining: true
+				needToChaining: true
 			));
 			break;
 
 			case "V":
-			StartCoroutine(StartChain(
+			StartCoroutine(StartLinedBreaking(
 				gemModel.Position, 
 				new Vector2{ x = 0, y = -1 }, 
 				gemModel.endurance, 
 				gemModel.id,
 				BASE_DURATION/4,
-				isChaining: true
+				needToChaining: true
 			));
-			StartCoroutine(StartChain(
+			StartCoroutine(StartLinedBreaking(
 				gemModel.Position, 
 				new Vector2{ x = 0, y = 1 }, 
 				gemModel.endurance, 
 				gemModel.id,
 				BASE_DURATION/4,
-				isChaining: true
+				needToChaining: true
 			));
 			break;
 
 			case "C":
+			StartCoroutine(StartRadialBreaking(
+				gemModel.Position,
+				gemModel.endurance, 
+				gemModel.id,
+				needToChaining: true
+			));
+
 			break;
 		}
 	}
 
-	IEnumerator StartChain(Position sourcePosition, Vector2 direction, int repeat, Int64 markerID, float duration, bool isChaining) 
+	IEnumerator StartRadialBreaking(Position sourcePosition, int repeat, Int64 markerID, bool needToChaining)
+	{	
+		var markedPositions = SetRadialBlock(sourcePosition, repeat, markerID, needToChaining);
+		foreach(var markedPosition in markedPositions)
+		{
+			var brokenGemInfo = Controller.Break(markedPosition, markerID, repeat);
+			if (brokenGemInfo.gemModels != null) {
+				BreakGems(brokenGemInfo, needToChaining);
+			} 
+		}
+		yield return null;
+	}
+		
+	IEnumerator StartLinedBreaking(Position sourcePosition, Vector2 direction, int repeat, Int64 markerID, float duration, bool needToChaining) 
 	{
 		var colOffset = (int)direction.x;
 		var rowOffset = (int)direction.y;
 
 		var initialPosition = sourcePosition;
-		SetBlock(sourcePosition, colOffset, rowOffset, repeat, markerID);
-		
-		while (repeat > 0) 
+		var markedPositions = SetLinedBlock(sourcePosition, colOffset, rowOffset, repeat, markerID);
+		foreach(var markedPosition in markedPositions)
 		{
-			var chainedGemInfo = Controller.Chain(sourcePosition, markerID, repeat);
-			if (chainedGemInfo.gemModels != null) {
-				ChainGems(chainedGemInfo, isChaining || initialPosition != sourcePosition);
-			} else if (!chainedGemInfo.hasNext) {
-				break;
-			}
+			var brokenGemInfo = Controller.Break(markedPosition, markerID, repeat);
+			if (brokenGemInfo.gemModels != null) {
+				BreakGems(brokenGemInfo, needToChaining || initialPosition != sourcePosition);
+			} 
 
-			sourcePosition = new Position(sourcePosition.index, colOffset, rowOffset);;
-			repeat--;
 			yield return new WaitForSeconds(duration);
 		}
-		
-		yield return null;
 	}
 
-	void SetBlock(Position sourcePosition, int colOffset, int rowOffset, int repeat, Int64 markerID) 
+	List<Position> SetRadialBlock(Position sourcePosition, int repeat, Int64 markerID, bool needToChaining)
 	{
-		var nextCol = colOffset;
-		var nextRow = rowOffset;
+		var markedPositions = new List<Position>();
+		while (repeat > 0)
+		{
+			List<int[]> positionVectors = new List<int[]>();
+			for (var row = -repeat; row <= repeat; row++) {
+				for (var col = -repeat; col <= repeat; col++) {
+					if (Math.Abs(col) < repeat && Math.Abs(row) < repeat) continue;
+
+					var nearPosition = new Position(sourcePosition.index, col, row);
+					var blockedGemInfo = Controller.MarkAsBlock(nearPosition, nearPosition, markerID);
+					markedPositions.Add(nearPosition);
+
+					if (blockedGemInfo.gemModels.Count > 0) {
+						blockedGemInfo.gemModels.ForEach(gemModel => {
+							GemView gemView;
+							if (gemViews.TryGetValue(gemModel.id, out gemView)) {
+								gemView.UpdateModel(gemModel);
+								gemView.SetBlock();
+							} 
+						});
+					} 
+				}
+			}
+
+			repeat--;
+		}
+
+		return markedPositions;
+	}
+
+	List<Position> SetLinedBlock(Position sourcePosition, int colOffset, int rowOffset, int repeat, Int64 markerID) 
+	{
+		var markedPositions = new List<Position>();
 		while (repeat > 0) 
 		{
-			var nearPosition = new Position(sourcePosition.index, nextCol, nextRow);
+			var nearPosition = new Position(sourcePosition.index, colOffset, rowOffset);
 			var blockedGemInfo = Controller.MarkAsBlock(sourcePosition, nearPosition, markerID);
-			
+			markedPositions.Add(sourcePosition);
+
 			if (blockedGemInfo.gemModels.Count > 0) {
 				blockedGemInfo.gemModels.ForEach(gemModel => {
 					GemView gemView;
 					if (gemViews.TryGetValue(gemModel.id, out gemView)) {
 						gemView.UpdateModel(gemModel);
 						gemView.SetBlock();
-					} 
+					}
 				});
-			} 
-			else if (!blockedGemInfo.hasNext) {
+			}
+			
+			if (!blockedGemInfo.hasNext) {
 				break;
 			}
 			
+			sourcePosition = nearPosition;
 			repeat--;
-			nextCol += colOffset;
-			nextRow += rowOffset;
 		}
+
+		return markedPositions;
 	}
 	
-	void ChainGems(BrokenGemInfo brokenGemInfo, bool needToChaining) 
+	void BreakGems(BrokenGemInfo brokenGemInfo, bool needToChaining) 
 	{
 		brokenGemInfo.gemModels.ForEach(brokenGemModel => {
 			RemoveGemView(brokenGemModel, needToChaining);

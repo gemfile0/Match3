@@ -136,17 +136,8 @@ public class GameController<M>: BaseController<M>
 			blockedGemInfo.gemModels.Add(CopyAsBlock(markerID, sourceGemModel));
 		}
 
-		if (nearPosition.IsBoundaryIndex())
-		{
-			blockedGemInfo.hasNext = true;
-			var nearGemModel = GetGemModel(nearPosition);
-			if (nearGemModel.Type != GemType.EmptyGem 
-				&& !(nearGemModel is IBlockable)
-				&& nearGemModel.deadline <= Model.currentTurn) {
-				blockedGemInfo.gemModels.Add(CopyAsBlock(markerID, nearGemModel));
-			}
-		}
-
+		blockedGemInfo.hasNext = nearPosition.IsBoundaryIndex();
+		
         return blockedGemInfo;
     }
 
@@ -162,24 +153,24 @@ public class GameController<M>: BaseController<M>
 		return copiedGemModel;
 	}
 
-	internal BrokenGemInfo Chain(Position targetPosition, Int64 markerID, int repeat) 
+	internal BrokenGemInfo Break(Position targetPosition, Int64 markerID, int repeat) 
 	{
-		BrokenGemInfo chainedGemInfo = new BrokenGemInfo();
+		BrokenGemInfo brokenGemInfo = new BrokenGemInfo();
 
 		if (targetPosition.IsBoundaryIndex() && repeat > 0) 
 		{
-			chainedGemInfo.hasNext = true;
+			brokenGemInfo.hasNext = true;
 			
 			var targetGemModel = GetGemModel(targetPosition);
 			if (targetGemModel.markedBy == markerID) {
 				var newGemModel = GemModelFactory.Get(GemType.EmptyGem, targetGemModel.Position);
 				SetGemModel(newGemModel);
 
-				chainedGemInfo.gemModels = new List<GemModel>{ targetGemModel };
+				brokenGemInfo.gemModels = new List<GemModel>{ targetGemModel };
 			}
 		}
 
-		return chainedGemInfo;
+		return brokenGemInfo;
 	}
 
     public List<GemModel> Feed()

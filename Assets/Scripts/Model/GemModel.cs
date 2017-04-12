@@ -153,7 +153,7 @@ static class GemModelFactory
     static void SetEndurance(GemModel gemModel) 
     {
         int endurance = 0;
-        switch(gemModel.Type) 
+        switch(gemModel.Type)
         {
             case GemType.ChocoGem:
             endurance = 4;
@@ -165,6 +165,10 @@ static class GemModelFactory
             case "H":
             case "V":
             endurance = int.MaxValue;
+            break;
+
+            case "C":
+            endurance = 1;
             break;
         }
         
