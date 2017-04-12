@@ -293,7 +293,7 @@ public class GameController<M>: BaseController<M>
 			.ToList();
     }
 
-    public List<MatchedLineInfo> Match(int colOffset = 0, int rowOffset = 0) 
+    public List<MatchedLineInfo> Match() 
 	{
 		var matchedLineInfos = new List<MatchedLineInfo>();
 		
@@ -344,7 +344,7 @@ public class GameController<M>: BaseController<M>
 				if (matchedGemModel == latestGemModel) {
 					newGemType = ReadGemType(
 						latestGemModel.Type, 
-						ReadSpecialKey(matchedLineInfo.matchLineModels, colOffset, rowOffset)
+						ReadSpecialKey(matchedLineInfo.matchLineModels, latestGemModel.PositionVector)
 					);
 				}
 				var newGemModel = GemModelFactory.Get(newGemType, matchedGemModel.Position);
@@ -418,14 +418,14 @@ public class GameController<M>: BaseController<M>
 		return gemType;
 	}
 
-	public string ReadSpecialKey(List<MatchLineModel> matchLineModels, int colOffset, int rowOffset) 
+	public string ReadSpecialKey(List<MatchLineModel> matchLineModels, PositionVector positionVector) 
 	{
 		var specialKey = "";
 
 		switch (matchLineModels[0].magnitude) 
 		{
 			case 5: specialKey = "SP"; break;
-			case 4: specialKey = colOffset != 0 ? "H": "V"; break;
+			case 4: specialKey = positionVector.colOffset != 0 ? "H": "V"; break;
 			case 2: specialKey = "SQ"; break;
 		}
 

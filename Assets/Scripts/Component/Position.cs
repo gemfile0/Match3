@@ -1,4 +1,10 @@
-﻿[System.Serializable]
+﻿public class PositionVector
+{
+	public int colOffset;
+	public int rowOffset;
+}
+
+[System.Serializable]
 public class Position
 {
 	public int index;

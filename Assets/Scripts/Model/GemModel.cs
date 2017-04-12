@@ -7,6 +7,7 @@ public interface IGemModel
     Position Position { get; set; }
     string Name { get; }
     bool IsFalling { set; }
+    PositionVector PositionVector { get; }
 }
 
 [System.Serializable]
@@ -43,6 +44,7 @@ public class GemModel: BaseModel
     public Position Position 
     { 
         set { 
+            positionBefore = position;
             position = value;
             sequence = SEQUENCE_ID++;
         }
@@ -50,6 +52,16 @@ public class GemModel: BaseModel
     }
     [UnityEngine.SerializeField]
     Position position;
+    public PositionVector PositionVector 
+    { 
+        get {
+            return new PositionVector {
+                colOffset = position.col - positionBefore.col,
+                rowOffset = position.row - positionBefore.row
+            };
+        }
+    }
+    Position positionBefore;
     public Int64 id;
     public Int64 markedBy;
     public Int64 sequence;
