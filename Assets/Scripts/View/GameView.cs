@@ -80,6 +80,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	{
 		while (true) 
 		{
+			Controller.TurnNext();
 			UpdateWatcher("match", MatchGems(Controller.Match()));
 			UpdateWatcher("feed", FeedGems(Controller.Feed()));
 			UpdateWatcher("fall", FallGems(Controller.Fall()));
@@ -178,7 +179,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		switch (gemType)
 		{
 			case GemType.ChocoGem:
-			StartCoroutine(StartBreak(gemSelected.Position, direction, gemSelected.Endurance, gemSelected.ID, BASE_DURATION, false));
+			StartCoroutine(StartChain(gemSelected.Position, direction, gemSelected.Endurance, gemSelected.ID, BASE_DURATION, false));
 			break;
 
 			case GemType.SuperGem:
@@ -210,7 +211,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			break;
 
 			case GemType.ChocoGem:
-			StartCoroutine(StartBreak(
+			StartCoroutine(StartChain(
 				gemModel.Position, 
 				GetRandomDirection(), 
 				gemModel.endurance, 
@@ -224,7 +225,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		switch (gemModel.specialKey)
 		{
 			case "H":
-			StartCoroutine(StartBreak(
+			StartCoroutine(StartChain(
 				gemModel.Position, 
 				new Vector2{ x = -1, y = 0 }, 
 				gemModel.endurance, 
@@ -232,7 +233,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				BASE_DURATION/4,
 				isChaining: true
 			));
-			StartCoroutine(StartBreak(
+			StartCoroutine(StartChain(
 				gemModel.Position, 
 				new Vector2{ x = 1, y = 0 }, 
 				gemModel.endurance, 
@@ -243,7 +244,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			break;
 
 			case "V":
-			StartCoroutine(StartBreak(
+			StartCoroutine(StartChain(
 				gemModel.Position, 
 				new Vector2{ x = 0, y = -1 }, 
 				gemModel.endurance, 
@@ -251,7 +252,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				BASE_DURATION/4,
 				isChaining: true
 			));
-			StartCoroutine(StartBreak(
+			StartCoroutine(StartChain(
 				gemModel.Position, 
 				new Vector2{ x = 0, y = 1 }, 
 				gemModel.endurance, 
@@ -266,7 +267,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		}
 	}
 
-	IEnumerator StartBreak(Position sourcePosition, Vector2 direction, int repeat, Int64 markerID, float duration, bool isChaining) 
+	IEnumerator StartChain(Position sourcePosition, Vector2 direction, int repeat, Int64 markerID, float duration, bool isChaining) 
 	{
 		var colOffset = (int)direction.x;
 		var rowOffset = (int)direction.y;
@@ -276,10 +277,10 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		
 		while (repeat > 0) 
 		{
-			var brokenGemInfo = Controller.Break(sourcePosition, markerID, repeat);
-			if (brokenGemInfo.gemModels != null) {
-				BreakGems(brokenGemInfo, isChaining || initialPosition != sourcePosition);
-			} else if (!brokenGemInfo.hasNext) {
+			var chainedGemInfo = Controller.Chain(sourcePosition, markerID, repeat);
+			if (chainedGemInfo.gemModels != null) {
+				ChainGems(chainedGemInfo, isChaining || initialPosition != sourcePosition);
+			} else if (!chainedGemInfo.hasNext) {
 				break;
 			}
 
@@ -319,7 +320,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		}
 	}
 	
-	void BreakGems(BrokenGemInfo brokenGemInfo, bool needToChaining) 
+	void ChainGems(BrokenGemInfo brokenGemInfo, bool needToChaining) 
 	{
 		brokenGemInfo.gemModels.ForEach(brokenGemModel => {
 			RemoveGemView(brokenGemModel, needToChaining);

@@ -71,6 +71,11 @@ public class GameController<M>: BaseController<M>
 		return allGemModels.ToList();
     }
 
+    internal void TurnNext()
+    {
+        Model.currentTurn += 1;
+    }
+
     public bool ExistAnyMatches(Position sourcePosition, MatchLineModel matchLineModel, GemType matchingType) 
 	{
 		foreach(var whereCanMatch in matchLineModel.wheresCanMatch) 
@@ -124,7 +129,9 @@ public class GameController<M>: BaseController<M>
 		
 		var sourceGemModel = GetGemModel(sourcePosition);
 
-		if (sourceGemModel.Type != GemType.EmptyGem && !(sourceGemModel is IBlockable)) 
+		if (sourceGemModel.Type != GemType.EmptyGem 
+			&& !(sourceGemModel is IBlockable) 
+			&& sourceGemModel.deadline <= Model.currentTurn) 
 		{
 			blockedGemInfo.gemModels.Add(CopyAsBlock(markerID, sourceGemModel));
 		}
@@ -133,8 +140,9 @@ public class GameController<M>: BaseController<M>
 		{
 			blockedGemInfo.hasNext = true;
 			var nearGemModel = GetGemModel(nearPosition);
-			
-			if (nearGemModel.Type != GemType.EmptyGem && !(nearGemModel is IBlockable)) {
+			if (nearGemModel.Type != GemType.EmptyGem 
+				&& !(nearGemModel is IBlockable)
+				&& nearGemModel.deadline <= Model.currentTurn) {
 				blockedGemInfo.gemModels.Add(CopyAsBlock(markerID, nearGemModel));
 			}
 		}
@@ -154,24 +162,24 @@ public class GameController<M>: BaseController<M>
 		return copiedGemModel;
 	}
 
-	internal BrokenGemInfo Break(Position targetPosition, Int64 markerID, int repeat) 
+	internal BrokenGemInfo Chain(Position targetPosition, Int64 markerID, int repeat) 
 	{
-		BrokenGemInfo brokenGemInfo = new BrokenGemInfo();
+		BrokenGemInfo chainedGemInfo = new BrokenGemInfo();
 
 		if (targetPosition.IsBoundaryIndex() && repeat > 0) 
 		{
-			brokenGemInfo.hasNext = true;
+			chainedGemInfo.hasNext = true;
 			
 			var targetGemModel = GetGemModel(targetPosition);
 			if (targetGemModel.markedBy == markerID) {
 				var newGemModel = GemModelFactory.Get(GemType.EmptyGem, targetGemModel.Position);
 				SetGemModel(newGemModel);
 
-				brokenGemInfo.gemModels = new List<GemModel>{ targetGemModel };
+				chainedGemInfo.gemModels = new List<GemModel>{ targetGemModel };
 			}
 		}
 
-		return brokenGemInfo;
+		return chainedGemInfo;
 	}
 
     public List<GemModel> Feed()
@@ -343,7 +351,9 @@ public class GameController<M>: BaseController<M>
 				SetGemModel(newGemModel);
 
 				if (newGemType != GemType.EmptyGem) {
+					UnityEngine.Debug.Log("newGemModel : " + newGemModel.ToString());
 					matchedLineInfo.newAdded = newGemModel;
+					newGemModel.deadline = Model.currentTurn + 1;
 				}
 			}
 		}

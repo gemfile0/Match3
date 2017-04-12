@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public interface IGameModel 
@@ -30,6 +31,7 @@ public class GameModel: BaseModel, IGameModel
         get { return matchingTypes; }   
     }
     List<GemType> matchingTypes;
+    public Int64 currentTurn;
 
     public int Rows 
     {
@@ -50,7 +52,7 @@ public class GameModel: BaseModel, IGameModel
 
     public GameModel() 
     {
-        
+        currentTurn = 0;
     }
 
     public override void Setup() 

@@ -55,6 +55,7 @@ public class GemModel: BaseModel
     public Int64 sequence;
     public string specialKey;
     public int endurance;
+    public /* gameModel.turn */Int64 deadline;
     public bool IsFalling 
     {
         set { 
