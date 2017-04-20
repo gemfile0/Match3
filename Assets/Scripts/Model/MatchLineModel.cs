@@ -15,11 +15,17 @@ public class MatchedLineInfo
     public bool isMerged;
     public GemModel newAdded;
 
-    internal void Merge(MatchedLineInfo matchedLineInfo) 
+    internal void Merge(MatchedLineInfo anotherMatchedLineInfo) 
     {
-        matchLineModels = matchLineModels.Union(matchedLineInfo.matchLineModels).ToList();
-        gemModels = gemModels.Union(matchedLineInfo.gemModels).ToList();
-        matchedLineInfo.isMerged = true;
+        matchLineModels = matchLineModels
+            .Union(anotherMatchedLineInfo.matchLineModels.Where(
+                anotherMatchLineModel => !matchLineModels.Exists(
+                    matchLineModel => matchLineModel.type == anotherMatchLineModel.type
+                )
+            ))
+            .ToList();
+        gemModels = gemModels.Union(anotherMatchedLineInfo.gemModels).ToList();
+        anotherMatchedLineInfo.isMerged = true;
     }
 
     public override string ToString() 

@@ -99,9 +99,9 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 497718673}
-  - component: {fileID: 497718672}
   - component: {fileID: 497718674}
   - component: {fileID: 497718675}
+  - component: {fileID: 497718672}
   m_Layer: 0
   m_Name: GameView
   m_TagString: Untagged
@@ -123,6 +123,7 @@ MonoBehaviour:
   Model:
     allwayMatchLineModels: []
     positiveMatchLineModels: []
+    currentTurn: 0
     levelData: {fileID: 4900000, guid: 34b6e00c2a0d84aba9388712e879c28f, type: 3}
     levelModel:
       tiles: 

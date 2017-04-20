@@ -67,43 +67,27 @@ public class GemModel: BaseModel
     public Int64 sequence;
     public string specialKey;
     public int endurance;
-    public /* gameModel.turn */Int64 deadline;
-    public bool IsFalling 
-    {
-        set { 
-            if (isFalling != value) {
-                callbacksOnFalling.ForEach(callback => {
-                    callback(value);
-                });
-            }
-            isFalling = value; 
-        }
-    }
-    bool isFalling;
-    List<Action<bool>> callbacksOnFalling;
+    public /* gameModel.turn */Int64 preservedFromBreak;
+    public /* gameModel.turn */Int64 preservedFromMatch;
+    public /* gameModel.turn */Int64 preservedFromFall;
 
     public GemModel(GemType type, Position position) 
     {
         Type = type;
         Position = position;
         id = GEM_ID++;
-        callbacksOnFalling = new List<Action<bool>>();
     }
 
     public override string ToString() 
     {
-        return string.Format("{0}: {1}: {2}", id, type, position.ToString());
-    }
-
-    public void SubscribeFalling(Action<bool> callback)
-    {
-        callbacksOnFalling.Add(callback);
+        return string.Format("{0}: {1}, {2}, {3}", id, type, position.ToString(), preservedFromMatch);
     }
 }
 
 public class GemInfo {
     public Position position;
     public Int64 id;
+    public bool endOfFall;
 }
 
 static class GemModelFactory 

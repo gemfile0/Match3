@@ -7,6 +7,8 @@ public interface IGemView
     int Endurance { get; }
     Position Position { get; }
     GemModel id { get; }
+    Int64 Deadline { get; }
+    Int64 PreservedUntil { get; }
     GemModel UpdateModel(GemModel gemModel);
 }
 
@@ -23,7 +25,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         movingSequence = DOTween.Sequence();
-        movingSequence.SetEase(Ease.InOutQuad);
+        movingSequence.SetEase(Ease.Linear);
     }
 
     internal Position Position 
@@ -41,18 +43,23 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         get { return Model.id; }
     }
 
+    internal Int64 PreservedFromBreak
+    {
+        get { return Model.preservedFromBreak; }
+    }
+
+    internal Int64 PreservedFromMatch
+    {
+        get { return Model.preservedFromMatch; }
+    }
+
     bool showID = true;
     Sequence movingSequence;
+    public Position reservedPosition;
 
     internal void UpdateModel(GemModel gemModel) 
     {
         Model = gemModel;
-        Model.SubscribeFalling(isFalling => {
-            if (!isFalling) {
-                Squash();
-            }
-        });
-
         if (showID) 
         {
             var ID = transform.Find("ID");
@@ -61,7 +68,6 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
             }
             ID.GetComponent<TextMesh>().text = gemModel.id.ToString();
         }
-
     }
     
     internal void Highlight() 
