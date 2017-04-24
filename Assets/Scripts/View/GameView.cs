@@ -16,7 +16,8 @@ class UpdateResult
 	public List<GemInfo> fallResult;
 	public bool hadUpdated = false;
 
-	public bool HasAnyResult {
+	public bool HasAnyResult 
+	{
 		get { return matchResult.Count > 0 || feedResult.Count > 0 || fallResult.Count > 0; }
 	}
 }
@@ -34,9 +35,10 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	Sequence sequence;
 
-	void Start()
+	public override void Start()
 	{
-		ResourceCache.LoadAll("");
+		base.Start();
+		
 		Controller.Init();
 		MakeField();
 		AlignField();
@@ -44,9 +46,23 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		StartCoroutine(StartHello());
 	}
 
-	void Destroy() 
+	public override void Destroy() 
 	{
+		base.Destroy();
+
 		UnsubscribeInput();
+
+		gemViews.Clear();
+		gemViews = null;
+
+		actionQueueByTurn.Values.ForEach(actionQueue => {
+			actionQueue.Clear();
+		});
+		actionQueueByTurn.Clear();
+		actionQueueByTurn = null;
+
+		sequence.Kill();
+		sequence = null;
 	}
 
 	IEnumerator StartHello() 
@@ -510,4 +526,9 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		
 		existingActionQueue.Enqueue(action);
 	}
+
+    public void PassTheLevelData(TextAsset levelData)
+    {
+        Model.levelData = levelData;
+    }
 }

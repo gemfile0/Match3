@@ -98,6 +98,20 @@ public class GameModel: BaseModel, IGameModel
                 count++;
             }
         }
+    }
 
+    public override void Destroy()
+    {
+        allwayMatchLineModels.Clear();
+        allwayMatchLineModels = null;
+
+        positiveMatchLineModels.Clear();
+        positiveMatchLineModels = null;
+
+        matchingTypes.Clear();
+        matchingTypes = null;
+
+        levelData = null;
+        
     }
 }
