@@ -16,11 +16,16 @@ public class LevelSelectionPanel: MonoBehaviour
 			levelItem.name = "LevelItem" + levelIndex;
 			levelItem.anchoredPosition = new Vector2(800 * i, levelItem.anchoredPosition.y);
 			levelItem.GetComponent<Image>().sprite = levelTextures[i];
-			levelItem.GetComponent<LevelItem>().title.text = "Level" + levelIndex;
+			levelItem.GetComponent<LevelItem>().title.text = "LEVEL " + levelIndex;
 
 			levelItems[i] = levelItem;
 		}
-		scrollRectSnap.items = levelItems;
+
+		int latestLevelIndex = -1;
+		if (PlayerPrefs.HasKey("LatestLevel")) {
+			latestLevelIndex = PlayerPrefs.GetInt("LatestLevel");
+		}
+		scrollRectSnap.Setup(levelItems, latestLevelIndex);
 	}
 	
 }

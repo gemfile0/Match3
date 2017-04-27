@@ -3,9 +3,6 @@
 public class LobbyScene: BaseScene 
 {
 	[SerializeField]
-	SceneLoader sceneLoader;
-
-	[SerializeField]
 	Transform levelItemContainer;
 	
 #if DIABLE_LOG
@@ -23,6 +20,7 @@ public class LobbyScene: BaseScene
 	void MakeLevelBlockToLoad()
 	{
 		var levelIndex = 1;
+		var sceneLoader = GameObject.Find("SceneLoader").GetComponent<SceneLoader>();
 		while (true)
 		{
 			var currentLevel = levelIndex;

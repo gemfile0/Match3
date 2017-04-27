@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-public class TestScene: BaseScene 
+﻿public class TestScene: BaseScene 
 {
 	protected override void Awake()
 	{

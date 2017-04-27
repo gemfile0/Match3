@@ -5,31 +5,37 @@ public class ScrollRectSnap: MonoBehaviour
 	public RectTransform panel;
 	public RectTransform[] items;
 	public RectTransform center;
-	public int startButton = 3;
+	public int startItem = 3;
 
 	private float[] positiveDistances;
 	private float[] distances;
 	private bool dragging = false;
 	private int itemDistance;
-	private int minButtonIndex;
+	private int minItemIndex;
 	private bool hasMessageSended;
-	private bool targetNearestButton = true;
+	private bool targetNearestItem = true;
 
-	void Start()
+	public void Setup(RectTransform[] items, int latestLevelIndex = -1)
 	{
+		this.items = items;
 		int itemLength = items.Length;
 		positiveDistances = new float[itemLength];
 		distances = new float[itemLength];
-		
 		itemDistance = (int)Mathf.Abs(
 			items[1].anchoredPosition.x - items[0].anchoredPosition.x
 		);
 
-		panel.anchoredPosition = new Vector2((startButton - 1) * -itemDistance, 0f);
+		if (latestLevelIndex >= 0) {
+			startItem = latestLevelIndex;
+		}
+
+		panel.anchoredPosition = new Vector2((startItem - 1) * -itemDistance, 0f);
 	}
 
 	void Update()
 	{
+		if (items.Length == 0) { return; }
+
 		for (int i = 0; i < items.Length; i++)
 		{
 			distances[i] = center.position.x - items[i].position.x;
@@ -54,25 +60,25 @@ public class ScrollRectSnap: MonoBehaviour
 			}
 		}
 
-		if (targetNearestButton)
+		if (targetNearestItem)
 		{
 			float minDistance = Mathf.Min(positiveDistances);
 
 			for (int j = 0; j < items.Length; j++)
 			{
 				if (minDistance == positiveDistances[j]) {
-					minButtonIndex = j;
+					minItemIndex = j;
 				}
 			}
 
 			if (!dragging)
 			{
-				LerpToButton(-items[minButtonIndex].anchoredPosition.x);
+				LerpToItem(-items[minItemIndex].anchoredPosition.x);
 			}
 		}
 	}
 
-	void LerpToButton(float position)
+	void LerpToItem(float position)
 	{
 		float newX = Mathf.Lerp(panel.anchoredPosition.x, position, Time.deltaTime * 5f);
 		Vector2 newPosition = new Vector2(newX, panel.anchoredPosition.y);
@@ -88,15 +94,15 @@ public class ScrollRectSnap: MonoBehaviour
 			&& !hasMessageSended) 
 		{
 			hasMessageSended = true;
-			SendMessageFromButton(minButtonIndex);
+			SendMessageFromItem(minItemIndex);
 		}
 
 		panel.anchoredPosition = newPosition;
 	}
 
-	void SendMessageFromButton(int buttonIndex)
+	void SendMessageFromItem(int itemIndex)
 	{
-		if (buttonIndex - 1 == 3) {
+		if (itemIndex - 1 == 3) {
 
 		}
 	}
@@ -105,7 +111,7 @@ public class ScrollRectSnap: MonoBehaviour
 	{
 		dragging = true;
 		hasMessageSended = false;
-		targetNearestButton = true;
+		targetNearestItem = true;
 	}
 
 	public void EndDrag()
@@ -114,9 +120,4 @@ public class ScrollRectSnap: MonoBehaviour
 		hasMessageSended = true;
 	}
 
-	public void GoToButton(int buttonIndex)
-	{
-		targetNearestButton = false;
-		minButtonIndex = buttonIndex - 1;
-	}
 }

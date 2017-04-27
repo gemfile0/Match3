@@ -13,4 +13,10 @@ public class LevelScene: BaseScene
 		TextAsset levelData = Resources.Load("level_" + levelIndex) as TextAsset;
 		gameView.PassTheLevelData(levelData);
 	}
+
+	public void LoadLobbyScene()
+	{
+		var sceneLoader = GameObject.Find("SceneLoader").GetComponent<SceneLoader>();
+		sceneLoader.Load("LobbyScene");
+	}
 }
