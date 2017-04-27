@@ -6,7 +6,7 @@ public class LobbyScene: BaseScene
 	SceneLoader sceneLoader;
 
 	[SerializeField]
-	Transform blockContainer;
+	Transform levelItemContainer;
 	
 #if DIABLE_LOG
 	void Awake()
@@ -26,11 +26,10 @@ public class LobbyScene: BaseScene
 		while (true)
 		{
 			var currentLevel = levelIndex;
-			var levelBlock = blockContainer.Find("LevelBlock" + currentLevel);
-			if (levelBlock == null) { break; }
+			var levelItem = levelItemContainer.Find("LevelItem" + currentLevel);
+			if (levelItem == null) { break; }
 
-			levelBlock.GetComponent<LevelBlock>().callback = () => {
-				// currentLevel
+			levelItem.GetComponent<LevelItem>().callback = () => {
 				PlayerPrefs.SetInt("LatestLevel", currentLevel);
 				sceneLoader.Load("LevelScene");
 			};

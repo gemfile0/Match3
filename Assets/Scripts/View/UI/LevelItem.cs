@@ -2,10 +2,11 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LevelBlock : MonoBehaviour 
+public class LevelItem: MonoBehaviour 
 {
 	[SerializeField]
 	Button button;
+	public Text title;
 	public Action callback;
 	
 	void Start()
