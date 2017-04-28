@@ -81,6 +81,11 @@ public class GemModel: BaseModel
     {
         return string.Format("{0}: {1}, {2}, {3}", id, type, position.ToString(), preservedFromMatch);
     }
+
+    public bool CanMatch(GemType matchingType) 
+    {
+        return type >= GemType.RedGem && type <= GemType.YellowGemV && type == matchingType;
+    }
 }
 
 public class GemInfo {

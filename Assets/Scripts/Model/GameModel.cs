@@ -24,6 +24,18 @@ public class GameModel: BaseModel, IGameModel
         }
     }
     GemModel[,] gemModels;
+
+    public TileModel[,] TileModels 
+    { 
+        get {
+            UnityEngine.Assertions.Assert.IsNotNull(tileModels);
+            return tileModels; 
+        } 
+        set {
+            tileModels = value;
+        }
+    }
+    TileModel[,] tileModels;
     public List<MatchLineModel> allwayMatchLineModels;
     public List<MatchLineModel> positiveMatchLineModels;
     public List<GemType> MatchingTypes 
@@ -79,21 +91,37 @@ public class GameModel: BaseModel, IGameModel
 		};
         
         levelModel = JsonUtility.FromJson<LevelModel>(levelData.text);
-        var tiles = levelModel.tiles;
-
         Position.levelModel = levelModel;
-        
+
+        var gems = levelModel.gems;
         var count = 0;
         gemModels = new GemModel[Rows, Cols];
         for (var row = Rows-1 ; row >= 0; row -= 1) 
         {
             for (var col = 0; col < Cols; col += 1) {
-                var tileIndex = row * Cols + col;
+                var gemIndex = row * Cols + col;
 
                 var colByCount = count % Cols;
                 var rowByCount = count / Cols;
                 gemModels[rowByCount, colByCount] = GemModelFactory.Get(
-                    (GemType)tiles[tileIndex], new Position(colByCount, rowByCount)
+                    (GemType)gems[gemIndex], new Position(colByCount, rowByCount)
+                );
+                count++;
+            }
+        }
+
+        var tiles = levelModel.tiles;
+        count = 0;
+        tileModels = new TileModel[Rows, Cols];
+        for (var row = Rows-1 ; row >= 0; row -= 1) 
+        {
+            for (var col = 0; col < Cols; col += 1) {
+                var gemIndex = row * Cols + col;
+
+                var colByCount = count % Cols;
+                var rowByCount = count / Cols;
+                tileModels[rowByCount, colByCount] = TileModelFactory.Get(
+                    (TileType)tiles[gemIndex]
                 );
                 count++;
             }

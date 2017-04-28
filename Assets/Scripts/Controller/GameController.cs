@@ -76,9 +76,9 @@ public class GameController<M>: BaseController<M>
 			var matchCount = 0;
 			foreach(var matchOffset in whereCanMatch.matchOffsets) {
 				var matchPosition = new Position(sourcePosition.index, matchOffset[0], matchOffset[1]);
-				if (matchPosition.IsBoundaryIndex() 
+				if (IsMovableTile(matchPosition)
 					&& (sourcePosition.index == matchPosition.index
-						|| matchingType == GetGemModel(matchPosition).Type)) {
+						|| GetGemModel(matchPosition).CanMatch(matchingType))) {
 					matchCount++;
 				} else {
 					break;
@@ -97,7 +97,7 @@ public class GameController<M>: BaseController<M>
 	{
 		var swappingGemModels = new List<GemModel>();
 
-		if (nearPosition.IsMovableIndex()) 
+		if (nearPosition.IsAcceptableIndex()) 
 		{
 			var sourceGemModel = GetGemModel(sourcePosition);
 			var nearGemModel = GetGemModel(nearPosition);
@@ -124,7 +124,7 @@ public class GameController<M>: BaseController<M>
 			from GemModel gemModel in Model.GemModels
 			where gemModel is IMovable 
 				&& gemModel.Type != GemType.EmptyGem 
-				&& gemModel.Position.IsBoundaryIndex() 
+				&& IsMovableTile(gemModel.Position) 
 				&& Model.currentTurn > gemModel.preservedFromMatch
 				&& !IsFalling(gemModel, gravity)
 			select gemModel;
@@ -191,12 +191,16 @@ public class GameController<M>: BaseController<M>
 		{
 			foreach (var matchOffset in whereCanMatch.matchOffsets) {
 				var matchingPosition = new Position(sourceGemModel.Position.index, matchOffset[0], matchOffset[1]);
-				if (matchingPosition.IsBoundaryIndex()
-					&& sourceGemModel.Type != GemType.ChocoGem
-					&& sourceGemModel.Type == GetGemModel(matchingPosition).Type 
-					&& Model.currentTurn > GetGemModel(matchingPosition).preservedFromMatch
-					&& !IsFalling(GetGemModel(matchingPosition), gravity)) {
-					matchedGemModels.Add(GetGemModel(matchingPosition));
+				if (!IsMovableTile(matchingPosition)) {
+					continue;
+				}
+
+				var matchingGemModel = GetGemModel(matchingPosition);
+				if (sourceGemModel.CanMatch(matchingGemModel.Type)
+					&& Model.currentTurn > matchingGemModel.preservedFromMatch
+					&& !IsFalling(matchingGemModel, gravity)
+				) {
+					matchedGemModels.Add(matchingGemModel);
 				} else {
 					break;
 				}
@@ -291,7 +295,7 @@ public class GameController<M>: BaseController<M>
 		while (true)
 		{
 			var nearPosition = new Position(sourcePosition.index, gravity[0], gravity[1]);
-			if (!nearPosition.IsBoundaryIndex()) {
+			if (!nearPosition.IsAcceptableIndex()) {
 				break;
 			}
 
@@ -321,17 +325,15 @@ public class GameController<M>: BaseController<M>
 		{
 			var emptyGemPosition = emptyGemModel.Position;
 			var nearPosition = new Position(emptyGemPosition.index, gravity[0], -gravity[1]);
-			if (nearPosition.IsMovableIndex()) {
-				var nearGemModel = GetGemModel(nearPosition);
-				if (Model.currentTurn <= nearGemModel.preservedFromMatch) {
-					continue;
-				}
+			if (!nearPosition.IsAcceptableIndex()) { continue; }
+			
+			var nearGemModel = GetGemModel(nearPosition);
+			if (Model.currentTurn <= nearGemModel.preservedFromMatch) { continue; }
 
-				if (nearGemModel is IMovable) {
-					fallingGemModels.AddRange(Swap(emptyGemPosition, nearPosition));
-				} else {
-					blockedGemModels.Push(emptyGemModel);
-				}
+			if (nearGemModel is IMovable) {
+				fallingGemModels.AddRange(Swap(emptyGemPosition, nearPosition));
+			} else {
+				blockedGemModels.Push(emptyGemModel);
 			}
 		}
 
@@ -346,14 +348,13 @@ public class GameController<M>: BaseController<M>
 			foreach (var colOffset in colOffsets) {
 				var nearPosition = new Position(blockedGemPosition.index, colOffset, -gravity[1]);
 
-				if (nearPosition.IsMovableIndex()) {
-					var nearGemModel = GetGemModel(nearPosition);
+				if (!nearPosition.IsAcceptableIndex()) { continue; }
 
-					if (nearGemModel is IMovable
-						&& !fallingGemModels.Contains(nearGemModel)) {
-						fallingGemModels.AddRange(Swap(blockedGemPosition, nearPosition));
-						break;
-					}
+				var nearGemModel = GetGemModel(nearPosition);
+				if (IsMovableTile(nearPosition)
+					&& !fallingGemModels.Contains(nearGemModel)) {
+					fallingGemModels.AddRange(Swap(blockedGemPosition, nearPosition));
+					break;
 				}
 			}
 		}
@@ -404,27 +405,31 @@ public class GameController<M>: BaseController<M>
 		};
 		
 		var sourceGemModel = GetGemModel(sourcePosition);
-		if (sourceGemModel.Type != GemType.EmptyGem 
-			&& !(sourceGemModel is IBlockable) 
+		if (IsMovableTile(sourcePosition)
+			&& sourceGemModel is IMovable 
+			&& sourceGemModel.Type != GemType.EmptyGem 
 			&& Model.currentTurn >= sourceGemModel.preservedFromBreak) 
 		{
 			blockedGemInfo.gemModels.Add(CopyAsBlock(markerID, sourceGemModel));
 		}
 
-		blockedGemInfo.hasNext = nearPosition.IsBoundaryIndex();
+		blockedGemInfo.hasNext = IsMovableTile(nearPosition);
 		
         return blockedGemInfo;
     }
 
-	public BlockedGemInfo MarkSameGemsAsBlock(GemType gemType, Int64 markerID)
+	public BlockedGemInfo MarkSameGemsAsBlock(Position sourcePosition, GemType gemType, Int64 markerID)
     {
 		var blockedGemInfo = new BlockedGemInfo {
-			gemModels = new List<GemModel>()
+			gemModels = new List<GemModel>{ CopyAsBlock(markerID, GetGemModel(sourcePosition)) }
 		};
 		
 		var sameGemModels = 
 			from GemModel gemModel in Model.GemModels
-			where !(gemModel is IBlockable) && gemModel.Type == gemType && Model.currentTurn >= gemModel.preservedFromBreak
+			where IsMovableTile(gemModel.Position)
+				&& gemModel is IMovable 
+				&& gemModel.CanMatch(gemType)
+				&& Model.currentTurn >= gemModel.preservedFromBreak
 			select gemModel;
 
 		foreach (var gemModel in sameGemModels)
@@ -453,7 +458,7 @@ public class GameController<M>: BaseController<M>
 	{
 		BrokenGemInfo brokenGemInfo = new BrokenGemInfo();
 
-		if (targetPosition.IsBoundaryIndex() && repeat > 0) 
+		if (IsMovableTile(targetPosition) && repeat > 0) 
 		{
 			brokenGemInfo.hasNext = true;
 			
@@ -477,5 +482,11 @@ public class GameController<M>: BaseController<M>
 	public void SetGemModel(GemModel gemModel) 
 	{
 		Model.GemModels[gemModel.Position.row, gemModel.Position.col] = gemModel;
+	}
+
+	public bool IsMovableTile(Position position) 
+	{
+		return position.IsAcceptableIndex() 
+			&& Model.TileModels[position.row, position.col].type == TileType.Movable;
 	}
 }

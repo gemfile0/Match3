@@ -29,15 +29,7 @@ public class Position
 		index = row * Position.levelModel.cols + col;
 	}
 
-	public bool IsBoundaryIndex()
-	{
-		return col >= Position.levelModel.colBoundary[0]
-			&& col <= Position.levelModel.colBoundary[1]
-			&& row >= Position.levelModel.rowBoundary[0]
-			&& row <= Position.levelModel.rowBoundary[1];
-	}
-
-	public bool IsMovableIndex()
+	public bool IsAcceptableIndex()
 	{
 		return col >= 0
 			&& col <  Position.levelModel.cols

@@ -116,7 +116,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     public void Hide()
     {
         var color = GetComponent<SpriteRenderer>().color;
-        GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 0.5f);
+        GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 0.1f);
     }
 
     public void SetBlock() 

@@ -243,6 +243,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			case GemType.SuperGem:
 			var nearGemModel = Controller.GetGemModel(nearPosition);
 			SameColorBreaking(
+				selectedPosition,
 				nearGemModel.Type,
 				gemSelected.ID, 
 				isChaining: false
@@ -398,9 +399,9 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		return allDirections[random.Next(allDirections.Length)];
 	}
 
-	void SameColorBreaking(GemType gemType, Int64 markerID, bool isChaining)
+	void SameColorBreaking(Position sourcePosition, GemType gemType, Int64 markerID, bool isChaining)
 	{	
-		var markedPositions = SetSameColorBlock(gemType, markerID);
+		var markedPositions = SetSameColorBlock(sourcePosition, gemType, markerID);
 		foreach(var markedPosition in markedPositions)
 		{
 			AddAction(Model.currentTurn + 1, (Sequence sequence, float currentTime) => {
@@ -496,8 +497,6 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 					if (Math.Abs(col) < repeat && Math.Abs(row) < repeat) { continue; }
 
 					var nearPosition = new Position(sourcePosition.index, col, row);
-					if (!nearPosition.IsBoundaryIndex()) { continue; }
-
 					var blockedGemInfo = Controller.MarkAsBlock(nearPosition, nearPosition, markerID);
 					markedPositions.Add(nearPosition);
 
@@ -506,7 +505,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 						if (gemViews.TryGetValue(gemModel.id, out gemView)) {
 							gemView.UpdateModel(gemModel);
 							gemView.SetBlock();
-						} 
+						}
 					});
 				}
 			}
@@ -517,11 +516,11 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		return markedPositions;
 	}
 
-	List<Position> SetSameColorBlock(GemType gemType, Int64 markerID)
+	List<Position> SetSameColorBlock(Position sourcePosition, GemType gemType, Int64 markerID)
 	{
 		var markedPositions = new List<Position>();
 			
-		var blockedGemInfo = Controller.MarkSameGemsAsBlock(gemType, markerID);
+		var blockedGemInfo = Controller.MarkSameGemsAsBlock(sourcePosition, gemType, markerID);
 		blockedGemInfo.gemModels.ForEach(gemModel => {
 			GemView gemView;
 			if (gemViews.TryGetValue(gemModel.id, out gemView)) {
