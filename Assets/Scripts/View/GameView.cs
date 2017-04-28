@@ -402,14 +402,16 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	void SameColorBreaking(Position sourcePosition, GemType gemType, Int64 markerID, bool isChaining)
 	{	
 		var markedPositions = SetSameColorBlock(sourcePosition, gemType, markerID);
+		var count = 1;
 		foreach(var markedPosition in markedPositions)
 		{
-			AddAction(Model.currentTurn + 1, (Sequence sequence, float currentTime) => {
+			AddAction(Model.currentTurn + count, (Sequence sequence, float currentTime) => {
 				var brokenGemInfo = Controller.Break(markedPosition, markerID, int.MaxValue);
 				if (brokenGemInfo.gemModels != null) {
 					BreakGems(brokenGemInfo, isChaining, sequence, currentTime);
 				}
 			});
+			count += 1;
 		}
 	}
 
