@@ -28,27 +28,27 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         movingSequence.SetEase(Ease.Linear);
     }
 
-    internal Position Position 
+    public Position Position 
     { 
         get { return Model.Position; } 
     }
 
-    internal int Endurance 
+    public int Endurance 
     {
         get { return Model.endurance; }
     } 
 
-    internal Int64 ID 
+    public Int64 ID 
     { 
         get { return Model.id; }
     }
 
-    internal Int64 PreservedFromBreak
+    public Int64 PreservedFromBreak
     {
         get { return Model.preservedFromBreak; }
     }
 
-    internal Int64 PreservedFromMatch
+    public Int64 PreservedFromMatch
     {
         get { return Model.preservedFromMatch; }
     }
@@ -57,7 +57,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     Sequence movingSequence;
     public Position reservedPosition;
 
-    internal void UpdateModel(GemModel gemModel) 
+    public void UpdateModel(GemModel gemModel) 
     {
         Model = gemModel;
         if (showID) 
@@ -70,7 +70,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         }
     }
     
-    internal void Highlight() 
+    public void Highlight() 
     {
         var duration = 0.395f;
 
@@ -88,7 +88,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         ).SetLoops(2, LoopType.Yoyo).SetEase(Ease.InOutSine);
     }
 
-    internal void Squash() 
+    public void Squash() 
     {
         var sequence = DOTween.Sequence();
         sequence.Append(transform.DOScale(new Vector3(1.08f, 0.92f, 1), 0.12f));
@@ -100,7 +100,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         spriteRenderer.SetPropertyBlock(mpb);
     }
 
-    internal void Open() 
+    public void Reveal() 
     {
         gameObject.SetActive(true);
 
@@ -108,9 +108,18 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         spriteRenderer.GetPropertyBlock(mpb);
         mpb.SetFloat("_FlashAmount", 0.4f);
         spriteRenderer.SetPropertyBlock(mpb);
+
+        var color = GetComponent<SpriteRenderer>().color;
+        GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 1f);
     }
 
-    internal void SetBlock() 
+    public void Hide()
+    {
+        var color = GetComponent<SpriteRenderer>().color;
+        GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 0.5f);
+    }
+
+    public void SetBlock() 
     {
         MaterialPropertyBlock mpb = new MaterialPropertyBlock();
         spriteRenderer.GetPropertyBlock(mpb);
@@ -119,7 +128,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         spriteRenderer.SetPropertyBlock(mpb);
     }
 
-    internal void DoLocalMove(Vector3 nextPosition, float duration)
+    public void DoLocalMove(Vector3 nextPosition, float duration)
     {
         movingSequence.Append(gameObject.transform.DOLocalMove(
 			nextPosition, 
@@ -127,12 +136,12 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
 		).SetEase(Ease.Linear));
     }
 
-    internal void SetActive(bool visible)
+    public void SetActive(bool visible)
     {
         gameObject.SetActive(visible);
     }
 
-    internal void SetLocalPosition(Vector2 position)
+    public void SetLocalPosition(Vector2 position)
     {
         transform.localPosition = position;
     }

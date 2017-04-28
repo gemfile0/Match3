@@ -321,8 +321,13 @@ public class GameController<M>: BaseController<M>
 		{
 			var emptyGemPosition = emptyGemModel.Position;
 			var nearPosition = new Position(emptyGemPosition.index, gravity[0], -gravity[1]);
-			if (nearPosition.IsMovableIndex() && Model.currentTurn > GetGemModel(nearPosition).preservedFromMatch) {
-				if (GetGemModel(nearPosition) is IMovable) {
+			if (nearPosition.IsMovableIndex()) {
+				var nearGemModel = GetGemModel(nearPosition);
+				if (Model.currentTurn <= nearGemModel.preservedFromMatch) {
+					continue;
+				}
+
+				if (nearGemModel is IMovable) {
 					fallingGemModels.AddRange(Swap(emptyGemPosition, nearPosition));
 				} else {
 					blockedGemModels.Push(emptyGemModel);
@@ -399,7 +404,6 @@ public class GameController<M>: BaseController<M>
 		};
 		
 		var sourceGemModel = GetGemModel(sourcePosition);
-		UnityEngine.Debug.Log("MarkAsBlock : " + sourceGemModel);
 		if (sourceGemModel.Type != GemType.EmptyGem 
 			&& !(sourceGemModel is IBlockable) 
 			&& Model.currentTurn >= sourceGemModel.preservedFromBreak) 
@@ -408,6 +412,25 @@ public class GameController<M>: BaseController<M>
 		}
 
 		blockedGemInfo.hasNext = nearPosition.IsBoundaryIndex();
+		
+        return blockedGemInfo;
+    }
+
+	public BlockedGemInfo MarkSameGemsAsBlock(GemType gemType, Int64 markerID)
+    {
+		var blockedGemInfo = new BlockedGemInfo {
+			gemModels = new List<GemModel>()
+		};
+		
+		var sameGemModels = 
+			from GemModel gemModel in Model.GemModels
+			where !(gemModel is IBlockable) && gemModel.Type == gemType && Model.currentTurn >= gemModel.preservedFromBreak
+			select gemModel;
+
+		foreach (var gemModel in sameGemModels)
+		{
+			blockedGemInfo.gemModels.Add(CopyAsBlock(markerID, gemModel));
+		}
 		
         return blockedGemInfo;
     }

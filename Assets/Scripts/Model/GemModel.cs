@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 public interface IGemModel 
 {
@@ -44,7 +43,7 @@ public class GemModel: BaseModel
     public Position Position 
     { 
         set { 
-            positionBefore = position;
+            positionBefore = (position == null) ? value : position;
             position = value;
             sequence = SEQUENCE_ID++;
         }
