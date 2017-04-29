@@ -14,6 +14,12 @@ public class BlockedGemInfo
 	public bool hasNext;
 }
 
+public class MergedGemInfo
+{
+	public GemModel mergee;
+	public GemModel merger;
+}
+
 public class GameController<M>: BaseController<M>
 	where M: GameModel 
 {
@@ -113,6 +119,29 @@ public class GameController<M>: BaseController<M>
 
 		return swappingGemModels;
     }
+
+	public MergedGemInfo Merge(Position sourcePosition, Position nearPosition)
+	{
+		var mergedGemInfo = new MergedGemInfo();
+
+		if (nearPosition.IsAcceptableIndex()) 
+		{
+			var sourceGemModel = GetGemModel(sourcePosition);
+			var nearGemModel = GetGemModel(nearPosition);
+
+			nearGemModel.specialKey = MergeSpecialKey(nearGemModel, sourceGemModel);
+			nearGemModel.endurance = Math.Max(sourceGemModel.endurance, nearGemModel.endurance);
+			sourceGemModel.specialKey = "";
+
+			sourceGemModel.preservedFromMatch = nearGemModel.preservedFromMatch = Model.currentTurn + 5;
+			mergedGemInfo = new MergedGemInfo {
+				merger = nearGemModel,
+				mergee = sourceGemModel
+			};
+		} 
+
+		return mergedGemInfo;
+	}
 
 	public List<MatchedLineInfo> Match() 
 	{
@@ -248,6 +277,16 @@ public class GameController<M>: BaseController<M>
 			gemType = (GemType)((int)baseGemType + specialGemType);
 		}
 		return gemType;
+	}
+
+	private string MergeSpecialKey(GemModel merger, GemModel mergee)
+	{
+		var result = merger.specialKey + mergee.specialKey;
+		if (merger.Type == GemType.ChocoGem && mergee.Type == GemType.ChocoGem)
+		{
+			result = "SQSQ";
+		}
+		return result;
 	}
 
 	public string ReadSpecialKey(List<MatchLineModel> matchLineModels, PositionVector positionVector) 
@@ -417,6 +456,8 @@ public class GameController<M>: BaseController<M>
 			gemModels = new List<GemModel>()
 		};
 		
+		if (!sourcePosition.IsAcceptableIndex()) { return blockedGemInfo; }
+
 		var sourceGemModel = GetGemModel(sourcePosition);
 		if (IsMovableTile(sourcePosition)
 			&& sourceGemModel is IMovable 
@@ -469,17 +510,18 @@ public class GameController<M>: BaseController<M>
 		return copiedGemModel;
 	}
 
-	public BrokenGemInfo Break(Position targetPosition, Int64 markerID, int repeat) 
+	public BrokenGemInfo Break(Position targetPosition, Int64 markerID) 
 	{
 		BrokenGemInfo brokenGemInfo = new BrokenGemInfo();
 
-		if (IsMovableTile(targetPosition) && repeat > 0) 
+		if (IsMovableTile(targetPosition)) 
 		{
 			brokenGemInfo.hasNext = true;
 			
 			var targetGemModel = GetGemModel(targetPosition);
 			if (targetGemModel.markedBy == markerID) {
 				var newGemModel = GemModelFactory.Get(GemType.EmptyGem, targetGemModel.Position);
+				newGemModel.preservedFromFall = Model.currentTurn + 1;
 				SetGemModel(newGemModel);
 
 				brokenGemInfo.gemModels = new List<GemModel>{ targetGemModel };
