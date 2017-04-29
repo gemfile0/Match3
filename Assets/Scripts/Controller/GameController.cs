@@ -361,8 +361,11 @@ public class GameController<M>: BaseController<M>
 				if (!nearPosition.IsAcceptableIndex()) { continue; }
 
 				var nearGemModel = GetGemModel(nearPosition);
+				if (Model.currentTurn <= nearGemModel.preservedFromMatch) { continue; }
+				
 				if (IsMovableTile(nearPosition)
-					&& !fallingGemModels.Contains(nearGemModel)) {
+					&& !fallingGemModels.Contains(nearGemModel)
+					&& nearGemModel is IMovable) {
 					fallingGemModels.AddRange(Swap(blockedGemPosition, nearPosition));
 					break;
 				}
@@ -418,7 +421,8 @@ public class GameController<M>: BaseController<M>
 		if (IsMovableTile(sourcePosition)
 			&& sourceGemModel is IMovable 
 			&& sourceGemModel.Type != GemType.EmptyGem 
-			&& Model.currentTurn >= sourceGemModel.preservedFromBreak) 
+			&& Model.currentTurn >= sourceGemModel.preservedFromBreak 
+			&& Model.currentTurn >= sourceGemModel.preservedFromMatch) 
 		{
 			blockedGemInfo.gemModels.Add(CopyAsBlock(markerID, sourceGemModel));
 		}
@@ -440,6 +444,7 @@ public class GameController<M>: BaseController<M>
 				&& gemModel is IMovable 
 				&& gemModel.CanMatch(gemType)
 				&& Model.currentTurn >= gemModel.preservedFromBreak
+				&& Model.currentTurn >= gemModel.preservedFromMatch
 			select gemModel;
 
 		foreach (var gemModel in sameGemModels)

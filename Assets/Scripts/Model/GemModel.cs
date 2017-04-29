@@ -144,7 +144,7 @@ static class GemModelFactory
         switch(gemModel.Type)
         {
             case GemType.ChocoGem:
-            endurance = 4;
+            endurance = 5;
             break;
         }
         

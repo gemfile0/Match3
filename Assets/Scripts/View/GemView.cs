@@ -67,6 +67,12 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
                 ID = ResourceCache.Instantiate("ID", transform).transform;
             }
             ID.GetComponent<TextMesh>().text = gemModel.id.ToString();
+
+            var MarkerID = transform.Find("MarkerID");
+            if (MarkerID == null) {
+                MarkerID = ResourceCache.Instantiate("MarkerID", transform).transform;
+                MarkerID.gameObject.SetActive(false);
+            }
         }
     }
     
@@ -119,13 +125,17 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 0.1f);
     }
 
-    public void SetBlock() 
+    public void SetBlock(Int64 markerID) 
     {
         MaterialPropertyBlock mpb = new MaterialPropertyBlock();
         spriteRenderer.GetPropertyBlock(mpb);
         mpb.SetFloat("_FlashAmount", 0.4f);
         mpb.SetColor("_FlashColor", new Color32(255, 0, 0, 1));
         spriteRenderer.SetPropertyBlock(mpb);
+
+        var markerIDObject = transform.Find("MarkerID").transform;
+        markerIDObject.GetComponent<TextMesh>().text = markerID.ToString();
+        markerIDObject.gameObject.SetActive(true);
     }
 
     public void DoLocalMove(Vector3 nextPosition, float duration)

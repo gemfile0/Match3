@@ -221,14 +221,14 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		swipeInput.OnSwipeEnd.RemoveAllListeners();
 	}
 
-	void ActByGemType(GemType gemType, Vector2 direction) 
+	void ActByGemType(GemType sourceGemType, Vector2 direction) 
 	{
 		var selectedPosition = gemSelected.Position;
 		var nearPosition = new Position(selectedPosition.index, (int)direction.x, (int)direction.y);
+		var nearGemModel = Controller.GetGemModel(nearPosition);
 
-		switch (gemType)
+		if (sourceGemType == GemType.ChocoGem) 
 		{
-			case GemType.ChocoGem:
 			LinedBreaking(
 				selectedPosition, 
 				direction, 
@@ -238,10 +238,9 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				breakingOffset: 5
 			);
 			UpdateChanges();
-			break;
-
-			case GemType.SuperGem:
-			var nearGemModel = Controller.GetGemModel(nearPosition);
+		}
+		else if (sourceGemType == GemType.SuperGem)
+		{
 			SameColorBreaking(
 				selectedPosition,
 				nearGemModel.Type,
@@ -249,17 +248,15 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				isChaining: false
 			);
 			UpdateChanges();
-			break;
-
-			default:
-			
+		}
+		else 
+		{
 			Swap(selectedPosition, nearPosition);
 			var updateInfo = UpdateChanges();
 			if (!updateInfo.hasAnyMatches) {
 				Swap(nearPosition, selectedPosition);
 				UpdateChanges(FRAME_BY_TURN * 0.02f * updateInfo.passedTurn);
 			}
-			break;
 		}
 	}
 
@@ -277,8 +274,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			{
 				var passedTurn = Model.currentTurn - startTurn;
 				var currentTime = latestTime + FRAME_BY_TURN * 0.02f * passedTurn;
-				// Debug.Log("CurrentTurn : " + Model.currentTurn);
-				// Debug.Log("currentTime : " + currentTime + ", " + (Model.currentTurn - startTurn));
+				// Debug.Log("currentTime : " + Model.currentTurn + ", " + currentTime);
 
 				Queue<Action<Sequence, float>> actionQueue;
 				if (actionQueueByTurn.TryGetValue(Model.currentTurn, out actionQueue)) {
@@ -382,7 +378,6 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				gemModel.id,
 				isChaining: true
 			);
-
 			break;
 		}
 	}
@@ -474,7 +469,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				GemView gemView;
 				if (gemViews.TryGetValue(gemModel.id, out gemView)) {
 					gemView.UpdateModel(gemModel);
-					gemView.SetBlock();
+					gemView.SetBlock(markerID);
 				}
 			});
 			
@@ -506,7 +501,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 						GemView gemView;
 						if (gemViews.TryGetValue(gemModel.id, out gemView)) {
 							gemView.UpdateModel(gemModel);
-							gemView.SetBlock();
+							gemView.SetBlock(markerID);
 						}
 					});
 				}
@@ -527,7 +522,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			GemView gemView;
 			if (gemViews.TryGetValue(gemModel.id, out gemView)) {
 				gemView.UpdateModel(gemModel);
-				gemView.SetBlock();
+				gemView.SetBlock(markerID);
 			} 
 
 			markedPositions.Add(gemModel.Position);
