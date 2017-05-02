@@ -18,7 +18,8 @@ class UpdateResult
 
 public class GameView: BaseView<GameModel, GameController<GameModel>>  
 {
-	readonly Int64 FRAME_BY_TURN = 3;
+	const Int64 FRAME_BY_TURN = 3;
+	const float TIME_PER_FRAME = 0.016f;
 
 	Bounds sampleBounds;
 	Vector3 gemSize;
@@ -61,7 +62,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	IEnumerator StartHello() 
 	{
-		yield return new WaitForSeconds(0.02f * FRAME_BY_TURN);
+		yield return new WaitForSeconds(TIME_PER_FRAME * FRAME_BY_TURN);
 		Controller.GetAll().ForEach(gemModel => {
 			gemViews[gemModel.id].Squash();
 		});
@@ -169,7 +170,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 			var nextPosition = new Vector3(position.col * gemSize.x, position.row * gemSize.y, 0);
 			var gapOfTurn = gemView.PreservedFromMatch - Model.currentTurn + 1;
-			var duration = gapOfTurn * (0.02f * FRAME_BY_TURN);
+			var duration = gapOfTurn * (TIME_PER_FRAME * FRAME_BY_TURN);
 			sequence.Insert(currentTime, gemView.transform.GOLocalMove(
 				nextPosition, 
 				duration
@@ -262,14 +263,14 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			Swap(sourcePosition, nearPosition);
 			UpdateChanges(0, (Int64 passedTurn) => {
 				Swap(nearPosition, sourcePosition);
-				UpdateChanges(FRAME_BY_TURN * 0.02f * passedTurn);
+				UpdateChanges(FRAME_BY_TURN * TIME_PER_FRAME * passedTurn);
 			});
 		}
 	}
 
 	IEnumerator StartUpdateChanges(float latestTime, Action<Int64> OnNoAnyMatches)
 	{
-		sequence = GOTween.Sequence().SetEase(GOEase.Smoothstep);
+		sequence = GOTween.Sequence().SetEase(GOEase.SmoothStep);
 
 		var currentFrame = 0;
 		var startTurn = Model.currentTurn;
@@ -279,7 +280,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			if (currentFrame % FRAME_BY_TURN == 0)
 			{
 				var passedTurn = Model.currentTurn - startTurn;
-				var currentTime = latestTime + FRAME_BY_TURN * 0.02f * passedTurn;
+				var currentTime = latestTime + FRAME_BY_TURN * TIME_PER_FRAME * passedTurn;
 				// Debug.Log("currentTime : " + Model.currentTurn + ", " + currentTime);
 
 				Queue<Action<GOSequence, float>> actionQueue;
@@ -639,8 +640,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			var gapOfTurn = gemView.PreservedFromMatch - Model.currentTurn + 1;
 			sequence.Insert(currentTime, gemView.transform.GOLocalMove(
 				nextPosition, 
-				gapOfTurn * (0.02f * FRAME_BY_TURN)
-			));
+				gapOfTurn * (TIME_PER_FRAME * FRAME_BY_TURN)
+			).SetEase(GOEase.EaseOut));
 		}
 	}
 
@@ -657,8 +658,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		var gapOfTurn = mergeeGemView.PreservedFromMatch - (Model.currentTurn + 1);
 		sequence.Insert(currentTime, mergeeGemView.transform.GOLocalMove(
 			mergeeNextPosition, 
-			gapOfTurn * (0.02f * FRAME_BY_TURN)
-		));
+			gapOfTurn * (TIME_PER_FRAME * FRAME_BY_TURN)
+		).SetEase(GOEase.EaseOut));
 		
 		var markerID = mergerGemModel.id;
 		

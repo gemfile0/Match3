@@ -7,7 +7,7 @@ public class Cube: MonoBehaviour
 
 	void Start () 
 	{
-		sequence = GOTween.Sequence().SetEase(GOEase.Smoothstep);
+		sequence = GOTween.Sequence().SetEase(GOEase.SmoothStep);
 		sequence.Insert(1, transform.GOLocalMove(
 			new Vector3(0, 5, 0),
 			1f

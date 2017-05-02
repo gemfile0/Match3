@@ -7,13 +7,13 @@ public class ScrollRectSnap: MonoBehaviour
 	public RectTransform center;
 	public int startItem = 3;
 
-	private float[] positiveDistances;
-	private float[] distances;
-	private bool dragging = false;
-	private int itemDistance;
-	private int minItemIndex;
-	private bool hasMessageSended;
-	private bool targetNearestItem = true;
+	float[] positiveDistances;
+	float[] distances;
+	bool dragging = false;
+	int itemDistance;
+	int minItemIndex;
+	bool hasMessageSended;
+	bool targetNearestItem = true;
 
 	public void Setup(RectTransform[] items, int latestLevelIndex = -1)
 	{
@@ -30,6 +30,19 @@ public class ScrollRectSnap: MonoBehaviour
 		}
 
 		panel.anchoredPosition = new Vector2((startItem - 1) * -itemDistance, 0f);
+	}
+	
+	public void StartDrag()
+	{
+		dragging = true;
+		hasMessageSended = false;
+		targetNearestItem = true;
+	}
+
+	public void EndDrag()
+	{
+		dragging = false;
+		hasMessageSended = true;
 	}
 
 	void Update()
@@ -105,19 +118,6 @@ public class ScrollRectSnap: MonoBehaviour
 		if (itemIndex - 1 == 3) {
 
 		}
-	}
-
-	public void StartDrag()
-	{
-		dragging = true;
-		hasMessageSended = false;
-		targetNearestItem = true;
-	}
-
-	public void EndDrag()
-	{
-		dragging = false;
-		hasMessageSended = true;
 	}
 
 }

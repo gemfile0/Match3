@@ -113,7 +113,8 @@ public class GameController<M>: BaseController<M>
 
 			SetGemModel(nearGemModel);
 			SetGemModel(sourceGemModel);
-			sourceGemModel.preservedFromMatch = nearGemModel.preservedFromMatch = Model.currentTurn + 5;
+			sourceGemModel.preservedFromMatch = nearGemModel.preservedFromMatch 
+				= Model.currentTurn + 5;
 			swappingGemModels = new List<GemModel>{ sourceGemModel, nearGemModel };
 		} 
 

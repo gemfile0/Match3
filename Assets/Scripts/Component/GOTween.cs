@@ -46,7 +46,16 @@ class SequenceItem
 
 public class GOEase
 {
-	public static Func<float, float> Smoothstep = (t) => t*t * (3f - 2f*t);
+	public static Func<float, float> SmootherStep = (t) => t*t*t * (t * (6f*t - 15f) + 10f);
+	public static Func<float, float> SmoothStep = (t) => t*t * (3f - 2f*t);
+	public static Func<float, float> EaseOut = (t) => Mathf.Sin(t * Mathf.PI * 0.5f);
+	public static Func<float, float> EaseIn = (t) => 1f - Mathf.Cos(t * Mathf.PI * 0.5f);
+	public static Func<float, float> Linear = (t) => t;
+	public static Func<float, float, float, float, float> EaseOutQuad = 
+		(t, b, c, d) => {
+			t /= d;
+			return -c * t*(t-2) + b;
+		};
 }
 
 public class GOSequence: IUpdater
@@ -79,6 +88,7 @@ public class GOSequence: IUpdater
 		this.startTime = Time.time;
 		this.id = 0;
 		this.hasCompleted = false;
+		this.Ease = GOEase.Linear;
 	}
 	
 	public void Kill()
@@ -133,6 +143,7 @@ public class GOSequence: IUpdater
 			hasCompleted = true;
 		}
 
+		// Ease(currentTime, Time.time, startTime, duration);
 		currentTime = Ease(currentTime) * duration;
 		foreach(var item in items.Values.ToList())
 		{
@@ -184,18 +195,20 @@ public class GOTweenCallback: IWatcher
 
 public class GOTween: MonoBehaviour, IWatcher
 {
-	private static GORoot root;
-	private bool hasCompleted;
-	private bool hasStarted;
-	private Action UpdateEndValue;
-	private Action<bool, float> UpdateCurrentValue;
 	public float Duration 
 	{
 		get { return duration; }
 	}
-	private float duration;
-	private List<Action> OnCompletes;
-	private float previous;
+
+	static GORoot root;
+	bool hasCompleted;
+	bool hasStarted;
+	Action UpdateEndValue;
+	Action<bool, float> UpdateCurrentValue;
+	float duration;
+	List<Action> OnCompletes;
+	float previous;
+	Func<float, float> Ease;
 	
 	static GOTween()
 	{
@@ -208,6 +221,7 @@ public class GOTween: MonoBehaviour, IWatcher
 		hasCompleted = false;
 		OnCompletes = new List<Action>();
 		previous = 0f;
+		Ease = GOEase.Linear;
 	}
 
 	public static GOSequence Sequence()
@@ -264,6 +278,7 @@ public class GOTween: MonoBehaviour, IWatcher
 		if (current > duration) { current = duration; hasCompleted = true; }
 		previous = current;
 
+		current = Ease(current / duration) * duration;
 		UpdateCurrentValue(false, current);
 		if (hasCompleted)
 		{
@@ -277,5 +292,11 @@ public class GOTween: MonoBehaviour, IWatcher
 	public void OnComplete(Action callback)
 	{
 		OnCompletes.Add(callback);
+	}
+
+	public GOTween SetEase(Func<float, float> gEase)
+	{
+		Ease = gEase;
+		return this;
 	}
 }

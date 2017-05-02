@@ -3,31 +3,38 @@
 public class LobbyScene: BaseScene 
 {
 	[SerializeField]
-	Transform levelItemContainer;
+	LevelSelectionPanel levelSelectionPanel;
 	
 #if DIABLE_LOG
-	void Awake()
+	protected override void Awake()
 	{
-		Debug.logger.logEnabled=false;
+		base.Awake();
+
+		if (Application.platform == RuntimePlatform.Android
+			|| Application.platform == RuntimePlatform.IPhonePlayer)
+		{
+			Debug.logger.logEnabled=false;
+		}
 	}
 #endif
 
 	void Start() 
 	{
-		MakeLevelBlockToLoad();
+		LetLevelItemToLoad();
 	}
 	
-	void MakeLevelBlockToLoad()
+	void LetLevelItemToLoad()
 	{
 		var levelIndex = 1;
 		var sceneLoader = GameObject.Find("SceneLoader").GetComponent<SceneLoader>();
+		levelSelectionPanel.Setup();
 		while (true)
 		{
 			var currentLevel = levelIndex;
-			var levelItem = levelItemContainer.Find("LevelItem" + currentLevel);
+			var levelItem = levelSelectionPanel.GetLevelItem(levelIndex);
 			if (levelItem == null) { break; }
 
-			levelItem.GetComponent<LevelItem>().callback = () => {
+			levelItem.callback = () => {
 				PlayerPrefs.SetInt("LatestLevel", currentLevel);
 				sceneLoader.Load("LevelScene");
 			};
