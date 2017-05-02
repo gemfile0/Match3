@@ -34,4 +34,14 @@ public static class ExtensionMethods
 	{
 		return (T) Enum.Parse(typeof(T), value, true);
 	}
+
+	public static GOTween GOLocalMove(this Transform transform, Vector3 endValue, float duration)
+	{
+		return GOTween.To(
+			() => transform.localPosition, 
+			value => transform.localPosition = value, 
+			endValue,
+			duration
+		);
+	}
 }   
