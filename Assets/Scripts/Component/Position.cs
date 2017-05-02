@@ -2,6 +2,11 @@
 {
 	public int colOffset;
 	public int rowOffset;
+
+	public override string ToString()
+	{
+		return string.Format("({0}, {1})", colOffset, rowOffset);
+	}
 }
 
 [System.Serializable]

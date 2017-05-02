@@ -131,6 +131,7 @@ public class GameController<M>: BaseController<M>
 
 			nearGemModel.specialKey = MergeSpecialKey(nearGemModel, sourceGemModel);
 			nearGemModel.endurance = Math.Max(sourceGemModel.endurance, nearGemModel.endurance);
+			nearGemModel.positionBefore = sourcePosition;
 			sourceGemModel.specialKey = "";
 
 			sourceGemModel.preservedFromMatch = nearGemModel.preservedFromMatch = Model.currentTurn + 5;
@@ -504,8 +505,8 @@ public class GameController<M>: BaseController<M>
 		copiedGemModel.Type = targetGemModel.Type;
 		copiedGemModel.specialKey = targetGemModel.specialKey;
 		copiedGemModel.endurance = targetGemModel.endurance;
-		// copiedGemModel.deadline = targetGemModel.deadline;
-		// copiedGemModel.preservedUntil = targetGemModel.preservedUntil;
+		copiedGemModel.Position = targetGemModel.Position;
+		copiedGemModel.positionBefore = targetGemModel.positionBefore;
 		SetGemModel(copiedGemModel);
 		return copiedGemModel;
 	}

@@ -107,7 +107,14 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 		if (needToChaining)
 		{
-			ActByChaining(gemModel.Type, gemModel.specialKey, gemModel.Position, gemModel.endurance, gemModel.id);
+			ActByChaining(
+				gemModel.Type, 
+				gemModel.specialKey, 
+				gemModel.Position, 
+				gemModel.endurance, 
+				gemModel.id, 
+				new Vector2(gemModel.PositionVector.colOffset, gemModel.PositionVector.rowOffset)
+			);
 		}
 
 		return gemView;
@@ -324,9 +331,15 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		StartCoroutine(StartUpdateChanges(latestTime, OnNoAnyMatches));
 	}
 
-	void ActByChaining(GemType gemType, string specialKey, Position sourcePosition, int repeat, Int64 markerID) 
-	{
-		Debug.Log("ActByChaining : " + gemType + ", " + specialKey);
+	void ActByChaining(
+		GemType gemType, 
+		string specialKey, 
+		Position sourcePosition, 
+		int repeat, 
+		Int64 markerID, 
+		Vector2 direction
+	) {
+		Debug.Log("ActByChaining : " + gemType + ", " + specialKey + ", " + direction);
 		switch (gemType)
 		{
 			case GemType.SuperGem:
@@ -384,7 +397,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			break;
 
 			case "SQSQ":
-			LinedRadialBreaking(sourcePosition, new Vector2{ x = 0, y = 1 }, repeat, markerID, isChaining: true, breakingOffset: 5);
+			LinedRadialBreaking(sourcePosition, direction, repeat, markerID, isChaining: true, breakingOffset: 5);
 			break;
 		}
 	}

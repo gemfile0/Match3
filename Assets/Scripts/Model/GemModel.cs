@@ -60,7 +60,7 @@ public class GemModel: BaseModel
             };
         }
     }
-    Position positionBefore;
+    public Position positionBefore;
     public Int64 id;
     public Int64 markedBy;
     public Int64 sequence;
