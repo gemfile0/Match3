@@ -2,19 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 
-public class BrokenGemInfo 
+public struct BrokenGemInfo 
 {
-	public List<GemModel> gemModels;
-	public bool hasNext;
+	public GemModel gemModel;
+	public bool isNextMovable;
 }
 
-public class BlockedGemInfo 
+public struct BlockedGemInfo 
 {
+	public GemModel gemModel;
 	public List<GemModel> gemModels;
-	public bool hasNext;
+	public bool isNextMovable;
 }
 
-public class MergedGemInfo
+public struct MergedGemInfo
 {
 	public GemModel mergee;
 	public GemModel merger;
@@ -60,16 +61,16 @@ public class GameController<M>: BaseController<M>
 		}
 	}
 
-	public List<GemModel> GetAll()
+	public IEnumerable<GemModel> GetAll()
     {
         var allGemModels = 
 			from GemModel gemModel in Model.GemModels
 			where gemModel is IMovable && gemModel.Type != GemType.EmptyGem
 			select gemModel;
 
-		return allGemModels.ToList();
+		return allGemModels;
     }
-
+	
     public void TurnNext()
     {
         Model.currentTurn += 1;
@@ -115,7 +116,8 @@ public class GameController<M>: BaseController<M>
 			SetGemModel(sourceGemModel);
 			sourceGemModel.preservedFromMatch = nearGemModel.preservedFromMatch 
 				= Model.currentTurn + 5;
-			swappingGemModels = new List<GemModel>{ sourceGemModel, nearGemModel };
+			swappingGemModels.Add(sourceGemModel);
+			swappingGemModels.Add(nearGemModel);
 		} 
 
 		return swappingGemModels;
@@ -134,12 +136,10 @@ public class GameController<M>: BaseController<M>
 			nearGemModel.endurance = Math.Max(sourceGemModel.endurance, nearGemModel.endurance);
 			nearGemModel.positionBefore = sourcePosition;
 			sourceGemModel.specialKey = "";
-
 			sourceGemModel.preservedFromMatch = nearGemModel.preservedFromMatch = Model.currentTurn + 5;
-			mergedGemInfo = new MergedGemInfo {
-				merger = nearGemModel,
-				mergee = sourceGemModel
-			};
+
+			mergedGemInfo.merger = nearGemModel;
+			mergedGemInfo.mergee = sourceGemModel;
 		} 
 
 		return mergedGemInfo;
@@ -161,25 +161,27 @@ public class GameController<M>: BaseController<M>
 
 		foreach (var matchableGemModel in matchableGemModels) 
 		{
-			foreach (var matchLineModel in matchLineModels) {
+			foreach (var matchLineModel in matchLineModels) 
+			{
 				var matchedGemModels = GetAnyMatches(matchableGemModel, matchLineModel);
-				if (matchedGemModels.Count > 0) {
-					var newMatchLineInfo = new MatchedLineInfo() {
-						gemModels = matchedGemModels, 
-						matchLineModels = new List<MatchLineModel>(){ matchLineModel }
-					};
 
-					// Merge if the matched line has intersection.
-					foreach (var matchedLineInfo in matchedLineInfos) {
-						if (matchedLineInfo.gemModels.Intersect(newMatchLineInfo.gemModels).Any()) {
-							matchedLineInfo.Merge(newMatchLineInfo);
-							break;
-						}
+				if (matchedGemModels.Count == 0) { continue; }
+
+				var newMatchLineInfo = new MatchedLineInfo() {
+					gemModels = matchedGemModels, 
+					matchLineModels = new List<MatchLineModel>(){ matchLineModel }
+				};
+
+				// Merge if the matched line has intersection.
+				foreach (var matchedLineInfo in matchedLineInfos) {
+					if (matchedLineInfo.gemModels.Intersect(newMatchLineInfo.gemModels).Any()) {
+						matchedLineInfo.Merge(newMatchLineInfo);
+						break;
 					}
-					
-					if (!newMatchLineInfo.isMerged) {
-						matchedLineInfos.Add(newMatchLineInfo);
-					}
+				}
+				
+				if (!newMatchLineInfo.isMerged) {
+					matchedLineInfos.Add(newMatchLineInfo);
 				}
 			}
 		}
@@ -191,7 +193,8 @@ public class GameController<M>: BaseController<M>
 			});
 			var latestGemModel = matchedLineInfo.gemModels.OrderByDescending(gemModel => gemModel.sequence).FirstOrDefault();
 
-			foreach (var matchedGemModel in matchedLineInfo.gemModels) {
+			foreach (var matchedGemModel in matchedLineInfo.gemModels) 
+			{
 				var newGemType = GemType.EmptyGem;
 				if (matchedGemModel == latestGemModel) {
 					newGemType = ReadGemType(
@@ -199,6 +202,8 @@ public class GameController<M>: BaseController<M>
 						ReadSpecialKey(matchedLineInfo.matchLineModels, latestGemModel.PositionVector)
 					);
 				}
+
+				// Create a new gem model either empty or merged.
 				var newGemModel = GemModelFactory.Get(newGemType, matchedGemModel.Position);
 				SetGemModel(newGemModel);
 
@@ -232,11 +237,13 @@ public class GameController<M>: BaseController<M>
 				) {
 					matchedGemModels.Add(matchingGemModel);
 				} else {
+					// Need to match about all offsets.
 					break;
 				}
 			}
 			
 			if (matchedGemModels.Count == whereCanMatch.matchOffsets.Count) {
+				// Finally found!
 				break;
 			} else {
 				matchedGemModels.Clear();
@@ -454,23 +461,22 @@ public class GameController<M>: BaseController<M>
 
 	public BlockedGemInfo MarkAsBlock(Position sourcePosition, Position nearPosition, Int64 markerID)
     {
-		var blockedGemInfo = new BlockedGemInfo {
-			gemModels = new List<GemModel>()
-		};
+		var blockedGemInfo = new BlockedGemInfo();
 		
 		if (!sourcePosition.IsAcceptableIndex()) { return blockedGemInfo; }
 
 		var sourceGemModel = GetGemModel(sourcePosition);
-		if (IsMovableTile(sourcePosition)
+		var isMovableTile = IsMovableTile(sourcePosition);
+		if (isMovableTile
 			&& sourceGemModel is IMovable 
 			&& sourceGemModel.Type != GemType.EmptyGem 
 			&& Model.currentTurn >= sourceGemModel.preservedFromBreak 
 			&& Model.currentTurn >= sourceGemModel.preservedFromMatch) 
 		{
-			blockedGemInfo.gemModels.Add(CopyAsBlock(markerID, sourceGemModel));
+			blockedGemInfo.gemModel = CopyAsBlock(markerID, sourceGemModel);
 		}
 
-		blockedGemInfo.hasNext = IsMovableTile(nearPosition);
+		blockedGemInfo.isNextMovable = isMovableTile;
 		
         return blockedGemInfo;
     }
@@ -516,19 +522,20 @@ public class GameController<M>: BaseController<M>
 	{
 		BrokenGemInfo brokenGemInfo = new BrokenGemInfo();
 
-		if (IsMovableTile(targetPosition)) 
+		var isNextMovable = IsMovableTile(targetPosition);
+		if (isNextMovable) 
 		{
-			brokenGemInfo.hasNext = true;
-			
 			var targetGemModel = GetGemModel(targetPosition);
 			if (targetGemModel.markedBy == markerID) {
 				var newGemModel = GemModelFactory.Get(GemType.EmptyGem, targetGemModel.Position);
 				newGemModel.preservedFromFall = Model.currentTurn + 1;
 				SetGemModel(newGemModel);
 
-				brokenGemInfo.gemModels = new List<GemModel>{ targetGemModel };
+				brokenGemInfo.gemModel = targetGemModel;
 			}
 		}
+
+		brokenGemInfo.isNextMovable = isNextMovable;
 
 		return brokenGemInfo;
 	}
