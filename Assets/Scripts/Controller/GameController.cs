@@ -133,9 +133,9 @@ public class GameController<M>: BaseController<M>
 			var nearGemModel = GetGemModel(nearPosition);
 
 			nearGemModel.specialKey = MergeSpecialKey(nearGemModel, sourceGemModel);
-			nearGemModel.endurance = Math.Max(sourceGemModel.endurance, nearGemModel.endurance);
+			nearGemModel.endurance = MergeEndurance(nearGemModel, sourceGemModel);
 			nearGemModel.positionBefore = sourcePosition;
-			sourceGemModel.specialKey = "";
+
 			sourceGemModel.preservedFromMatch = nearGemModel.preservedFromMatch = Model.currentTurn + 5;
 
 			mergedGemInfo.merger = nearGemModel;
@@ -288,14 +288,31 @@ public class GameController<M>: BaseController<M>
 		return gemType;
 	}
 
-	private string MergeSpecialKey(GemModel merger, GemModel mergee)
+	string MergeSpecialKey(GemModel merger, GemModel mergee)
 	{
-		var result = merger.specialKey + mergee.specialKey;
-		if (merger.Type == GemType.ChocoGem && mergee.Type == GemType.ChocoGem)
-		{
-			result = "SQSQ";
-		}
-		return result;
+		var mergerType = merger.Type;
+		var mergerKey = merger.specialKey;
+
+		var mergeeType = mergee.Type;
+		var mergeeKey = mergee.specialKey;
+		merger.Type = mergee.Type = GemType.Nil;
+		merger.specialKey = mergee.specialKey = "";
+		return ReadMergingKey(mergerType, mergerKey) 
+			+ ReadMergingKey(mergeeType, mergeeKey);
+	}
+
+	int MergeEndurance(GemModel merger, GemModel mergee)
+	{
+		if (merger.specialKey == "CC") { return 2; }
+		if (merger.specialKey == "HSQ" || merger.specialKey == "SQH") { return 5; }
+		return Math.Max(merger.endurance, mergee.endurance);
+	}
+
+	string ReadMergingKey(GemType gemType, string specialKey)
+	{
+		if (gemType == GemType.SuperGem) { return "SP"; }
+		else if (gemType == GemType.ChocoGem) { return "SQ"; }
+		return specialKey;
 	}
 
 	public string ReadSpecialKey(List<MatchLineModel> matchLineModels, PositionVector positionVector) 
@@ -470,8 +487,8 @@ public class GameController<M>: BaseController<M>
 		if (isMovableTile
 			&& sourceGemModel is IMovable 
 			&& sourceGemModel.Type != GemType.EmptyGem 
-			&& Model.currentTurn >= sourceGemModel.preservedFromBreak 
-			&& Model.currentTurn >= sourceGemModel.preservedFromMatch) 
+			&& Model.currentTurn >= sourceGemModel.preservedFromBreak)
+			// && Model.currentTurn >= sourceGemModel.preservedFromMatch) 
 		{
 			blockedGemInfo.gemModel = CopyAsBlock(markerID, sourceGemModel);
 		}
@@ -481,7 +498,7 @@ public class GameController<M>: BaseController<M>
         return blockedGemInfo;
     }
 
-	public BlockedGemInfo MarkSameGemsAsBlock(Position sourcePosition, GemType gemType, Int64 markerID)
+	public BlockedGemInfo MarkSameTypeAsBlock(Position sourcePosition, GemType gemType, Int64 markerID)
     {
 		var blockedGemInfo = new BlockedGemInfo {
 			gemModels = new List<GemModel>{ CopyAsBlock(markerID, GetGemModel(sourcePosition)) }
@@ -503,6 +520,28 @@ public class GameController<M>: BaseController<M>
 		
         return blockedGemInfo;
     }
+
+	public BlockedGemInfo MarkAllGemsAsBlock(Position sourcePosition, Int64 markerID)
+	{
+		var blockedGemInfo = new BlockedGemInfo {
+			gemModels = new List<GemModel>()
+		};
+		
+		var sameGemModels = 
+			from GemModel gemModel in Model.GemModels
+			where IsMovableTile(gemModel.Position)
+				&& gemModel is IMovable 
+				&& Model.currentTurn >= gemModel.preservedFromBreak
+				&& Model.currentTurn >= gemModel.preservedFromMatch
+			select gemModel;
+
+		foreach (var gemModel in sameGemModels)
+		{
+			blockedGemInfo.gemModels.Add(CopyAsBlock(markerID, gemModel));
+		}
+		
+        return blockedGemInfo;
+	}
 
 	GemModel CopyAsBlock(Int64 markerID, GemModel targetGemModel)
 	{
@@ -559,5 +598,23 @@ public class GameController<M>: BaseController<M>
 	{
 		return position.IsAcceptableIndex() 
 			&& Model.TileModels[position.row, position.col].type != TileType.Immovable;
+	}
+
+	public bool IsSpecialType(GemModel gemModel)
+	{
+		// "H": "H", "V", "C", Choco, Super
+		// "V': "H", "V", "C", Choco, Super
+		// "C": "H", "V", "C", Choco, Super
+		// Choco: "H", "V", "C", Choco, Super
+		// Super: "H", "V", "C", Choco, Super
+		var gemType = gemModel.Type;
+		var specialKey = gemModel.specialKey;
+		return (
+			gemType == GemType.SuperGem 
+			|| gemType == GemType.ChocoGem 
+			|| specialKey == "H"
+			|| specialKey == "V"
+			|| specialKey == "C"
+		);
 	}
 }

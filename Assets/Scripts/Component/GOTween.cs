@@ -65,6 +65,9 @@ public class GOSequence: IUpdater
 	private float startTime;
 	private int id;
 	Func<float, float> Ease;
+	public bool IsComplete {
+		get { return hasCompleted; }
+	}
 	bool hasCompleted;
 
 	public float Duration
@@ -97,12 +100,15 @@ public class GOSequence: IUpdater
 		{
 			item.watcher.Kill();
 		}
-		items.Clear();
+		items = null;
+		Ease = null;
 		root.RemoveUpdater(this);
 	}
 
 	public void InsertCallback(float atTime, Action callback)
 	{
+		if (items == null) { return; }
+		
 		var id = GetID();
 		items.Add(id, new SequenceItem {
 			id = id,
@@ -118,6 +124,8 @@ public class GOSequence: IUpdater
 
 	public void Insert(float atTime, GOTween gTween)
 	{
+		if (items == null) { return; }
+		
 		var id = GetID();
 		gTween.OnComplete(() => {
 			// items.Remove(id);
@@ -251,6 +259,7 @@ public class GOTween: MonoBehaviour, IWatcher
 		}
 		goTween.UpdateEndValue = () => {
 			setter(endValue);
+			Destroy(goTween);
 		};
 		goTween.duration = duration;
 		return goTween;
@@ -260,7 +269,8 @@ public class GOTween: MonoBehaviour, IWatcher
 	{
 		UpdateEndValue = null;
 		UpdateCurrentValue = null;
-		OnCompletes.Clear();
+		OnCompletes = null;
+		Ease = null;
 		Destroy(this);
 	}
 

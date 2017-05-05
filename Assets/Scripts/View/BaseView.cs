@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class BaseView<M, C>: MonoBehaviour 
+public class BaseView<M, C>: PooledObject
 	where M: BaseModel
 	where C: BaseController<M>, new() 
 {

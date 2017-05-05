@@ -14,18 +14,20 @@ public interface IGemView
 
 public class GemView: BaseView<GemModel, GemController<GemModel>>
 {
-    public GemType Type 
-    { 
-        get { return Model.Type; } 
-    }
-
     private SpriteRenderer spriteRenderer;
-
+    private TextMesh idText;
+    private TextMesh markerIdText;
+    
+    void Awake()
+    {
+        idText = ResourceCache.Instantiate("ID", transform).GetComponent<TextMesh>();
+        markerIdText = ResourceCache.Instantiate("MarkerID", transform).GetComponent<TextMesh>();
+        markerIdText.gameObject.SetActive(false);
+    }
+    
     void OnEnable() 
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        movingSequence = DOTween.Sequence();
-        movingSequence.SetEase(Ease.Linear);
     }
 
     public Position Position 
@@ -33,19 +35,9 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         get { return Model.Position; } 
     }
 
-    public int Endurance 
-    {
-        get { return Model.endurance; }
-    } 
-
     public Int64 ID 
     { 
         get { return Model.id; }
-    }
-
-    public Int64 PreservedFromBreak
-    {
-        get { return Model.preservedFromBreak; }
     }
 
     public Int64 PreservedFromMatch
@@ -54,25 +46,13 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     }
 
     bool showID = true;
-    Sequence movingSequence;
-    public Position reservedPosition;
 
     public void UpdateModel(GemModel gemModel) 
     {
         Model = gemModel;
         if (showID) 
         {
-            var ID = transform.Find("ID");
-            if (ID == null) {
-                ID = ResourceCache.Instantiate("ID", transform).transform;
-            }
-            ID.GetComponent<TextMesh>().text = gemModel.id.ToString();
-
-            var MarkerID = transform.Find("MarkerID");
-            if (MarkerID == null) {
-                MarkerID = ResourceCache.Instantiate("MarkerID", transform).transform;
-                MarkerID.gameObject.SetActive(false);
-            }
+            idText.text = gemModel.id.ToString();
         }
     }
     
@@ -115,14 +95,14 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         mpb.SetFloat("_FlashAmount", 0.4f);
         spriteRenderer.SetPropertyBlock(mpb);
 
-        var color = GetComponent<SpriteRenderer>().color;
-        GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 1f);
+        var color = spriteRenderer.color;
+        spriteRenderer.color = new Color(color.r, color.g, color.b, 1f);
     }
 
     public void Hide()
     {
-        var color = GetComponent<SpriteRenderer>().color;
-        GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, 0.1f);
+        var color = spriteRenderer.color;
+        spriteRenderer.color = new Color(color.r, color.g, color.b, 0.1f);
     }
 
     public void SetBlock(Int64 markerID) 
@@ -133,17 +113,8 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         mpb.SetColor("_FlashColor", new Color32(255, 0, 0, 1));
         spriteRenderer.SetPropertyBlock(mpb);
 
-        var markerIDObject = transform.Find("MarkerID").transform;
-        markerIDObject.GetComponent<TextMesh>().text = markerID.ToString();
-        markerIDObject.gameObject.SetActive(true);
-    }
-
-    public void DoLocalMove(Vector3 nextPosition, float duration)
-    {
-        movingSequence.Append(gameObject.transform.DOLocalMove(
-			nextPosition, 
-			duration
-		).SetEase(Ease.Linear));
+        markerIdText.text = markerID.ToString();
+        markerIdText.gameObject.SetActive(true);
     }
 
     public void SetActive(bool visible)
@@ -154,5 +125,11 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     public void SetLocalPosition(Vector2 position)
     {
         transform.localPosition = position;
+    }
+
+    public override void ReturnToPool()
+    {   
+        markerIdText.gameObject.SetActive(false);
+        base.ReturnToPool();
     }
 }

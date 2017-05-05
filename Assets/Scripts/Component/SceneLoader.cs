@@ -3,8 +3,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Canvas))]
-public class SceneLoader: MonoBehaviour 
+public class SceneLoader: MonoBehaviour
 {
+	public LoadingCover loadingCoverPrefab;
+	
 	public void Load(string sceneName)
 	{
 		StartCoroutine(StartSceneLoading(sceneName));
@@ -12,10 +14,9 @@ public class SceneLoader: MonoBehaviour
 
 	IEnumerator StartSceneLoading(string sceneName)
 	{
-		var loadingCoverObject = ResourceCache.Instantiate("LoadingCover");
-		loadingCoverObject.transform.SetParent(transform, false);
+		var loadingCover = Object.Instantiate<LoadingCover>(loadingCoverPrefab);
+		loadingCover.transform.SetParent(transform, false);
 		
-		var loadingCover = loadingCoverObject.GetComponent<LoadingCover>();
 		yield return loadingCover.Show(sceneName);
 
 		AsyncOperation asyncOpeartion = SceneManager.LoadSceneAsync(sceneName);
@@ -25,6 +26,6 @@ public class SceneLoader: MonoBehaviour
 		}
 
 		yield return loadingCover.Progress(1);
-		yield return loadingCover.Hide();
+		yield return loadingCover.HideAndKill();
 	}
 }

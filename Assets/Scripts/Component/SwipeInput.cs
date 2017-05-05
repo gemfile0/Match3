@@ -8,12 +8,13 @@ public interface ISwipeInput
     SwipeEvent OnSwipeStart { get; }
     SwipeEvent OnSwipeMove { get; }
     SwipeEvent OnSwipeEnd { get; }
-    SwipeEvent OnSwipeCancel { get; }
+    SwipeEventWithoutArgs OnSwipeCancel { get; }
 }
 
 public class SwipeEvent: UnityEvent<SwipeInfo> {}
+public class SwipeEventWithoutArgs: UnityEvent {}
 
-public class SwipeInfo 
+public struct SwipeInfo 
 {
     public Vector2 touchBegin;
     public Vector2 direction;
@@ -31,15 +32,22 @@ public class SwipeInput: MonoBehaviour, ISwipeInput
     readonly SwipeEvent onSwipeEnd = new SwipeEvent();
     public SwipeEvent OnSwipeMove { get { return onSwipeMove; } }
     readonly SwipeEvent onSwipeMove = new SwipeEvent();
-    public SwipeEvent OnSwipeCancel { get { return onSwipeCancel; } }
-    readonly SwipeEvent onSwipeCancel = new SwipeEvent();
+    public SwipeEventWithoutArgs OnSwipeCancel { get { return onSwipeCancel; } }
+    readonly SwipeEventWithoutArgs onSwipeCancel = new SwipeEventWithoutArgs();
     
+    public static Vector2[] ALL_DIRECTIONS = new Vector2[] {
+        Vector2.up, 
+        Vector2.down, 
+        Vector2.left, 
+        Vector2.right
+    };
     float timeBegin = 0;
     float timeEnd = 0;
     Vector2 touchBegin = Vector2.zero;
     Vector2 touchEnd = Vector2.zero;
     Vector2 directionFirst = Vector2.zero;
     bool isTouchDown = false;
+    float threshold = 20;
 
     void Update () 
     {
@@ -84,7 +92,7 @@ public class SwipeInput: MonoBehaviour, ISwipeInput
                 };
 
                 if (directionFirst != direction) {
-                    onSwipeCancel.Invoke(null);
+                    onSwipeCancel.Invoke();
                     Reset();
                 } else if (isTouchDown) {
                     onSwipeMove.Invoke(swipeInfo);
@@ -157,7 +165,7 @@ public class SwipeInput: MonoBehaviour, ISwipeInput
 
             if (touchPhase == TouchPhase.Canceled)
             {
-                onSwipeCancel.Invoke(null);
+                onSwipeCancel.Invoke();
                 Reset();
             }
         }

@@ -21,7 +21,7 @@ public class LoadingCover: MonoBehaviour
 		yield return new WaitForSeconds(DURATION);
 	}
 
-	public IEnumerator Hide()
+	public IEnumerator HideAndKill()
 	{
 		canvasGroup.DOFade(0, DURATION);
 		yield return new WaitForSeconds(DURATION);

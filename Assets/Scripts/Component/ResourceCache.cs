@@ -23,16 +23,23 @@ public static class ResourceCache
 		return cache[key];
 	}
 
-	static public GameObject Instantiate(string key, Transform parent = null) 
+	static public GameObject Instantiate(string key, Transform parent = null)
 	{
-		// Debug.Log("Instantiate : " + key);
 		var instance = Object.Instantiate<GameObject>(cache[key]);
 		instance.name = key;
+		if (parent) { instance.transform.SetParent(parent); }
+		return instance;
+	}
 
-		if (parent) 
-		{
-			instance.transform.SetParent(parent);
-		}
+	static public T Instantiate<T>(string key, Transform parent = null) 
+		where T: PooledObject
+	{
+		// Debug.Log("Instantiate : " + key + ", " + prefab);
+		var prefab = cache[key].GetComponent<T>();
+		T instance = prefab.GetPooledInstance<T>();
+		instance.transform.name = key;
+
+		if (parent) { instance.transform.SetParent(parent); }
 		return instance;
 	}
 }
