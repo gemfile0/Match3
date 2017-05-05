@@ -4,19 +4,6 @@ public class LobbyScene: BaseScene
 {
 	[SerializeField]
 	LevelSelectionPanel levelSelectionPanel;
-	
-#if DIABLE_LOG
-	protected override void Awake()
-	{
-		base.Awake();
-
-		if (Application.platform == RuntimePlatform.Android
-			|| Application.platform == RuntimePlatform.IPhonePlayer)
-		{
-			Debug.logger.logEnabled=false;
-		}
-	}
-#endif
 
 	void Start() 
 	{

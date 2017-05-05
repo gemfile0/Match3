@@ -8,9 +8,29 @@ public class BaseScene: MonoBehaviour
 		ResourceCache.LoadAll("Common");
 		ResourceCache.LoadAll(SceneManager.GetActiveScene().name);
 
-		if (GameObject.Find("SceneLoader") == null) {
+		if (GameObject.Find("SceneLoader") == null) 
+		{
 			ResourceCache.Instantiate("SceneLoader");
 		}
+
+#if DIABLE_LOG
+		if (Application.platform == RuntimePlatform.Android
+			|| Application.platform == RuntimePlatform.IPhonePlayer)
+		{
+			Debug.logger.logEnabled=false;
+		}
+#endif
+
+#if DIABLE_FPS_COUNTER
+#else
+		var uiView = transform.Find("UIView");
+		if (uiView != null)
+		{
+			ResourceCache.Load("FPSPanel");
+			var fpsPanel = ResourceCache.Instantiate("FPSPanel");
+			fpsPanel.transform.SetParent(uiView, false);
+		}
+#endif
 	}
 
 	public virtual void Init(object param)

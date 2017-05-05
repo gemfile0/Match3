@@ -12,6 +12,12 @@ public static class ResourceCache
 		});
 	}
 
+	static public void Load(string path)
+	{
+		var resource = Resources.Load(path, typeof(GameObject));
+		cache[resource.name] = (GameObject)resource;
+	}
+
 	static public GameObject Get(string key) 
 	{
 		return cache[key];
