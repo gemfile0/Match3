@@ -18,11 +18,6 @@ public static class ResourceCache
 		cache[resource.name] = (GameObject)resource;
 	}
 
-	static public GameObject Get(string key) 
-	{
-		return cache[key];
-	}
-
 	static public GameObject Instantiate(string key, Transform parent = null)
 	{
 		var instance = Object.Instantiate<GameObject>(cache[key]);
@@ -34,7 +29,7 @@ public static class ResourceCache
 	static public T Instantiate<T>(string key, Transform parent = null) 
 		where T: PooledObject
 	{
-		// Debug.Log("Instantiate : " + key + ", " + prefab);
+		// Debug.Log("Instantiate : " + key);
 		var prefab = cache[key].GetComponent<T>();
 		T instance = prefab.GetPooledInstance<T>();
 		instance.transform.name = key;

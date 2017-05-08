@@ -107,8 +107,6 @@ public class GOSequence: IUpdater
 
 	public void InsertCallback(float atTime, Action callback)
 	{
-		if (items == null) { return; }
-		
 		var id = GetID();
 		items.Add(id, new SequenceItem {
 			id = id,
@@ -116,7 +114,6 @@ public class GOSequence: IUpdater
 			watcher = new GOTweenCallback { 
 				callback = () => {
 					callback();
-					items.Remove(id);
 				}
 			}
 		});
@@ -124,12 +121,7 @@ public class GOSequence: IUpdater
 
 	public void Insert(float atTime, GOTween gTween)
 	{
-		if (items == null) { return; }
-		
 		var id = GetID();
-		gTween.OnComplete(() => {
-			// items.Remove(id);
-		});
 		items.Add(id, new SequenceItem {
 			id = id,
 			atTime = atTime,
@@ -151,7 +143,6 @@ public class GOSequence: IUpdater
 			hasCompleted = true;
 		}
 
-		// Ease(currentTime, Time.time, startTime, duration);
 		currentTime = Ease(currentTime) * duration;
 		foreach(var item in items.Values.ToList())
 		{

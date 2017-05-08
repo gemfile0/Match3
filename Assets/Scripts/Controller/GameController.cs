@@ -5,6 +5,7 @@ using System.Linq;
 public struct BrokenGemInfo 
 {
 	public GemModel gemModel;
+	public List<GemModel> gemModels;
 	public bool isNextMovable;
 }
 
@@ -13,6 +14,12 @@ public struct BlockedGemInfo
 	public GemModel gemModel;
 	public List<GemModel> gemModels;
 	public bool isNextMovable;
+}
+
+public struct ReplacedGemInfo 
+{
+	public GemModel blockedGemModel;
+	public List<GemModel> gemModels;
 }
 
 public struct MergedGemInfo
@@ -24,6 +31,15 @@ public struct MergedGemInfo
 public class GameController<M>: BaseController<M>
 	where M: GameModel 
 {
+	readonly int[][] SET_OF_RANDOM_DIRECTIONS;
+	readonly Random RANDOM;
+
+	public GameController()
+	{
+		SET_OF_RANDOM_DIRECTIONS = new int[][]{ new int[]{ -1, 1 }, new int[]{ 1, -1 } };
+		RANDOM = new Random();
+	}
+	
 	public void Init() 
 	{
 		PutGems();
@@ -39,7 +55,6 @@ public class GameController<M>: BaseController<M>
 			where gemModel is EmptyGemModel && gemModel.Type == GemType.EmptyGem
 			select gemModel;
 
-		var random = new System.Random();
 		foreach (var emptyGemModel in emptyGemModels) 
 		{
 			var gemsCantPutIn = new List<GemType>();
@@ -57,7 +72,7 @@ public class GameController<M>: BaseController<M>
 			}
 
 			var gemsCanPutIn = matchingTypes.Except(gemsCantPutIn).ToList();
-			emptyGemModel.Type = gemsCanPutIn[random.Next(gemsCanPutIn.Count)];
+			emptyGemModel.Type = gemsCanPutIn[RANDOM.Next(gemsCanPutIn.Count)];
 		}
 	}
 
@@ -295,10 +310,11 @@ public class GameController<M>: BaseController<M>
 
 		var mergeeType = mergee.Type;
 		var mergeeKey = mergee.specialKey;
-		merger.Type = mergee.Type = GemType.Nil;
+		var maxOfGemtype = Math.Max((int)merger.Type, (int)mergee.Type);
+		merger.Type = (maxOfGemtype >= 10) ? (GemType)maxOfGemtype : GemType.Nil;
+		mergee.Type = GemType.Nil;
 		merger.specialKey = mergee.specialKey = "";
-		return ReadMergingKey(mergerType, mergerKey) 
-			+ ReadMergingKey(mergeeType, mergeeKey);
+		return ReadMergingKey(mergerType, mergerKey) + ReadMergingKey(mergeeType, mergeeKey);
 	}
 
 	int MergeEndurance(GemModel merger, GemModel mergee)
@@ -380,7 +396,7 @@ public class GameController<M>: BaseController<M>
 		
 		var emptyGemModels = 
 			from GemModel gemModel in Model.GemModels
-			where gemModel.Type == GemType.EmptyGem && Model.currentTurn > gemModel.preservedFromFall
+			where gemModel is IMovable && gemModel.Type == GemType.EmptyGem && Model.currentTurn > gemModel.preservedFromFall
 			select gemModel;
 
 		// Only one of them will be executed between a and b.
@@ -403,13 +419,11 @@ public class GameController<M>: BaseController<M>
 		}
 
 		// B: Diagonal comparing as bottom up
-		var setOfRandomDirections = new int[][]{ new int[]{ -1, 1 }, new int[]{ 1, -1 } };
-		var random = new System.Random();
 		foreach (var blockedGemModel in blockedGemModels) 
 		{
 			var blockedGemPosition = blockedGemModel.Position;
 			var gravity = GetGravityModel(blockedGemPosition).vector;
-			var randomDirections = setOfRandomDirections[random.Next(setOfRandomDirections.Length)];
+			var randomDirections = SET_OF_RANDOM_DIRECTIONS[RANDOM.Next(SET_OF_RANDOM_DIRECTIONS.Length)];
 
 			foreach (var randomDirection in randomDirections) {
 				int directionX = 0;
@@ -455,7 +469,6 @@ public class GameController<M>: BaseController<M>
 		
 		var matchingTypes = Model.MatchingTypes;
 
-		var random = new System.Random();
 		var spawnerGemModels = 
 			from GemModel gemModel in Model.GemModels
 			where gemModel is SpawnerGemModel
@@ -468,7 +481,7 @@ public class GameController<M>: BaseController<M>
 			if (GetGemModel(spawneePosition).Type == GemType.EmptyGem) {
 				var spawneeGemModel = GemModelFactory.Get(GemType.EmptyGem, spawneePosition);
 				SetGemModel(spawneeGemModel);
-				spawneeGemModel.Type = matchingTypes[random.Next(matchingTypes.Count)];
+				spawneeGemModel.Type = matchingTypes[RANDOM.Next(matchingTypes.Count)];
 				feedingGemModels.Add(spawneeGemModel);
 			}
 		}
@@ -498,6 +511,37 @@ public class GameController<M>: BaseController<M>
         return blockedGemInfo;
     }
 
+	public ReplacedGemInfo ReplaceSameTypeAsSpecial(
+		Position sourcePosition, 
+		GemType gemType, 
+		Int64 replacerID, 
+		string[] specialKeys, 
+		int endurance
+	) {
+		var replacedGemInfo = new ReplacedGemInfo { 
+			blockedGemModel = CopyAsBlock(replacerID, GetGemModel(sourcePosition)),
+			gemModels = new List<GemModel>{}
+		};
+		
+		var sameGemModels = 
+			from GemModel gemModel in Model.GemModels
+			where IsMovableTile(gemModel.Position)
+				&& gemModel is IMovable 
+				&& gemModel.CanMatch(gemType)
+				&& Model.currentTurn >= gemModel.preservedFromBreak
+				// && Model.currentTurn >= gemModel.preservedFromMatch
+			select gemModel;
+
+		foreach (var gemModel in sameGemModels)
+		{
+			replacedGemInfo.gemModels.Add(
+				CopyAsSpecial(replacerID, gemModel, specialKeys[RANDOM.Next(specialKeys.Length)], endurance)
+			);
+		}
+		
+        return replacedGemInfo;
+    }
+
 	public BlockedGemInfo MarkSameTypeAsBlock(Position sourcePosition, GemType gemType, Int64 markerID)
     {
 		var blockedGemInfo = new BlockedGemInfo {
@@ -510,7 +554,7 @@ public class GameController<M>: BaseController<M>
 				&& gemModel is IMovable 
 				&& gemModel.CanMatch(gemType)
 				&& Model.currentTurn >= gemModel.preservedFromBreak
-				&& Model.currentTurn >= gemModel.preservedFromMatch
+				// && Model.currentTurn >= gemModel.preservedFromMatch
 			select gemModel;
 
 		foreach (var gemModel in sameGemModels)
@@ -532,7 +576,7 @@ public class GameController<M>: BaseController<M>
 			where IsMovableTile(gemModel.Position)
 				&& gemModel is IMovable 
 				&& Model.currentTurn >= gemModel.preservedFromBreak
-				&& Model.currentTurn >= gemModel.preservedFromMatch
+				// && Model.currentTurn >= gemModel.preservedFromMatch
 			select gemModel;
 
 		foreach (var gemModel in sameGemModels)
@@ -557,6 +601,21 @@ public class GameController<M>: BaseController<M>
 		return copiedGemModel;
 	}
 
+	GemModel CopyAsSpecial(Int64 replacerID, GemModel targetGemModel, string specialKey, int endurance)
+	{
+		var copiedGemModel = GemModelFactory.Get(
+			ReadGemType(targetGemModel.Type, specialKey), 
+			targetGemModel.Position
+		);
+		copiedGemModel.id = targetGemModel.id;
+		copiedGemModel.replacedBy = replacerID;
+		copiedGemModel.Type = targetGemModel.Type;
+		copiedGemModel.specialKey = specialKey;
+		copiedGemModel.endurance = endurance;
+		SetGemModel(copiedGemModel);
+		return copiedGemModel;
+	}
+
 	public BrokenGemInfo Break(Position targetPosition, Int64 markerID) 
 	{
 		BrokenGemInfo brokenGemInfo = new BrokenGemInfo();
@@ -565,7 +624,7 @@ public class GameController<M>: BaseController<M>
 		if (isNextMovable) 
 		{
 			var targetGemModel = GetGemModel(targetPosition);
-			if (targetGemModel.markedBy == markerID) {
+			if (targetGemModel.markedBy == markerID || targetGemModel.replacedBy == markerID) {
 				var newGemModel = GemModelFactory.Get(GemType.EmptyGem, targetGemModel.Position);
 				newGemModel.preservedFromFall = Model.currentTurn + 1;
 				SetGemModel(newGemModel);
@@ -575,6 +634,30 @@ public class GameController<M>: BaseController<M>
 		}
 
 		brokenGemInfo.isNextMovable = isNextMovable;
+
+		return brokenGemInfo;
+	}
+
+	public BrokenGemInfo BreakEmptyBlocks(Int64 markerID) 
+	{
+		BrokenGemInfo brokenGemInfo = new BrokenGemInfo() {
+			gemModels = new List<GemModel>()
+		};
+		
+		var emptyBlockGemModels = 
+			from GemModel gemModel in Model.GemModels
+			where gemModel is IBlockable
+				&& gemModel.markedBy == markerID
+			select gemModel;
+
+		foreach (var gemModel in emptyBlockGemModels)
+		{
+			var newGemModel = GemModelFactory.Get(GemType.EmptyGem, gemModel.Position);
+			newGemModel.preservedFromFall = Model.currentTurn;
+			SetGemModel(newGemModel);
+
+			brokenGemInfo.gemModels.Add(gemModel);
+		}
 
 		return brokenGemInfo;
 	}

@@ -130,6 +130,12 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     public override void ReturnToPool()
     {   
         markerIdText.gameObject.SetActive(false);
+        
+        MaterialPropertyBlock mpb = new MaterialPropertyBlock();
+        spriteRenderer.GetPropertyBlock(mpb);
+        mpb.SetFloat("_FlashAmount", 0.0f);
+        spriteRenderer.SetPropertyBlock(mpb);
+
         base.ReturnToPool();
     }
 }

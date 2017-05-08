@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody))]
 public class Stuff: PooledObject 
@@ -20,6 +21,12 @@ public class Stuff: PooledObject
 	{
 		Body = GetComponent<Rigidbody>();	
 		meshRenderers = GetComponentsInChildren<MeshRenderer>();
+		SceneManager.sceneLoaded += OnSceneLoaded;
+	}
+
+	void Destroy()
+	{
+		SceneManager.sceneLoaded -= OnSceneLoaded;
 	}
 
 	void OnTriggerEnter(Collider enteredCollider)
@@ -30,7 +37,7 @@ public class Stuff: PooledObject
 		}
 	}
 
-	void OnLevelWasLoaded()
+	void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 	{
 		ReturnToPool();
 	}

@@ -34,6 +34,7 @@ public class GemModel: BaseModel
         }
         get { return type; }
     }
+    [UnityEngine.SerializeField]
     GemType type;
     public string Name 
     { 
@@ -63,6 +64,7 @@ public class GemModel: BaseModel
     public Position positionBefore;
     public Int64 id;
     public Int64 markedBy;
+    public Int64 replacedBy;
     public Int64 sequence;
     public string specialKey;
     public int endurance;
