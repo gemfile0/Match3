@@ -13,9 +13,10 @@ class ShowBoundsEditor: Editor
 		Handles.color = Color.white;
 
 		Vector3 endPoint = t.edges[0];
-		t.edges.ForEach(edge => {
+		foreach (var edge in t.edges)
+		{
 			Handles.DrawLine(endPoint, edge);
 			endPoint = edge;
-		});
+		}
 	}
 }

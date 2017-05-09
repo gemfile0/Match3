@@ -14,27 +14,6 @@ public static class ExtensionMethods
 		return bounds;
 	}
 
-	public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> handler) 
-	{
-		foreach (var item in enumerable) 
-		{
-			handler(item);
-		}
-	}
-
-	public static void ForEachWithIndex<T>(this IEnumerable<T> enumerable, Action<T, int> handler) 
-	{
-        int idx = 0;
-        foreach (T item in enumerable) 
-		{
-            handler(item, idx++);
-		}
-    }
-	public static T ToEnum<T>(this string value) 
-	{
-		return (T) Enum.Parse(typeof(T), value, true);
-	}
-
 	public static GOTween GOLocalMove(this Transform transform, Vector3 endValue, float duration)
 	{
 		return GOTween.To(

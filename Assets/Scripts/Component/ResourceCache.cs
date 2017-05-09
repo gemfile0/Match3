@@ -7,9 +7,10 @@ public static class ResourceCache
 
 	static public void LoadAll(string path) 
 	{
-		Resources.LoadAll(path, typeof(GameObject)).ForEach(resource => {
+		foreach (var resource in Resources.LoadAll(path, typeof(GameObject)))
+		{
 			cache[resource.name] = (GameObject)resource;
-		});
+		}
 	}
 
 	static public void Load(string path)

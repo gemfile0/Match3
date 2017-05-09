@@ -647,6 +647,7 @@ public class GameController<M>: BaseController<M>
 		var emptyBlockGemModels = 
 			from GemModel gemModel in Model.GemModels
 			where gemModel is IBlockable
+				&& (gemModel.Type == GemType.EmptyGem || gemModel.Type == GemType.Nil)
 				&& gemModel.markedBy == markerID
 			select gemModel;
 

@@ -67,9 +67,10 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	IEnumerator StartHello() 
 	{
 		yield return new WaitForSeconds(TIME_PER_FRAME * FRAME_BY_TURN);
-		Controller.GetAll().ForEach(gemModel => {
+		foreach (var gemModel in Controller.GetAll())
+		{
 			gemViews[gemModel.id].Squash();
-		});
+		}
 	}
 
 	void MakeField() 
@@ -396,6 +397,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			case "SQH":
 			case "VSQ":
 			case "SQV":
+			EmptyBlockBreaking(1, markerID);
 			LinedBreaking(
 				sourcePosition, 
 				direction, 
@@ -414,6 +416,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 			case "CSQ":
 			case "SQC":
+			EmptyBlockBreaking(1, markerID);
 			LinedBreaking(
 				sourcePosition, 
 				direction, 
@@ -470,7 +473,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		var markedPositions = SetSameTypeAsBlock(sourcePosition, gemType, markerID);
 		var count = 1;
 		
-		foreach(var markedPosition in markedPositions)
+		foreach (var markedPosition in markedPositions)
 		{
 			AddAction(Model.currentTurn + count, (GOSequence sequence, float currentTime) => {
 				var brokenGemInfo = Controller.Break(markedPosition, markerID);
@@ -492,20 +495,20 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 		var count = replacedPositionsInfo.latestCount;
 		EmptyBlockBreaking(count, replacerID);
-		foreach(var replacedPosition in replacedPositionsInfo.positions)
-		{
-			AddAction(Model.currentTurn + count, (GOSequence sequence, float currentTime) => {
+		AddAction(Model.currentTurn + count, (GOSequence sequence, float currentTime) => {
+			foreach (var replacedPosition in replacedPositionsInfo.positions)
+			{
 				var brokenGemInfo = Controller.Break(replacedPosition, replacerID);
 				BreakGems(brokenGemInfo.gemModel, isChaining, sequence, currentTime);
-			});
-		}
+			}
+		});
 	}
 
 	void AllTypeBreaking(Position sourcePosition, Int64 markerID, bool isChaining)
 	{
 		var markedPositions = SetAllTypeAsBlock(sourcePosition, markerID);
 		var count = 1;
-		foreach(var markedPosition in markedPositions)
+		foreach (var markedPosition in markedPositions)
 		{
 			AddAction(Model.currentTurn + count, (GOSequence sequence, float currentTime) => {
 				var brokenGemInfo = Controller.Break(markedPosition, markerID);
@@ -518,13 +521,13 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	void RadialBreaking(Position sourcePosition, int repeat, Int64 markerID, bool isChaining)
 	{
 		var markedPositionsInfo = SetRadialBlock(sourcePosition, repeat, markerID);
-		foreach(var markedPosition in markedPositionsInfo.positions)
-		{
-			AddAction(Model.currentTurn + 1, (GOSequence sequence, float currentTime) => {
+		AddAction(Model.currentTurn + 1, (GOSequence sequence, float currentTime) => {
+			foreach (var markedPosition in markedPositionsInfo.positions)
+			{
 				var brokenGemInfo = Controller.Break(markedPosition, markerID);
 				BreakGems(brokenGemInfo.gemModel, isChaining, sequence, currentTime);
-			});
-		}
+			}
+		});
 	}
 
 	void LinedRadialBreaking(
@@ -539,17 +542,17 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		var rowOffset = (int)direction.y;
 
 		var count = breakingOffset;
-		while(repeat > 0)
+		while (repeat > 0)
 		{
 			var nearPosition = new Position(sourcePosition.index, colOffset, rowOffset);
 			var markedPositionsInfo = SetRadialBlock(sourcePosition, 1, markerID);
-			foreach(var markedPosition in markedPositionsInfo.positions)
-			{
-				AddAction(Model.currentTurn + count, (GOSequence sequence, float currentTime) => {
+			AddAction(Model.currentTurn + count, (GOSequence sequence, float currentTime) => {
+				foreach (var markedPosition in markedPositionsInfo.positions)
+				{
 					var brokenGemInfo = Controller.Break(markedPosition, markerID);
 					BreakGems(brokenGemInfo.gemModel, isChaining, sequence, currentTime);
-				});
-			}
+				}
+			});
 
 			if (!markedPositionsInfo.isNextMovable) { break; }
 			
@@ -683,7 +686,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		
 		var count = 3;
 		var blockedGemInfo = Controller.ReplaceSameTypeAsSpecial(sourcePosition, gemType, replacerID, specialKeys, endurance);
-		blockedGemInfo.gemModels.ForEach(gemModel => {
+		foreach (var gemModel in blockedGemInfo.gemModels)
+		{
 			var gemViewRemoving = RemoveGemView(gemModel, false);
 			var gemViewCreating = MakeGemView(gemModel);
 			gemViewCreating.SetActive(false);
@@ -696,7 +700,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			
 			replacedPositions.Add(gemModel.Position);
 			count += 3;
-		});
+		}
 
 		var replacedPositionInfo = new ReplacedPositionsInfo {
 			positions = replacedPositions,
@@ -711,7 +715,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		var markedPositions = new List<Position>();
 
 		var blockedGemInfo = Controller.MarkSameTypeAsBlock(sourcePosition, gemType, markerID);
-		blockedGemInfo.gemModels.ForEach(gemModel => {
+		foreach (var gemModel in blockedGemInfo.gemModels)
+		{
 			GemView gemView;
 			if (gemViews.TryGetValue(gemModel.id, out gemView)) {
 				gemView.UpdateModel(gemModel);
@@ -719,7 +724,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			} 
 
 			markedPositions.Add(gemModel.Position);
-		});
+		}
 
 		return markedPositions;
 	}
@@ -729,7 +734,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		var markedPositions = new List<Position>();
 		
 		var blockedGemInfo = Controller.MarkAllGemsAsBlock(sourcePosition, markerID);
-		blockedGemInfo.gemModels.ForEach(gemModel => {
+		foreach (var gemModel in blockedGemInfo.gemModels)
+		{
 			GemView gemView;
 			if (gemViews.TryGetValue(gemModel.id, out gemView)) {
 				gemView.UpdateModel(gemModel);
@@ -737,7 +743,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			} 
 
 			markedPositions.Add(gemModel.Position);
-		});
+		}
 
 		return markedPositions;
 	}
