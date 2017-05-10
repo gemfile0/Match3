@@ -40,9 +40,16 @@ public class GameController<M>: BaseController<M>
 		RANDOM = new Random();
 	}
 	
-	public void Init() 
+	public override void Setup(M model) 
 	{
+		base.Setup(model);
+
 		PutGems();
+	}
+	
+	public override void Destroy() 
+	{
+		base.Destroy();
 	}
 
 	public void PutGems() 
@@ -203,9 +210,10 @@ public class GameController<M>: BaseController<M>
 
 		foreach (var matchedLineInfo in matchedLineInfos) 
 		{
-			matchedLineInfo.matchLineModels.ForEach(matchLineModel => {
+			foreach (var matchLineModel in matchedLineInfo.matchLineModels)
+			{
 				UnityEngine.Debug.Log(matchLineModel.ToString());
-			});
+			}
 			var latestGemModel = matchedLineInfo.gemModels.OrderByDescending(gemModel => gemModel.sequence).FirstOrDefault();
 
 			foreach (var matchedGemModel in matchedLineInfo.gemModels) 
@@ -331,7 +339,7 @@ public class GameController<M>: BaseController<M>
 		return specialKey;
 	}
 
-	public string ReadSpecialKey(List<MatchLineModel> matchLineModels, PositionVector positionVector) 
+	public string ReadSpecialKey(IEnumerable<MatchLineModel> matchLineModels, PositionVector positionVector) 
 	{
 		var specialKey = "";
 
@@ -425,7 +433,8 @@ public class GameController<M>: BaseController<M>
 			var gravity = GetGravityModel(blockedGemPosition).vector;
 			var randomDirections = SET_OF_RANDOM_DIRECTIONS[RANDOM.Next(SET_OF_RANDOM_DIRECTIONS.Length)];
 
-			foreach (var randomDirection in randomDirections) {
+			foreach (var randomDirection in randomDirections) 
+			{
 				int directionX = 0;
 				int directionY = 0;
 				if (gravity[0] != 0) {

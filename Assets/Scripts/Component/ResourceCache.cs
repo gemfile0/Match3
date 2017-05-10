@@ -4,9 +4,13 @@ using System.Collections.Generic;
 public static class ResourceCache 
 {
 	static readonly Dictionary<string, GameObject> cache = new Dictionary<string, GameObject>();
+	static List<string> loadedPath = new List<string>();
 
 	static public void LoadAll(string path) 
 	{
+		if (loadedPath.Contains(path)) { return; }
+
+		loadedPath.Add(path);
 		foreach (var resource in Resources.LoadAll(path, typeof(GameObject)))
 		{
 			cache[resource.name] = (GameObject)resource;

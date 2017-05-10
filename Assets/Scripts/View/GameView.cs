@@ -61,7 +61,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	{
 		base.Start();
 		
-		Controller.Init();
+		MakePoolOfGems();
 		MakeField();
 		AlignField();
 		SubscribeInput();
@@ -86,6 +86,27 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		foreach (var gemModel in Controller.GetAll())
 		{
 			gemViews[gemModel.id].Squash();
+		}
+	}
+
+	void MakePoolOfGems()
+	{
+		var gemViews = new List<GemView>();
+		foreach (GemType gemType in Enum.GetValues(typeof(GemType)))
+		{
+			if (gemType == GemType.Nil) { continue; }
+
+			var countOfPool = 20;
+			while (countOfPool > 0)
+			{
+				gemViews.Add(ResourceCache.Instantiate<GemView>(gemType.ToString()));
+				countOfPool -= 1;
+			}
+		}
+
+		foreach (var gemView in gemViews)
+		{
+			gemView.ReturnToPool();
 		}
 	}
 
@@ -348,7 +369,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				Controller.TurnNext();
 
 				if (passedTurn >= 12) { yield return null; }
-				if (noUpdateCount >= 18 && sequence.IsComplete && countOfAction == 0) { break; }
+				if (noUpdateCount >= 24 && sequence.IsComplete && countOfAction == 0) { break; }
 			}
 
 			currentFrame += 1;

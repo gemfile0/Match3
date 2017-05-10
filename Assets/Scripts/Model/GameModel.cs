@@ -118,16 +118,13 @@ public class GameModel: BaseModel
 
     public override void Destroy()
     {
-        allwayMatchLineModels.Clear();
         allwayMatchLineModels = null;
-
-        positiveMatchLineModels.Clear();
         positiveMatchLineModels = null;
-
-        matchingTypes.Clear();
         matchingTypes = null;
-
+        levelModel = null;
         levelData = null;
-        
+        gemModels = null;
+        tileModels = null;
+        gravityModels = null;
     }
 }

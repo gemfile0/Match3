@@ -5,10 +5,11 @@ public class BaseScene: MonoBehaviour
  {
 	protected virtual void Awake()
 	{
+		Application.targetFrameRate = 60;
+
 		ResourceCache.LoadAll("Common");
 		ResourceCache.LoadAll(SceneManager.GetActiveScene().name);
-
-		if (GameObject.Find("SceneLoader") == null) 
+		if (transform.root.Find("SceneLoader") == null) 
 		{
 			ResourceCache.Instantiate("SceneLoader");
 		}
@@ -21,7 +22,7 @@ public class BaseScene: MonoBehaviour
 		}
 #endif
 
-#if DISABLE_DEBUG
+#if DISABLE_FPS
 #else
 		var uiView = transform.Find("UIView");
 		if (uiView != null)

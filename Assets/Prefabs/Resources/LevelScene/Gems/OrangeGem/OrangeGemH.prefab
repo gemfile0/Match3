@@ -51,7 +51,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
@@ -68,9 +68,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Model:
+    type: 0
+    position:
+      index: 0
+      row: 0
+      col: 0
+    positionBefore:
+      index: 0
+      row: 0
+      col: 0
     id: 0
+    markedBy: 0
+    replacedBy: 0
     sequence: 0
     specialKey: 
+    endurance: 0
+    preservedFromBreak: 0
+    preservedFromMatch: 0
+    preservedFromFall: 0
 --- !u!212 &212665537209785828
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -84,7 +99,7 @@ SpriteRenderer:
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
   m_Materials:
-  - {fileID: 2100000, guid: c145bb83adbed4f4dbc6e9482e26051e, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

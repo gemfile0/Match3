@@ -29,9 +29,9 @@ public class GORoot: MonoBehaviour
 	
 	void Update()
 	{
-		foreach(var updater in updaters.ToList())
+		for (var i = 0; i < updaters.Count; i++)
 		{
-			updater.Update();
+			updaters[i].Update();
 		}
 	}
 }
@@ -144,8 +144,9 @@ public class GOSequence: IUpdater
 		}
 
 		currentTime = Ease(currentTime) * duration;
-		foreach(var item in items.Values.ToList())
+		for(var i = 0; i < items.Count; i++)
 		{
+			var item = items[i];
 			if (currentTime >= item.atTime) {
 				item.watcher.Lerp(currentTime - item.atTime);
 			}

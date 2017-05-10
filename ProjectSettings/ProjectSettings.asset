@@ -381,7 +381,7 @@ PlayerSettings:
   webGLUseWasm: 0
   webGLCompressionFormat: 1
   scriptingDefineSymbols:
-    7: DISABLE_LOG
+    7: DISABLE_LOG;DISABLE_DEBUG
   platformArchitecture: {}
   scriptingBackend: {}
   incrementalIl2cppBuild: {}

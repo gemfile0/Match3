@@ -19,7 +19,7 @@ public class MatchedLineInfo
     {
         matchLineModels = matchLineModels
             .Union(anotherMatchedLineInfo.matchLineModels.Where(
-                anotherMatchLineModel => !matchLineModels.Exists(
+                anotherMatchLineModel => !matchLineModels.Any(
                     matchLineModel => matchLineModel.type == anotherMatchLineModel.type
                 )
             ))
@@ -32,6 +32,7 @@ public class MatchedLineInfo
     {
         return string.Format("MatchLineInfo : {0}, {1}\n", matchLineModels.Count, gemModels.Count);
     }
+
 }
 
 [System.Serializable]
