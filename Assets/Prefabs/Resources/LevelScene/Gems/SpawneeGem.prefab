@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 114296095670658166}
   - component: {fileID: 61156720945484560}
   m_Layer: 0
-  m_Name: SpawnerGem
+  m_Name: SpawneeGem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -67,7 +67,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Model:
+    type: 0
+    position:
+      index: 0
+      row: 0
+      col: 0
+    positionBefore:
+      index: 0
+      row: 0
+      col: 0
     id: 0
+    markedBy: 0
+    replacedBy: 0
     sequence: 0
     specialKey: 
     endurance: 0
+    preservedFromBreak: 0
+    preservedFromMatch: 0
+    preservedFromFall: 0

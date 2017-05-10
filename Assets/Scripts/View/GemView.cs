@@ -2,21 +2,12 @@
 using DG.Tweening;
 using UnityEngine;
 
-public interface IGemView
-{
-    int Endurance { get; }
-    Position Position { get; }
-    GemModel id { get; }
-    Int64 Deadline { get; }
-    Int64 PreservedUntil { get; }
-    GemModel UpdateModel(GemModel gemModel);
-}
-
 public class GemView: BaseView<GemModel, GemController<GemModel>>
 {
-    private SpriteRenderer spriteRenderer;
-    private TextMesh idText;
-    private TextMesh markerIdText;
+    SpriteRenderer spriteRenderer;
+    TextMesh idText;
+    TextMesh markerIdText;
+    bool showID = true;
     
     void Awake()
     {
@@ -35,25 +26,15 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         get { return Model.Position; } 
     }
 
-    public Int64 ID 
-    { 
-        get { return Model.id; }
-    }
-
     public Int64 PreservedFromMatch
     {
         get { return Model.preservedFromMatch; }
     }
 
-    bool showID = true;
-
-    public void UpdateModel(GemModel gemModel) 
+    public override void UpdateModel(GemModel gemModel) 
     {
-        Model = gemModel;
-        if (showID) 
-        {
-            idText.text = gemModel.id.ToString();
-        }
+        base.UpdateModel(gemModel);
+        if (showID) { idText.text = gemModel.id.ToString(); }
     }
     
     public void Highlight() 
@@ -120,11 +101,6 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     public void SetActive(bool visible)
     {
         gameObject.SetActive(visible);
-    }
-
-    public void SetLocalPosition(Vector2 position)
-    {
-        transform.localPosition = position;
     }
 
     public override void ReturnToPool()

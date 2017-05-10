@@ -681,7 +681,7 @@ public class GameController<M>: BaseController<M>
 	public bool IsMovableTile(Position position) 
 	{
 		return position.IsAcceptableIndex() 
-			&& Model.TileModels[position.row, position.col].type != TileType.Immovable;
+			&& Model.TileModels[position.row, position.col].Type != TileType.Immovable;
 	}
 
 	public bool IsSpecialType(GemModel gemModel)

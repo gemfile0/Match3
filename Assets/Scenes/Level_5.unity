@@ -170,13 +170,13 @@ MonoBehaviour:
     currentTurn: 0
     levelData: {fileID: 4900000, guid: 163ddc83899784c1c9926f30283229f7, type: 3}
     levelModel:
+      gems: 
       tiles: 
+      gravities: 
       moves: 0
       cols: 0
       rows: 0
       gravity: 
-      colBoundary: 
-      rowBoundary: 
 --- !u!1 &991623908
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,16 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IGameModel 
-{
-    GemModel[,] GemModels { get; set; }
-    List<GemType> MatchingTypes { get; }
-    int Rows { get; }
-    int Cols { get; }
-}
-
 [System.Serializable]
-public class GameModel: BaseModel, IGameModel 
+public class GameModel: BaseModel 
 {
     public GemModel[,] GemModels 
     { 
@@ -19,9 +11,6 @@ public class GameModel: BaseModel, IGameModel
             UnityEngine.Assertions.Assert.IsNotNull(gemModels);
             return gemModels; 
         } 
-        set {
-            gemModels = value;
-        }
     }
     GemModel[,] gemModels;
 
@@ -31,9 +20,6 @@ public class GameModel: BaseModel, IGameModel
             UnityEngine.Assertions.Assert.IsNotNull(tileModels);
             return tileModels; 
         } 
-        set {
-            tileModels = value;
-        }
     }
     TileModel[,] tileModels;
     public GravityModel[,] GravityModels 
@@ -42,9 +28,6 @@ public class GameModel: BaseModel, IGameModel
             UnityEngine.Assertions.Assert.IsNotNull(gravityModels);
             return gravityModels; 
         } 
-        set {
-            gravityModels = value;
-        }
     }
     GravityModel[,] gravityModels;
     public List<MatchLineModel> allwayMatchLineModels;
@@ -118,14 +101,15 @@ public class GameModel: BaseModel, IGameModel
 
                 var colByCount = count % Cols;
                 var rowByCount = count / Cols;
+                var position = new Position(colByCount, rowByCount);
                 gemModels[rowByCount, colByCount] = GemModelFactory.Get(
-                    (GemType)gems[gemIndex], new Position(colByCount, rowByCount)
+                    (GemType)gems[gemIndex], position
                 );
                 tileModels[rowByCount, colByCount] = TileModelFactory.Get(
-                    (TileType)tiles[gemIndex]
+                    (TileType)tiles[gemIndex], position
                 );
                 gravityModels[rowByCount, colByCount] = GravityModelFactory.Get(
-                    (GravityType)gravities[gemIndex]
+                    (GravityType)gravities[gemIndex], position
                 );
                 count++;
             }

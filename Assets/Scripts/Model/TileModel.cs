@@ -2,44 +2,25 @@
 public enum TileType 
 {
     Immovable = 0, Movable = 1, 
-    UP, DOWN, LEFT, RIGHT
 }
 
 [System.Serializable]
-public class TileModel 
+public class TileModel: BaseModel 
 {
-    public TileType type;
-    public int[] gravity;
-    public TileModel(TileType type) 
+    public TileType Type { get; private set; }
+    public Position Position { get; private set; }
+    public TileModel(TileType type, Position position) 
     {
-        this.type = type;
-
-        switch (type)
-        {
-            case TileType.UP:
-            gravity = new int[]{ 0, 1 };
-            break;
-
-            case TileType.DOWN:
-            gravity = new int[]{ 0, -1 };
-            break;
-            
-            case TileType.LEFT:
-            gravity = new int[]{ -1, 0 };
-            break;
-            
-            case TileType.RIGHT:
-            gravity = new int[]{ 1, 0 };
-            break;
-        }
+        Type = type;
+        Position = position;
     }
 }
 
 static class TileModelFactory 
 {
-    public static TileModel Get(TileType tileType) 
+    public static TileModel Get(TileType tileType, Position position) 
     {
-        var tileModel = new TileModel(tileType);
+        var tileModel = new TileModel(tileType, position);
         return tileModel;
     }
 }

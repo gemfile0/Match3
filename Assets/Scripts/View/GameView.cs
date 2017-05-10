@@ -41,6 +41,22 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	GOSequence sequence;
 
+	GameObject tiles;
+	GameObject gems;
+	GameObject gravities;
+
+	public void Awake()
+	{
+		gravities = new GameObject("Gravities");
+		gravities.transform.SetParent(transform);
+
+		tiles = new GameObject("Tiles");
+		tiles.transform.SetParent(transform);
+
+		gems = new GameObject("Gems");
+		gems.transform.SetParent(transform);
+	}
+
 	public override void Start()
 	{
 		base.Start();
@@ -80,21 +96,52 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		gemSize = sampleBounds.size;
 		Destroy(sampleGem);
 
-		var gemModels = Model.GemModels;
-		foreach (var gemModel in gemModels) 
+		foreach (var gemModel in Model.GemModels) 
 		{
-			if (gemModel.Type == GemType.EmptyGem) { continue; }
-			var gemView = MakeGemView(gemModel);
+			if (gemModel.Type == GemType.EmptyGem || gemModel.Type == GemType.BlockedGem) { continue; }
+			MakeGemView(gemModel);
+		}
+
+		foreach (var tileModel in Model.TileModels)
+		{
+			if (tileModel.Type == TileType.Immovable) { continue; }
+			MakeTileView(tileModel);
+		}
+
+		foreach (var gravityModel in Model.GravityModels)
+		{
+			if (gravityModel.Type == GravityType.Nil) { continue; }
+			MakeGravityView(gravityModel);
 		}
 	}
 
 	GemView MakeGemView(GemModel gemModel) 
 	{
-		var gemView = ResourceCache.Instantiate<GemView>(gemModel.Name, transform);
+		var gemView = ResourceCache.Instantiate<GemView>(gemModel.Name, gems.transform);
 		gemView.UpdateModel(gemModel);
-		gemView.SetLocalPosition(new Vector2(gemModel.Position.col * gemSize.x, gemModel.Position.row * gemSize.y));
+		gemView.transform.localPosition
+			= new Vector2(gemModel.Position.col * gemSize.x, gemModel.Position.row * gemSize.y);
 		gemViews.Add(gemModel.id, gemView);
 		return gemView;
+	}
+
+	TileView MakeTileView(TileModel tileModel)
+	{
+		var tileView = ResourceCache.Instantiate<TileView>("Tile", tiles.transform);
+		tileView.UpdateModel(tileModel);
+		tileView.transform.localPosition 
+			= new Vector2(tileModel.Position.col * gemSize.x, tileModel.Position.row * gemSize.y);
+		return tileView;
+	}
+
+	GravityView MakeGravityView(GravityModel gravityModel)
+	{
+		Debug.Log(gravityModel.Type);
+		var gravityView = ResourceCache.Instantiate<GravityView>(gravityModel.Name, gravities.transform);
+		gravityView.UpdateModel(gravityModel);
+		gravityView.transform.localPosition 
+			= new Vector2(gravityModel.Position.col * gemSize.x, gravityModel.Position.row * gemSize.y);
+		return gravityView;
 	}
 
 	GemView RemoveGemView(GemModel gemModel, bool needToChaining) 

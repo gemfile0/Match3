@@ -19,4 +19,9 @@ public class BaseView<M, C>: PooledObject
 		Controller.Destroy();
 		Controller = null;
 	}
+
+	public virtual void UpdateModel(M model) 
+    {
+        Model = model;
+    }
 }
