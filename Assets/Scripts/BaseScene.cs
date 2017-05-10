@@ -13,7 +13,7 @@ public class BaseScene: MonoBehaviour
 			ResourceCache.Instantiate("SceneLoader");
 		}
 
-#if DIABLE_LOG
+#if DISABLE_LOG
 		if (Application.platform == RuntimePlatform.Android
 			|| Application.platform == RuntimePlatform.IPhonePlayer)
 		{
@@ -21,7 +21,7 @@ public class BaseScene: MonoBehaviour
 		}
 #endif
 
-#if DIABLE_FPS_COUNTER
+#if DISABLE_DEBUG
 #else
 		var uiView = transform.Find("UIView");
 		if (uiView != null)

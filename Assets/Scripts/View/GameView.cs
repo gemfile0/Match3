@@ -136,7 +136,6 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	GravityView MakeGravityView(GravityModel gravityModel)
 	{
-		Debug.Log(gravityModel.Type);
 		var gravityView = ResourceCache.Instantiate<GravityView>(gravityModel.Name, gravities.transform);
 		gravityView.UpdateModel(gravityModel);
 		gravityView.transform.localPosition 
@@ -296,8 +295,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		{
 			Swap(sourcePosition, nearPosition);
 			UpdateChanges(0, (Int64 passedTurn) => {
-				Swap(nearPosition, sourcePosition);
-				UpdateChanges(FRAME_BY_TURN * TIME_PER_FRAME * passedTurn);
+				Swap(nearPosition, sourcePosition, 1);
 			});
 		}
 	}
@@ -335,7 +333,6 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 				if (passedTurn == 6 && updateResult.matchResult.Count == 0 && OnNoAnyMatches != null) {
 					OnNoAnyMatches(Model.currentTurn - startTurn);
-					break;
 				}
 
 				if (updateResult.HasAnyResult) {
@@ -795,9 +792,9 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		return markedPositions;
 	}
 
-	void Swap(Position sourcePosition, Position nearPosition) 
+	void Swap(Position sourcePosition, Position nearPosition, int turnOffset = 0) 
 	{
-		AddAction(Model.currentTurn, (sequence, currentTime) => {
+		AddAction(Model.currentTurn + turnOffset, (sequence, currentTime) => {
 			SwapGems(Controller.Swap(sourcePosition, nearPosition), sequence, currentTime);
 		});
 	}

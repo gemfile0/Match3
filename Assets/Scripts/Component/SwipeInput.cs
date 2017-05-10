@@ -47,7 +47,7 @@ public class SwipeInput: MonoBehaviour, ISwipeInput
     Vector2 touchEnd = Vector2.zero;
     Vector2 directionFirst = Vector2.zero;
     bool isTouchDown = false;
-    float threshold = 20;
+    const float THRESHOLD = 40;
 
     void Update () 
     {
@@ -94,6 +94,9 @@ public class SwipeInput: MonoBehaviour, ISwipeInput
                 if (directionFirst != direction) {
                     onSwipeCancel.Invoke();
                     Reset();
+                } else if (Math.Max(Math.Abs(touchDelta.x), Math.Abs(touchDelta.y)) > THRESHOLD) {
+                    onSwipeEnd.Invoke(swipeInfo);
+                    Reset();
                 } else if (isTouchDown) {
                     onSwipeMove.Invoke(swipeInfo);
                 } else {
@@ -112,25 +115,13 @@ public class SwipeInput: MonoBehaviour, ISwipeInput
 
         if (absoluteX > absoluteY)
         {
-            if (touchDelta.x > 0)
-            {
-                direction = Vector2.right;
-            } 
-            else 
-            {
-                direction = Vector2.left;
-            }
+            if (touchDelta.x > 0) { direction = Vector2.right; } 
+            else { direction = Vector2.left; }
         } 
         else if (absoluteX < absoluteY)
         {
-            if (touchDelta.y > 0) 
-            {
-                direction = Vector2.up;
-            } 
-            else 
-            {
-                direction = Vector2.down;
-            }
+            if (touchDelta.y > 0) { direction = Vector2.up; } 
+            else { direction = Vector2.down; }
         }
 
         return direction;
@@ -203,22 +194,10 @@ public class SwipeInput: MonoBehaviour, ISwipeInput
     void KeyboardUpdate() 
     {
         Vector2 direction = Vector2.zero;
-        if (Input.GetKeyDown(KeyCode.LeftArrow)) 
-        {
-            direction = Vector2.left;
-        } 
-        else if (Input.GetKeyDown(KeyCode.RightArrow)) 
-        {
-            direction = Vector2.right;
-        } 
-        else if (Input.GetKeyDown(KeyCode.UpArrow)) 
-        {
-            direction = Vector2.up;
-        } 
-        else if (Input.GetKeyDown(KeyCode.DownArrow)) 
-        {
-            direction = Vector2.down;
-        }
+        if (Input.GetKeyDown(KeyCode.LeftArrow)) { direction = Vector2.left; } 
+        else if (Input.GetKeyDown(KeyCode.RightArrow)) { direction = Vector2.right; } 
+        else if (Input.GetKeyDown(KeyCode.UpArrow)) { direction = Vector2.up; } 
+        else if (Input.GetKeyDown(KeyCode.DownArrow)) { direction = Vector2.down; }
 
         if (direction != Vector2.zero) 
         {

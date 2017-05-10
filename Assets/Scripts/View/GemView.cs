@@ -7,13 +7,25 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     SpriteRenderer spriteRenderer;
     TextMesh idText;
     TextMesh markerIdText;
-    bool showID = true;
+    bool isDebugging = true;
+    MaterialPropertyBlock mpb;
+    Sequence squash;
     
     void Awake()
     {
         idText = ResourceCache.Instantiate("ID", transform).GetComponent<TextMesh>();
         markerIdText = ResourceCache.Instantiate("MarkerID", transform).GetComponent<TextMesh>();
         markerIdText.gameObject.SetActive(false);
+        mpb = new MaterialPropertyBlock();
+        squash = DOTween.Sequence();
+        squash.Append(transform.DOScale(new Vector3(1.08f, 0.92f, 1), 0.12f));
+        squash.Append(transform.DOScale(new Vector3(1, 1, 1), 0.68f).SetEase(Ease.OutElastic));
+        squash.Pause();
+        squash.SetAutoKill(false);
+
+#if DISABLE_DEBUG
+        isDebugging = false;
+#endif
     }
     
     void OnEnable() 
@@ -34,16 +46,17 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     public override void UpdateModel(GemModel gemModel) 
     {
         base.UpdateModel(gemModel);
-        if (showID) { idText.text = gemModel.id.ToString(); }
+
+        if (!isDebugging) { return; }
+        idText.text = gemModel.id.ToString();
     }
+    
     
     public void Highlight() 
     {
-        var duration = 0.395f;
-
-        MaterialPropertyBlock mpb = new MaterialPropertyBlock();
         spriteRenderer.GetPropertyBlock(mpb);
 
+        if (!isDebugging) { return; }
         DOTween.To(
             () => mpb.GetFloat("_FlashAmount"),
             value => {
@@ -51,17 +64,15 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
                 spriteRenderer.SetPropertyBlock(mpb);
             }, 
             .2f, 
-            duration
+            .395f
         ).SetLoops(2, LoopType.Yoyo).SetEase(Ease.InOutSine);
     }
 
     public void Squash() 
     {
-        var sequence = DOTween.Sequence();
-        sequence.Append(transform.DOScale(new Vector3(1.08f, 0.92f, 1), 0.12f));
-        sequence.Append(transform.DOScale(new Vector3(1, 1, 1), 0.68f).SetEase(Ease.OutElastic));
+        squash.Restart();
 
-        MaterialPropertyBlock mpb = new MaterialPropertyBlock();
+        if (!isDebugging) { return; }
         spriteRenderer.GetPropertyBlock(mpb);
         mpb.SetFloat("_FlashAmount", 0.0f);
         spriteRenderer.SetPropertyBlock(mpb);
@@ -71,13 +82,13 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     {
         gameObject.SetActive(true);
 
-        MaterialPropertyBlock mpb = new MaterialPropertyBlock();
+        var color = spriteRenderer.color;
+        spriteRenderer.color = new Color(color.r, color.g, color.b, 1f);
+
+        if (!isDebugging) { return; }
         spriteRenderer.GetPropertyBlock(mpb);
         mpb.SetFloat("_FlashAmount", 0.4f);
         spriteRenderer.SetPropertyBlock(mpb);
-
-        var color = spriteRenderer.color;
-        spriteRenderer.color = new Color(color.r, color.g, color.b, 1f);
     }
 
     public void Hide()
@@ -88,7 +99,8 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
 
     public void SetBlock(Int64 markerID) 
     {
-        MaterialPropertyBlock mpb = new MaterialPropertyBlock();
+        if (!isDebugging) { return; }
+
         spriteRenderer.GetPropertyBlock(mpb);
         mpb.SetFloat("_FlashAmount", 0.4f);
         mpb.SetColor("_FlashColor", new Color32(255, 0, 0, 1));
@@ -106,12 +118,12 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     public override void ReturnToPool()
     {   
         markerIdText.gameObject.SetActive(false);
+        base.ReturnToPool();
         
-        MaterialPropertyBlock mpb = new MaterialPropertyBlock();
+        if (!isDebugging) { return; }
+
         spriteRenderer.GetPropertyBlock(mpb);
         mpb.SetFloat("_FlashAmount", 0.0f);
         spriteRenderer.SetPropertyBlock(mpb);
-
-        base.ReturnToPool();
     }
 }
