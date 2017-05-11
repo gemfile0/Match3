@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-struct UpdateResult
+class UpdateResult
 {
 	public List<MatchedLineInfo> matchResult;
 	public List<GemModel> feedResult;
@@ -36,6 +36,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	Vector3 gemSize;
 	SwipeInput swipeInput;
 	GemView gemSelected;
+	UpdateResult updateResult;
 	Dictionary<Int64, GemView> gemViews = new Dictionary<Int64, GemView>();
 	Dictionary<Int64, Queue<Action<GOSequence, float>>> actionQueueByTurn = new Dictionary<Int64, Queue<Action<GOSequence, float>>>();
 
@@ -55,6 +56,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 		gems = new GameObject(Literals.Gems);
 		gems.transform.SetParent(transform);
+
+		updateResult = new UpdateResult();
 	}
 
 	public override void Start()
@@ -347,12 +350,10 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 					actionQueueByTurn.Remove(Model.currentTurn);
 				}
 				
-				var updateResult = new UpdateResult {
-					matchResult = Controller.Match(),
-					feedResult = Controller.Feed(),
-					fallResult = Controller.Fall(),
-				};
-
+				updateResult.matchResult = Controller.Match();
+				updateResult.feedResult = Controller.Feed();
+				updateResult.fallResult = Controller.Fall();
+				
 				if (passedTurn == 6 && updateResult.matchResult.Count == 0 && OnNoAnyMatches != null) {
 					OnNoAnyMatches(Model.currentTurn - startTurn);
 				}

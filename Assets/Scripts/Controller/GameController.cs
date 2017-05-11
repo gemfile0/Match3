@@ -8,6 +8,13 @@ public class BrokenGemInfo
 	public GemModel gemModel;
 	public List<GemModel> gemModels;
 	public bool isNextMovable;
+
+	public void Clear()
+	{
+		gemModel = null;
+		gemModels.Clear();
+		isNextMovable = false;
+	}
 }
 
 public class BlockedGemInfo 
@@ -15,18 +22,37 @@ public class BlockedGemInfo
 	public GemModel gemModel;
 	public List<GemModel> gemModels;
 	public bool isNextMovable;
+
+	public void Clear()
+	{
+		gemModel = null;
+		gemModels.Clear();
+		isNextMovable = false;
+	}
 }
 
 public class ReplacedGemInfo 
 {
 	public GemModel blockedGemModel;
 	public List<GemModel> gemModels;
+
+	public void Clear()
+	{
+		blockedGemModel = null;
+		gemModels.Clear();
+	}
 }
 
 public class MergedGemInfo
 {
 	public GemModel mergee;
 	public GemModel merger;
+
+	public void Clear()
+	{
+		mergee = null;
+		merger = null;
+	}
 }
 
 public class GameController<M>: BaseController<M>
@@ -38,9 +64,12 @@ public class GameController<M>: BaseController<M>
 	List<GemModel> feedingGemModels;
 	List<GemModel> fallingGemModels;
 	Stack<GemModel> blockedGemModels;
+	List<GemModel> swappingGemModels;
 	BrokenGemInfo brokenGemInfo;
 	BlockedGemInfo blockedGemInfo;
 	List<GemModel> matchedGemModels;
+	ReplacedGemInfo replacedGemInfo;
+	MergedGemInfo mergedGemInfo;
 	
 	public GameController()
 	{
@@ -50,13 +79,18 @@ public class GameController<M>: BaseController<M>
 		feedingGemModels = new List<GemModel>();
 		fallingGemModels = new List<GemModel>();
 		blockedGemModels = new Stack<GemModel>();
+		matchedGemModels = new List<GemModel>();
+		swappingGemModels = new List<GemModel>();
 		brokenGemInfo = new BrokenGemInfo() {
 			gemModels = new List<GemModel>()
 		};
 		blockedGemInfo = new BlockedGemInfo {
 			gemModels = new List<GemModel>()
 		};
-		matchedGemModels = new List<GemModel>();
+		replacedGemInfo = new ReplacedGemInfo { 
+			gemModels = new List<GemModel>()
+		};
+		mergedGemInfo = new MergedGemInfo();
 	}
 	
 	public override void Setup(M model) 
@@ -75,6 +109,10 @@ public class GameController<M>: BaseController<M>
 		fallingGemModels = null;
 		blockedGemModels = null;
 		matchedGemModels = null;
+		swappingGemModels = null;
+		brokenGemInfo = null;
+		blockedGemInfo = null;
+		replacedGemInfo = null;
 	}
 
 	public void PutGems() 
@@ -149,7 +187,7 @@ public class GameController<M>: BaseController<M>
 
 	public List<GemModel> Swap(Position sourcePosition, Position nearPosition) 
 	{
-		var swappingGemModels = new List<GemModel>();
+		swappingGemModels.Clear();
 
 		if (nearPosition.IsAcceptableIndex()) 
 		{
@@ -172,7 +210,7 @@ public class GameController<M>: BaseController<M>
 
 	public MergedGemInfo Merge(Position sourcePosition, Position nearPosition)
 	{
-		var mergedGemInfo = new MergedGemInfo();
+		mergedGemInfo.Clear();
 
 		if (nearPosition.IsAcceptableIndex()) 
 		{
@@ -235,10 +273,10 @@ public class GameController<M>: BaseController<M>
 
 		foreach (var matchedLineInfo in matchedLineInfos) 
 		{
-			foreach (var matchLineModel in matchedLineInfo.matchLineModels)
-			{
+			// foreach (var matchLineModel in matchedLineInfo.matchLineModels)
+			// {
 				// UnityEngine.Debug.Log(matchLineModel.ToString());
-			}
+			// }
 			var latestGemModel = matchedLineInfo.gemModels.OrderByDescending(gemModel => gemModel.sequence).FirstOrDefault();
 
 			foreach (var matchedGemModel in matchedLineInfo.gemModels) 
@@ -529,9 +567,7 @@ public class GameController<M>: BaseController<M>
 
 	public BlockedGemInfo MarkAsBlock(Position sourcePosition, Position nearPosition, Int64 markerID)
     {
-		blockedGemInfo.gemModel = null;
-		blockedGemInfo.gemModels.Clear();
-		blockedGemInfo.isNextMovable = false;
+		blockedGemInfo.Clear();
 		
 		if (!sourcePosition.IsAcceptableIndex()) { return blockedGemInfo; }
 
@@ -558,10 +594,8 @@ public class GameController<M>: BaseController<M>
 		string[] specialKeys, 
 		int endurance
 	) {
-		var replacedGemInfo = new ReplacedGemInfo { 
-			blockedGemModel = CopyAsBlock(replacerID, GetGemModel(sourcePosition)),
-			gemModels = new List<GemModel>{}
-		};
+		replacedGemInfo.Clear();
+		replacedGemInfo.blockedGemModel = CopyAsBlock(replacerID, GetGemModel(sourcePosition));
 		
 		var sameGemModels = 
 			from GemModel gemModel in Model.GemModels
@@ -584,10 +618,7 @@ public class GameController<M>: BaseController<M>
 
 	public BlockedGemInfo MarkSameTypeAsBlock(Position sourcePosition, GemType gemType, Int64 markerID)
     {
-		blockedGemInfo.gemModel = null;
-		blockedGemInfo.gemModels.Clear();
-		blockedGemInfo.isNextMovable = false;
-
+		blockedGemInfo.Clear();
 		blockedGemInfo.gemModels.Add(CopyAsBlock(markerID, GetGemModel(sourcePosition)));
 		
 		var sameGemModels = 
@@ -609,9 +640,7 @@ public class GameController<M>: BaseController<M>
 
 	public BlockedGemInfo MarkAllGemsAsBlock(Position sourcePosition, Int64 markerID)
 	{
-		blockedGemInfo.gemModel = null;
-		blockedGemInfo.gemModels.Clear();
-		blockedGemInfo.isNextMovable = false;
+		blockedGemInfo.Clear();
 		
 		var sameGemModels = 
 			from GemModel gemModel in Model.GemModels
@@ -660,9 +689,7 @@ public class GameController<M>: BaseController<M>
 
 	public BrokenGemInfo Break(Position targetPosition, Int64 markerID) 
 	{
-		brokenGemInfo.gemModel = null;
-		brokenGemInfo.gemModels.Clear();
-		brokenGemInfo.isNextMovable = false;
+		brokenGemInfo.Clear();
 
 		var isNextMovable = IsMovableTile(targetPosition);
 		if (isNextMovable) 
@@ -684,9 +711,7 @@ public class GameController<M>: BaseController<M>
 
 	public BrokenGemInfo BreakEmptyBlocks(Int64 markerID) 
 	{
-		brokenGemInfo.gemModel = null;
-		brokenGemInfo.gemModels.Clear();
-		brokenGemInfo.isNextMovable = false;
+		brokenGemInfo.Clear();
 		
 		var emptyBlockGemModels = 
 			from GemModel gemModel in Model.GemModels
