@@ -722,6 +722,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 545a4a548d10b4968aa112b890118996, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  targetFrameRate: 60
   levelSelectionPanel: {fileID: 380617715}
 --- !u!4 &1966424890
 Transform:
