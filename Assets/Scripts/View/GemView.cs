@@ -13,8 +13,8 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     
     void Awake()
     {
-        idText = ResourceCache.Instantiate("ID", transform).GetComponent<TextMesh>();
-        markerIdText = ResourceCache.Instantiate("MarkerID", transform).GetComponent<TextMesh>();
+        idText = ResourceCache.Instantiate(Literals.ID, transform).GetComponent<TextMesh>();
+        markerIdText = ResourceCache.Instantiate(Literals.MarkerID, transform).GetComponent<TextMesh>();
         markerIdText.gameObject.SetActive(false);
         mpb = new MaterialPropertyBlock();
         spriteRenderer = GetComponent<SpriteRenderer>();

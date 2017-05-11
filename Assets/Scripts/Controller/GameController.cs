@@ -1,28 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
-public struct BrokenGemInfo 
+public class BrokenGemInfo 
 {
 	public GemModel gemModel;
 	public List<GemModel> gemModels;
 	public bool isNextMovable;
 }
 
-public struct BlockedGemInfo 
+public class BlockedGemInfo 
 {
 	public GemModel gemModel;
 	public List<GemModel> gemModels;
 	public bool isNextMovable;
 }
 
-public struct ReplacedGemInfo 
+public class ReplacedGemInfo 
 {
 	public GemModel blockedGemModel;
 	public List<GemModel> gemModels;
 }
 
-public struct MergedGemInfo
+public class MergedGemInfo
 {
 	public GemModel mergee;
 	public GemModel merger;
@@ -33,11 +34,29 @@ public class GameController<M>: BaseController<M>
 {
 	readonly int[][] SET_OF_RANDOM_DIRECTIONS;
 	readonly Random RANDOM;
-
+	List<MatchedLineInfo> matchedLineInfos;
+	List<GemModel> feedingGemModels;
+	List<GemModel> fallingGemModels;
+	Stack<GemModel> blockedGemModels;
+	BrokenGemInfo brokenGemInfo;
+	BlockedGemInfo blockedGemInfo;
+	List<GemModel> matchedGemModels;
+	
 	public GameController()
 	{
 		SET_OF_RANDOM_DIRECTIONS = new int[][]{ new int[]{ -1, 1 }, new int[]{ 1, -1 } };
 		RANDOM = new Random();
+		matchedLineInfos = new List<MatchedLineInfo>();
+		feedingGemModels = new List<GemModel>();
+		fallingGemModels = new List<GemModel>();
+		blockedGemModels = new Stack<GemModel>();
+		brokenGemInfo = new BrokenGemInfo() {
+			gemModels = new List<GemModel>()
+		};
+		blockedGemInfo = new BlockedGemInfo {
+			gemModels = new List<GemModel>()
+		};
+		matchedGemModels = new List<GemModel>();
 	}
 	
 	public override void Setup(M model) 
@@ -50,6 +69,12 @@ public class GameController<M>: BaseController<M>
 	public override void Destroy() 
 	{
 		base.Destroy();
+
+		matchedLineInfos = null;
+		feedingGemModels = null;
+		fallingGemModels = null;
+		blockedGemModels = null;
+		matchedGemModels = null;
 	}
 
 	public void PutGems() 
@@ -169,7 +194,7 @@ public class GameController<M>: BaseController<M>
 
 	public List<MatchedLineInfo> Match() 
 	{
-		var matchedLineInfos = new List<MatchedLineInfo>();
+		matchedLineInfos.Clear();
 		
 		var matchLineModels = Model.positiveMatchLineModels;
 		var matchableGemModels = 
@@ -190,7 +215,7 @@ public class GameController<M>: BaseController<M>
 				if (matchedGemModels.Count == 0) { continue; }
 
 				var newMatchLineInfo = new MatchedLineInfo() {
-					gemModels = matchedGemModels, 
+					gemModels = matchedGemModels.ToList(), 
 					matchLineModels = new List<MatchLineModel>(){ matchLineModel }
 				};
 
@@ -212,7 +237,7 @@ public class GameController<M>: BaseController<M>
 		{
 			foreach (var matchLineModel in matchedLineInfo.matchLineModels)
 			{
-				UnityEngine.Debug.Log(matchLineModel.ToString());
+				// UnityEngine.Debug.Log(matchLineModel.ToString());
 			}
 			var latestGemModel = matchedLineInfo.gemModels.OrderByDescending(gemModel => gemModel.sequence).FirstOrDefault();
 
@@ -231,7 +256,7 @@ public class GameController<M>: BaseController<M>
 				SetGemModel(newGemModel);
 
 				if (newGemType != GemType.EmptyGem) {
-					UnityEngine.Debug.Log("newGemModel : " + newGemModel.ToString());
+					// UnityEngine.Debug.Log("newGemModel : " + newGemModel.ToString());
 					matchedLineInfo.newAdded = newGemModel;
 					newGemModel.preservedFromBreak = Model.currentTurn + 1;
 				}
@@ -244,7 +269,7 @@ public class GameController<M>: BaseController<M>
 
 	public List<GemModel> GetAnyMatches(GemModel sourceGemModel, MatchLineModel matchLineModel) 
 	{
-		var matchedGemModels = new List<GemModel>();
+		matchedGemModels.Clear();
 		foreach (var whereCanMatch in matchLineModel.wheresCanMatch) 
 		{
 			foreach (var matchOffset in whereCanMatch.matchOffsets) {
@@ -283,23 +308,23 @@ public class GameController<M>: BaseController<M>
 		int specialGemType = 0;
 		switch (specialKey) 
 		{
-			case "SP": 
+			case Literals.SP: 
 				gemType = GemType.SuperGem; 
 				break;
 
-			case "SQ":
+			case Literals.SQ:
 				gemType = GemType.ChocoGem; 
 				break;
 
-			case "C":
+			case Literals.C:
 				specialGemType = 1;
 				break;
 
-			case "H":
+			case Literals.H:
 				specialGemType = 2;
 				break;
 
-			case "V":
+			case Literals.V:
 				specialGemType = 3;
 				break;
 		}
@@ -321,27 +346,31 @@ public class GameController<M>: BaseController<M>
 		var maxOfGemtype = Math.Max((int)merger.Type, (int)mergee.Type);
 		merger.Type = (maxOfGemtype >= 10) ? (GemType)maxOfGemtype : GemType.Nil;
 		mergee.Type = GemType.Nil;
-		merger.specialKey = mergee.specialKey = "";
-		return ReadMergingKey(mergerType, mergerKey) + ReadMergingKey(mergeeType, mergeeKey);
+		merger.specialKey = mergee.specialKey = Literals.Nil;
+
+		var sb = new StringBuilder();
+		sb.Append(ReadMergingKey(mergerType, mergerKey));
+		sb.Append(ReadMergingKey(mergeeType, mergeeKey));
+		return sb.ToString();
 	}
 
 	int MergeEndurance(GemModel merger, GemModel mergee)
 	{
-		if (merger.specialKey == "CC") { return 2; }
-		if (merger.specialKey == "HSQ" || merger.specialKey == "SQH") { return 5; }
+		if (merger.specialKey == Literals.CC) { return 2; }
+		if (merger.specialKey == Literals.HSQ || merger.specialKey == Literals.SQH) { return 5; }
 		return Math.Max(merger.endurance, mergee.endurance);
 	}
 
 	string ReadMergingKey(GemType gemType, string specialKey)
 	{
-		if (gemType == GemType.SuperGem) { return "SP"; }
-		else if (gemType == GemType.ChocoGem) { return "SQ"; }
+		if (gemType == GemType.SuperGem) { return Literals.SP; }
+		else if (gemType == GemType.ChocoGem) { return Literals.SQ; }
 		return specialKey;
 	}
 
 	public string ReadSpecialKey(IEnumerable<MatchLineModel> matchLineModels, PositionVector positionVector) 
 	{
-		var specialKey = "";
+		var specialKey = Literals.Nil;
 
 		var hasVerticalMatch = false;
 		var hasHorizontalMatch = false;
@@ -357,19 +386,19 @@ public class GameController<M>: BaseController<M>
 
 		if (maxMagnitude == 5)
 		{
-			specialKey = "SP";
+			specialKey = Literals.SP;
 		}
 		else if (hasVerticalMatch && hasHorizontalMatch) 
 		{
-			specialKey = "C";
+			specialKey = Literals.C;
 		}
 		else if (maxMagnitude == 4)
 		{
-			specialKey = positionVector.colOffset != 0 ? "H": "V";
+			specialKey = positionVector.colOffset != 0 ? Literals.H: Literals.V;
 		}
 		else if (hasSquareMatch)
 		{
-			specialKey = "SQ";
+			specialKey = Literals.SQ;
 		}
 
 		return specialKey;
@@ -399,8 +428,8 @@ public class GameController<M>: BaseController<M>
 
 	public List<GemInfo> Fall() 
 	{
-		var fallingGemModels = new List<GemModel>();
-		var blockedGemModels = new Stack<GemModel>();
+		fallingGemModels.Clear();
+		blockedGemModels.Clear();
 		
 		var emptyGemModels = 
 			from GemModel gemModel in Model.GemModels
@@ -474,7 +503,7 @@ public class GameController<M>: BaseController<M>
 
 	public List<GemModel> Feed()
 	{
-		var feedingGemModels = new List<GemModel>();
+		feedingGemModels.Clear();
 		
 		var matchingTypes = Model.MatchingTypes;
 
@@ -500,7 +529,9 @@ public class GameController<M>: BaseController<M>
 
 	public BlockedGemInfo MarkAsBlock(Position sourcePosition, Position nearPosition, Int64 markerID)
     {
-		var blockedGemInfo = new BlockedGemInfo();
+		blockedGemInfo.gemModel = null;
+		blockedGemInfo.gemModels.Clear();
+		blockedGemInfo.isNextMovable = false;
 		
 		if (!sourcePosition.IsAcceptableIndex()) { return blockedGemInfo; }
 
@@ -553,9 +584,11 @@ public class GameController<M>: BaseController<M>
 
 	public BlockedGemInfo MarkSameTypeAsBlock(Position sourcePosition, GemType gemType, Int64 markerID)
     {
-		var blockedGemInfo = new BlockedGemInfo {
-			gemModels = new List<GemModel>{ CopyAsBlock(markerID, GetGemModel(sourcePosition)) }
-		};
+		blockedGemInfo.gemModel = null;
+		blockedGemInfo.gemModels.Clear();
+		blockedGemInfo.isNextMovable = false;
+
+		blockedGemInfo.gemModels.Add(CopyAsBlock(markerID, GetGemModel(sourcePosition)));
 		
 		var sameGemModels = 
 			from GemModel gemModel in Model.GemModels
@@ -576,9 +609,9 @@ public class GameController<M>: BaseController<M>
 
 	public BlockedGemInfo MarkAllGemsAsBlock(Position sourcePosition, Int64 markerID)
 	{
-		var blockedGemInfo = new BlockedGemInfo {
-			gemModels = new List<GemModel>()
-		};
+		blockedGemInfo.gemModel = null;
+		blockedGemInfo.gemModels.Clear();
+		blockedGemInfo.isNextMovable = false;
 		
 		var sameGemModels = 
 			from GemModel gemModel in Model.GemModels
@@ -627,7 +660,9 @@ public class GameController<M>: BaseController<M>
 
 	public BrokenGemInfo Break(Position targetPosition, Int64 markerID) 
 	{
-		BrokenGemInfo brokenGemInfo = new BrokenGemInfo();
+		brokenGemInfo.gemModel = null;
+		brokenGemInfo.gemModels.Clear();
+		brokenGemInfo.isNextMovable = false;
 
 		var isNextMovable = IsMovableTile(targetPosition);
 		if (isNextMovable) 
@@ -649,9 +684,9 @@ public class GameController<M>: BaseController<M>
 
 	public BrokenGemInfo BreakEmptyBlocks(Int64 markerID) 
 	{
-		BrokenGemInfo brokenGemInfo = new BrokenGemInfo() {
-			gemModels = new List<GemModel>()
-		};
+		brokenGemInfo.gemModel = null;
+		brokenGemInfo.gemModels.Clear();
+		brokenGemInfo.isNextMovable = false;
 		
 		var emptyBlockGemModels = 
 			from GemModel gemModel in Model.GemModels
@@ -705,9 +740,9 @@ public class GameController<M>: BaseController<M>
 		return (
 			gemType == GemType.SuperGem 
 			|| gemType == GemType.ChocoGem 
-			|| specialKey == "H"
-			|| specialKey == "V"
-			|| specialKey == "C"
+			|| specialKey == Literals.H
+			|| specialKey == Literals.V
+			|| specialKey == Literals.C
 		);
 	}
 }

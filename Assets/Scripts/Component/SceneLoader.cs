@@ -25,6 +25,8 @@ public class SceneLoader: MonoBehaviour
 			yield return loadingCover.Progress(asyncOpeartion.progress);
 		}
 
+		System.GC.Collect();
+
 		yield return loadingCover.Progress(1);
 		yield return loadingCover.HideAndKill();
 	}

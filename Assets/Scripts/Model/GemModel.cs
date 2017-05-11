@@ -1,13 +1,5 @@
 ﻿using System;
-
-public interface IGemModel 
-{
-    GemType Type { get; set; }
-    Position Position { get; set; }
-    string Name { get; }
-    bool IsFalling { set; }
-    PositionVector PositionVector { get; }
-}
+using System.Text;
 
 [System.Serializable]
 public enum GemType 
@@ -38,7 +30,12 @@ public class GemModel: BaseModel
     GemType type;
     public string Name 
     { 
-        get { return name + specialKey; }
+        get { 
+            var sb = new StringBuilder();
+            sb.Append(name);
+            sb.Append(specialKey);
+            return sb.ToString(); 
+        }
     }
     string name;
     public Position Position 
@@ -61,16 +58,16 @@ public class GemModel: BaseModel
             };
         }
     }
-    public Position positionBefore;
-    public Int64 id;
-    public Int64 markedBy;
-    public Int64 replacedBy;
-    public Int64 sequence;
-    public string specialKey;
-    public int endurance;
-    public /* gameModel.turn */Int64 preservedFromBreak;
-    public /* gameModel.turn */Int64 preservedFromMatch;
-    public /* gameModel.turn */Int64 preservedFromFall;
+    [System.NonSerializedAttribute] public Position positionBefore;
+    [System.NonSerializedAttribute] public Int64 id;
+    [System.NonSerializedAttribute] public Int64 markedBy;
+    [System.NonSerializedAttribute] public Int64 replacedBy;
+    [System.NonSerializedAttribute] public Int64 sequence;
+    [System.NonSerializedAttribute] public string specialKey;
+    [System.NonSerializedAttribute] public int endurance;
+    [System.NonSerializedAttribute] public /* gameModel.turn */Int64 preservedFromBreak;
+    [System.NonSerializedAttribute] public /* gameModel.turn */Int64 preservedFromMatch;
+    [System.NonSerializedAttribute] public /* gameModel.turn */Int64 preservedFromFall;
 
     public GemModel(GemType type, Position position) 
     {
@@ -101,13 +98,13 @@ static class GemModelFactory
     public static GemModel Get(GemType gemType, Position position) 
     {
         string className = gemType.ToString();
-        var specialKey = "";
+        var specialKey = Literals.Nil;
 
         int rawGemType = (int)gemType;
         if (rawGemType >= 10)
         {
             var baseGemType = (GemType)(rawGemType - (rawGemType % 10));
-            specialKey = gemType.ToString().Replace(baseGemType.ToString(), "");
+            specialKey = gemType.ToString().Replace(baseGemType.ToString(), Literals.Nil);
             gemType = baseGemType;
         }
 
@@ -129,8 +126,12 @@ static class GemModelFactory
             break;
         }
         
+        var sb = new StringBuilder();
+        sb.Append(className);
+        sb.Append(Literals.Model);
+
         var gemModel = (GemModel)Activator.CreateInstance(
-            Type.GetType(className + "Model"),
+            Type.GetType(sb.ToString()),
             gemType,
             position
         );
@@ -152,12 +153,12 @@ static class GemModelFactory
         
         switch(gemModel.specialKey) 
         {
-            case "H":
-            case "V":
+            case Literals.H:
+            case Literals.V:
             endurance = int.MaxValue;
             break;
 
-            case "C":
+            case Literals.C:
             endurance = 1;
             break;
         }

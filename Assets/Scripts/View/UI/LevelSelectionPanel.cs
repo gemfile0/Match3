@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Text;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class LevelSelectionPanel: MonoBehaviour 
@@ -13,25 +14,34 @@ public class LevelSelectionPanel: MonoBehaviour
 		for (var i = 0; i < levelTextures.Length; i++)
 		{
 			var levelIndex = i + 1;
-			var levelItem = ResourceCache.Instantiate("LevelItem", scrollRectSnap.transform).GetComponent<RectTransform>();
-			levelItem.name = "LevelItem" + levelIndex;
+			var levelItem = ResourceCache.Instantiate(Literals.LevelItem, scrollRectSnap.transform).GetComponent<RectTransform>();
+
+			var sb = new StringBuilder();
+			sb.AppendFormat(Literals.LevelItem0, levelIndex);
+			levelItem.name = sb.ToString();
 			levelItem.anchoredPosition = new Vector2(GAP_OF_ITEM * i, levelItem.anchoredPosition.y);
 			levelItem.GetComponent<Image>().sprite = levelTextures[i];
-			levelItem.GetComponent<LevelItem>().title.text = "LEVEL " + levelIndex;
+
+			sb = new StringBuilder();
+			sb.AppendFormat(Literals.Level0, levelIndex);
+			levelItem.GetComponent<LevelItem>().title.text = sb.ToString();
 
 			levelItems[i] = levelItem;
 		}
 
 		int latestLevelIndex = -1;
-		if (PlayerPrefs.HasKey("LatestLevel")) {
-			latestLevelIndex = PlayerPrefs.GetInt("LatestLevel");
+		if (PlayerPrefs.HasKey(Literals.LatestLevel)) {
+			latestLevelIndex = PlayerPrefs.GetInt(Literals.LatestLevel);
 		}
 		scrollRectSnap.Setup(levelItems, latestLevelIndex);
 	}
 	
 	public LevelItem GetLevelItem(int levelIndex)
 	{
-		var levelItem = scrollRectSnap.transform.Find("LevelItem" + levelIndex);
+		var sb = new StringBuilder();
+		sb.AppendFormat(Literals.LevelItem0, levelIndex);
+		var levelItem = scrollRectSnap.transform.Find(sb.ToString());
+		
 		return levelItem != null ? levelItem.GetComponent<LevelItem>() : null;
 	}
 }

@@ -3,15 +3,17 @@ using UnityEngine.SceneManagement;
 
 public class BaseScene: MonoBehaviour
  {
+	public int targetFrameRate = 60;
+
 	protected virtual void Awake()
 	{
-		Application.targetFrameRate = 60;
+		Application.targetFrameRate = targetFrameRate;
 
-		ResourceCache.LoadAll("Common");
+		ResourceCache.LoadAll(Literals.Common);
 		ResourceCache.LoadAll(SceneManager.GetActiveScene().name);
-		if (transform.root.Find("SceneLoader") == null) 
+		if (transform.root.Find(Literals.SceneLoader) == null) 
 		{
-			ResourceCache.Instantiate("SceneLoader");
+			ResourceCache.Instantiate(Literals.SceneLoader);
 		}
 
 #if DISABLE_LOG
@@ -24,11 +26,11 @@ public class BaseScene: MonoBehaviour
 
 #if DISABLE_FPS
 #else
-		var uiView = transform.Find("UIView");
+		var uiView = transform.Find(Literals.UIView);
 		if (uiView != null)
 		{
-			ResourceCache.Load("FPSPanel");
-			var fpsPanel = ResourceCache.Instantiate("FPSPanel");
+			ResourceCache.Load(Literals.FPSPanel);
+			var fpsPanel = ResourceCache.Instantiate(Literals.FPSPanel);
 			fpsPanel.transform.SetParent(uiView, false);
 		}
 #endif

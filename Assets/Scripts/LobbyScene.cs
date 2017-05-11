@@ -13,7 +13,7 @@ public class LobbyScene: BaseScene
 	void LetLevelItemToLoad()
 	{
 		var levelIndex = 1;
-		var sceneLoader = GameObject.Find("SceneLoader").GetComponent<SceneLoader>();
+		var sceneLoader = GameObject.Find(Literals.SceneLoader).GetComponent<SceneLoader>();
 		levelSelectionPanel.Setup();
 		while (true)
 		{
@@ -22,8 +22,8 @@ public class LobbyScene: BaseScene
 			if (levelItem == null) { break; }
 
 			levelItem.callback = () => {
-				PlayerPrefs.SetInt("LatestLevel", currentLevel);
-				sceneLoader.Load("LevelScene");
+				PlayerPrefs.SetInt(Literals.LatestLevel, currentLevel);
+				sceneLoader.Load(Literals.LevelScene);
 			};
 
 			levelIndex++;

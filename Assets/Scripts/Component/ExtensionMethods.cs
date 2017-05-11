@@ -13,14 +13,4 @@ public static class ExtensionMethods
 		}
 		return bounds;
 	}
-
-	public static GOTween GOLocalMove(this Transform transform, Vector3 endValue, float duration)
-	{
-		return GOTween.To(
-			() => transform.localPosition, 
-			value => transform.localPosition = value, 
-			endValue,
-			duration
-		);
-	}
 }   

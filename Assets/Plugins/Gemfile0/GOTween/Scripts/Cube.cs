@@ -25,7 +25,7 @@ public class Cube: MonoBehaviour
 			var randomX = random.Next(-5, 5);
 			var randomY = random.Next(-5, 5);
 
-			Debug.Log(count + ": " + randomX + ", " + randomY);
+			// Debug.Log(count + ": " + randomX + ", " + randomY);
 			
 			sequence.Insert(count, transform.GOLocalMove(
 				new Vector3(randomX, randomY, 0),

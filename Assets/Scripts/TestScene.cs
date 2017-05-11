@@ -3,5 +3,7 @@
 	protected override void Awake()
 	{
 		ResourceCache.LoadAll("");
+
+		base.Awake();
 	}
 }

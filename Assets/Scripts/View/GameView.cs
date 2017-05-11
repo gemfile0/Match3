@@ -47,13 +47,13 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	public void Awake()
 	{
-		gravities = new GameObject("Gravities");
+		gravities = new GameObject(Literals.Gravities);
 		gravities.transform.SetParent(transform);
 
-		tiles = new GameObject("Tiles");
+		tiles = new GameObject(Literals.Tiles);
 		tiles.transform.SetParent(transform);
 
-		gems = new GameObject("Gems");
+		gems = new GameObject(Literals.Gems);
 		gems.transform.SetParent(transform);
 	}
 
@@ -112,7 +112,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	void MakeField() 
 	{
-		var sampleGem = ResourceCache.Instantiate("RedGem");
+		var sampleGem = ResourceCache.Instantiate(Literals.RedGem);
 		sampleBounds = sampleGem.GetBounds();
 		gemSize = sampleBounds.size;
 		Destroy(sampleGem);
@@ -148,7 +148,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	TileView MakeTileView(TileModel tileModel)
 	{
-		var tileView = ResourceCache.Instantiate<TileView>("Tile", tiles.transform);
+		var tileView = ResourceCache.Instantiate<TileView>(Literals.Tile, tiles.transform);
 		tileView.UpdateModel(tileModel);
 		tileView.transform.localPosition 
 			= new Vector2(tileModel.Position.col * gemSize.x, tileModel.Position.row * gemSize.y);
@@ -173,7 +173,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		}
 		else
 		{
-			Debug.Log("Can't remove the gem! " + gemModel.ToString());
+			// Debug.Log("Can't remove the gem! " + gemModel.ToString());
 		}
 
 		if (needToChaining)
@@ -253,8 +253,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	{
 		foreach (var gemModel in feedingGemModels)
 		{
-			var gemView = MakeGemView(gemModel);
-			gemView.Hide();
+			MakeGemView(gemModel).Hide();
 		}
 	}
 
@@ -293,6 +292,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	{
 		var sourcePosition = sourceGemModel.Position;
 		var nearPosition = new Position(sourcePosition.index, (int)direction.x, (int)direction.y);
+		if (!Controller.IsMovableTile(nearPosition)) { return; }
+
 		var nearGemModel = Controller.GetGemModel(nearPosition);
 		if ((Controller.IsSpecialType(sourceGemModel) && Controller.IsSpecialType(nearGemModel))
 			|| sourceGemModel.Type == GemType.SuperGem || nearGemModel.Type == GemType.SuperGem
@@ -368,8 +369,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 				Controller.TurnNext();
 
-				if (passedTurn >= 12) { yield return null; }
-				if (noUpdateCount >= 24 && sequence.IsComplete && countOfAction == 0) { break; }
+				if (passedTurn > 20) { yield return null; }
+				if (noUpdateCount > 20 && sequence.IsComplete && countOfAction == 0) { break; }
 			}
 
 			currentFrame += 1;
@@ -391,7 +392,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		Int64 markerID, 
 		Vector2 direction
 	) {
-		Debug.Log("ActByChaining : " + gemType + ", " + specialKey + ", " + repeat + ", " + direction);
+		// Debug.Log("ActByChaining : " + gemType + ", " + specialKey + ", " + repeat + ", " + direction);
 		switch (gemType)
 		{
 			case GemType.SuperGem:
@@ -405,63 +406,63 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		
 		switch (specialKey)
 		{
-			case "SP":
+			case Literals.SP:
 			EmptyBlockBreaking(1, markerID);
 			SameTypeBreaking(sourcePosition, gemType, markerID, isChaining: true);
 			break;
 
-			case "H":
+			case Literals.H:
 			LinedBreaking(sourcePosition, new Vector2{ x = -1, y = 0 }, repeat, markerID, isChaining: true);
 			LinedBreaking(sourcePosition, new Vector2{ x = 1, y = 0 }, repeat, markerID, isChaining: true);
 			break;
 
-			case "V":
+			case Literals.V:
 			LinedBreaking(sourcePosition, new Vector2{ x = 0, y = -1 }, repeat, markerID, isChaining: true);
 			LinedBreaking(sourcePosition, new Vector2{ x = 0, y = 1 }, repeat, markerID, isChaining: true);
 			break;
 
-			case "C":
+			case Literals.C:
 			RadialBreaking(sourcePosition, repeat, markerID, isChaining: true);
 			break;
 
-			case "HH":
-			case "VV":
-			case "HV":
-			case "VH":
+			case Literals.HH:
+			case Literals.VV:
+			case Literals.HV:
+			case Literals.VH:
 			LinedBreaking(sourcePosition, new Vector2{ x = -1, y = 0 }, repeat, markerID, isChaining: true);
 			LinedBreaking(sourcePosition, new Vector2{ x = 1, y = 0 }, repeat, markerID, isChaining: true);
 			LinedBreaking(sourcePosition, new Vector2{ x = 0, y = -1 }, repeat, markerID, isChaining: true);
 			LinedBreaking(sourcePosition, new Vector2{ x = 0, y = 1 }, repeat, markerID, isChaining: true);
 			break;
 
-			case "CC":
+			case Literals.CC:
 			RadialBreaking(sourcePosition, repeat, markerID, isChaining: true);
 			break;
 
-			case "SQSQ":
+			case Literals.SQSQ:
 			LinedRadialBreaking(sourcePosition, direction, repeat, markerID, isChaining: true, breakingOffset: 5);
 			break;
 
-			case "SPSP":
+			case Literals.SPSP:
 			AllTypeBreaking(sourcePosition, markerID, isChaining: true);
 			break;
 
-			case "CH":
-			case "HC":
+			case Literals.CH:
+			case Literals.HC:
 			LinedRadialBreaking(sourcePosition, new Vector2{ x = -1, y = 0 }, repeat, markerID, isChaining: true);
 			LinedRadialBreaking(sourcePosition, new Vector2{ x = 1, y = 0 }, repeat, markerID, isChaining: true);
 			break;
 
-			case "CV":
-			case "VC":
+			case Literals.CV:
+			case Literals.VC:
 			LinedRadialBreaking(sourcePosition, new Vector2{ x = 0, y = -1 }, repeat, markerID, isChaining: true);
 			LinedRadialBreaking(sourcePosition, new Vector2{ x = 0, y = 1 }, repeat, markerID, isChaining: true);
 			break;
 
-			case "HSQ":
-			case "SQH":
-			case "VSQ":
-			case "SQV":
+			case Literals.HSQ:
+			case Literals.SQH:
+			case Literals.VSQ:
+			case Literals.SQV:
 			EmptyBlockBreaking(1, markerID);
 			LinedBreaking(
 				sourcePosition, 
@@ -479,8 +480,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			);
 			break;
 
-			case "CSQ":
-			case "SQC":
+			case Literals.CSQ:
+			case Literals.SQC:
 			EmptyBlockBreaking(1, markerID);
 			LinedBreaking(
 				sourcePosition, 
@@ -495,20 +496,24 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			);
 			break;
 
-			case "HSP":
-			case "SPH":
-			case "VSP":
-			case "SPV":
-			SameTypeReplacing(sourcePosition, gemType, markerID, new string[]{ "H", "V" }, repeat, isChaining: true);
+			case Literals.HSP:
+			case Literals.SPH:
+			case Literals.VSP:
+			case Literals.SPV:
+			SameTypeReplacing(
+				sourcePosition, gemType, markerID, new string[]{ Literals.H, Literals.V }, repeat, isChaining: true
+			);
 			break;
 
-			case "CSP":
-			case "SPC":
-			SameTypeReplacing(sourcePosition, gemType, markerID, new string[]{ "C" }, repeat, isChaining: true);
+			case Literals.CSP:
+			case Literals.SPC:
+			SameTypeReplacing(
+				sourcePosition, gemType, markerID, new string[]{ Literals.C }, repeat, isChaining: true
+			);
 			break;
 
-			case "SPSQ":
-			case "SQSP":
+			case Literals.SPSQ:
+			case Literals.SQSP:
 			break;
 		}
 	}

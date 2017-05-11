@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Text;
+using UnityEngine;
 
 public class LevelScene: BaseScene 
 {
@@ -9,14 +10,17 @@ public class LevelScene: BaseScene
 	{
 		base.Awake();
 
-		var levelIndex = PlayerPrefs.GetInt("LatestLevel");
-		TextAsset levelData = Resources.Load("level_" + levelIndex) as TextAsset;
+		var levelIndex = PlayerPrefs.GetInt(Literals.LatestLevel);
+		StringBuilder sb = new StringBuilder();
+		sb.AppendFormat(Literals.level_0, levelIndex);
+
+		TextAsset levelData = Resources.Load(sb.ToString()) as TextAsset;
 		gameView.PassTheLevelData(levelData);
 	}
 
 	public void LoadLobbyScene()
 	{
-		var sceneLoader = GameObject.Find("SceneLoader").GetComponent<SceneLoader>();
-		sceneLoader.Load("LobbyScene");
+		var sceneLoader = GameObject.Find(Literals.SceneLoader).GetComponent<SceneLoader>();
+		sceneLoader.Load(Literals.LobbyScene);
 	}
 }
