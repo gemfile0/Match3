@@ -30,7 +30,7 @@ public class ObjectPool: MonoBehaviour
 	public void AddObject(PooledObject pooledObject)
 	{
 		pooledObject.gameObject.SetActive(false);
-		pooledObject.transform.SetParent(transform, false);
+		pooledObject.transform.SetParent(transform, true);
 		availableObjects.Add(pooledObject);
 	}
 

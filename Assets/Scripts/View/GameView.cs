@@ -109,7 +109,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 		foreach (var gemView in gemViews)
 		{
-			gemView.ReturnToPool();
+			gemView.ReturnToPool(false);
 		}
 	}
 
@@ -328,7 +328,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	IEnumerator StartUpdateChanges(float timeOffset, Action<Int64> OnNoAnyMatches)
 	{
-		sequence = GOTween.Sequence().SetEase(GOEase.EaseIn);
+		sequence = GOTween.Sequence();
 
 		var currentFrame = 0;
 		var startTurn = Model.currentTurn;
@@ -358,7 +358,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				if (passedTurn == 6 && updateResult.matchResult.Count == 0 && OnNoAnyMatches != null) {
 					OnNoAnyMatches(Model.currentTurn - startTurn);
 				}
-
+				
 				if (updateResult.HasAnyResult) {
 					noUpdateCount = 0;
 
