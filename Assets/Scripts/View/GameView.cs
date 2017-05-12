@@ -18,7 +18,8 @@ class UpdateResult
 struct MarkedPositionsInfo
 {
 	public List<Position> positions;
-	public bool isNextImmovable;
+	public bool isNextMovable;
+	public bool isNextBreakable;
 }
 
 struct ReplacedPositionsInfo
@@ -30,7 +31,7 @@ struct ReplacedPositionsInfo
 public class GameView: BaseView<GameModel, GameController<GameModel>>  
 {
 	const Int64 FRAME_BY_TURN = 3;
-	const float TIME_PER_FRAME = 0.016f;
+	const float TIME_PER_FRAME = 0.012f;
 
 	Bounds sampleBounds;
 	Vector3 gemSize;
@@ -358,9 +359,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				if (passedTurn == 6) {
 					if (updateResult.matchResult.Count == 0 && OnNoAnyMatches != null) {
 						OnNoAnyMatches(Model.currentTurn - startTurn);
-					} else {
-						sequence.InsertCallback(currentTime, () => sequence.SetEase(GOEase.EaseIn));
-					}
+					} 
 				}
 				
 				if (updateResult.HasAnyResult) {
@@ -448,7 +447,9 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			break;
 
 			case Literals.SQSQ:
-			LinedRadialBreaking(sourcePosition, direction, repeat, markerID, isChaining: true, breakingOffset: 5);
+			LinedRadialBreaking(
+				sourcePosition, direction, repeat, markerID, isChaining: true, breakingOffset: 5, comparingToMoveon: CompareIsMovable
+			);
 			break;
 
 			case Literals.SPSP:
@@ -457,14 +458,22 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 			case Literals.CH:
 			case Literals.HC:
-			LinedRadialBreaking(sourcePosition, new Vector2{ x = -1, y = 0 }, repeat, markerID, isChaining: true);
-			LinedRadialBreaking(sourcePosition, new Vector2{ x = 1, y = 0 }, repeat, markerID, isChaining: true);
+			LinedRadialBreaking(
+				sourcePosition, new Vector2{ x = -1, y = 0 }, repeat, markerID, isChaining: true, comparingToMoveon: CompareIsBreakable
+			);
+			LinedRadialBreaking(
+				sourcePosition, new Vector2{ x = 1, y = 0 }, repeat, markerID, isChaining: true, comparingToMoveon: CompareIsBreakable
+			);
 			break;
 
 			case Literals.CV:
 			case Literals.VC:
-			LinedRadialBreaking(sourcePosition, new Vector2{ x = 0, y = -1 }, repeat, markerID, isChaining: true);
-			LinedRadialBreaking(sourcePosition, new Vector2{ x = 0, y = 1 }, repeat, markerID, isChaining: true);
+			LinedRadialBreaking(
+				sourcePosition, new Vector2{ x = 0, y = -1 }, repeat, markerID, isChaining: true, comparingToMoveon: CompareIsBreakable
+			);
+			LinedRadialBreaking(
+				sourcePosition, new Vector2{ x = 0, y = 1 }, repeat, markerID, isChaining: true, comparingToMoveon: CompareIsBreakable
+			);
 			break;
 
 			case Literals.HSQ:
@@ -532,6 +541,9 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 			case Literals.SPSQ:
 			case Literals.SQSP:
+			SameTypeReplacing(
+				sourcePosition, GetRandomType(), markerID, new string[]{ Literals.SQ }, repeat, isChaining: true
+			);
 			break;
 		}
 	}
@@ -541,9 +553,19 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		return blockedGemInfo.isNextBreakable;
 	} 
 
+	bool CompareIsBreakable(MarkedPositionsInfo markedPositionsInfo)
+	{
+		return markedPositionsInfo.isNextBreakable;
+	} 
+
 	bool CompareIsMovable(BlockedGemInfo blockedGemInfo)
 	{
 		return blockedGemInfo.isNextMovable;
+	} 
+
+	bool CompareIsMovable(MarkedPositionsInfo markedPositionsInfo)
+	{
+		return markedPositionsInfo.isNextMovable;
 	} 
 
 	Vector2 GetRandomDirection()
@@ -634,7 +656,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		int repeat, 
 		Int64 markerID, 
 		bool isChaining, 
-		int breakingOffset = 1
+		int breakingOffset = 1,
+		Func<MarkedPositionsInfo, bool> comparingToMoveon = null
 	) {	
 		var colOffset = (int)direction.x;
 		var rowOffset = (int)direction.y;
@@ -644,7 +667,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		{
 			var nearPosition = new Position(sourcePosition.index, colOffset, rowOffset);
 			Debug.Log("LinedRadialBreaking : " + sourcePosition + ": "+ nearPosition);
-			var markedPositionsInfo = SetRadialBlock(sourcePosition, 1, markerID);
+			var markedPositionsInfo = SetRadialBlock(sourcePosition, 1, markerID, colOffset, rowOffset);
 			AddAction(Model.currentTurn + count, (GOSequence sequence, float currentTime) => {
 				foreach (var markedPosition in markedPositionsInfo.positions)
 				{
@@ -653,7 +676,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				}
 			});
 
-			if (markedPositionsInfo.isNextImmovable) { break; }
+			if (!comparingToMoveon(markedPositionsInfo)) { break; }
 			
 			sourcePosition = nearPosition;
 			count += breakingOffset;
@@ -674,7 +697,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		var colOffset = (int)direction.x;
 		var rowOffset = (int)direction.y;
 
-		var markedPositions = SetLinedBlock(sourcePosition, colOffset, rowOffset, repeat, markerID, comparingToMoveon);
+		var markedPositions = SetLinedBlock(sourcePosition, repeat, markerID, colOffset, rowOffset, comparingToMoveon);
 		var count = breakingOffset;
 		for (var i = 0; i < markedPositions.Count; i++)
 		{
@@ -707,10 +730,10 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	List<Position> SetLinedBlock(
 		Position sourcePosition, 
-		int colOffset, 
-		int rowOffset, 
 		int repeat, 
 		Int64 markerID,
+		int colOffset, 
+		int rowOffset, 
 		Func<BlockedGemInfo, bool> comparingToMoveon = null
 	)  {
 		var markedPositions = new List<Position>();
@@ -742,10 +765,9 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		return markedPositions;
 	}
 
-	MarkedPositionsInfo SetRadialBlock(Position sourcePosition, int repeat, Int64 markerID)
+	MarkedPositionsInfo SetRadialBlock(Position sourcePosition, int repeat, Int64 markerID, int colOffset = 0, int rowOffset = 0)
 	{
 		var markedPositions = new List<Position>();
-		var isNextImmovable = false;
 		while (repeat > 0)
 		{
 			for (var row = -repeat; row <= repeat; row++) 
@@ -756,7 +778,6 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 					var nextPosition = new Position(sourcePosition.index, col, row);
 					var blockedGemInfo = Controller.MarkAsBlock(nextPosition, nextPosition, markerID);
-					if (!isNextImmovable && !blockedGemInfo.isNextBreakable) { isNextImmovable = true; }
 					
 					var gemModel = blockedGemInfo.gemModel;
 					if (gemModel == null) { continue; }
@@ -773,9 +794,11 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			repeat--;
 		}
 
+		var nearPosition = new Position(sourcePosition.index, colOffset, rowOffset);
 		var markedPositionInfo = new MarkedPositionsInfo {
 			positions = markedPositions,
-			isNextImmovable = isNextImmovable
+			isNextMovable = Controller.IsMovableTile(nearPosition),
+			isNextBreakable = Controller.IsBreakableTile(nearPosition)
 		};
 
 		return markedPositionInfo;
@@ -879,7 +902,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			sequence.Insert(currentTime, gemView.transform.GOLocalMove(
 				nextPosition, 
 				gapOfTurn * (TIME_PER_FRAME * FRAME_BY_TURN)
-			).SetEase(GOEase.EaseOut));
+			));
 		}
 	}
 
