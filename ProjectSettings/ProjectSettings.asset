@@ -464,6 +464,7 @@ PlayerSettings:
   XboxOnePersistentLocalStorageSize: 0
   vrEditorSettings: {}
   cloudServicesEnabled:
+    Build: 0
     UNet: 1
   cloudProjectId: 8b29c6fc-ae5c-4b89-b11c-1ddfd9c55068
   projectName: Match3

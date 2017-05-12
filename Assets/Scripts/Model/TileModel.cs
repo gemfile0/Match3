@@ -1,7 +1,7 @@
 [System.Serializable]
 public enum TileType 
 {
-    Immovable = 0, Movable = 1, 
+    Immovable = 0, Movable = 1, Breakable = 2
 }
 
 [System.Serializable]

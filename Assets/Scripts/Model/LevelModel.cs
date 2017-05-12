@@ -7,5 +7,4 @@ public class LevelModel
     public int moves;
     public int cols;
     public int rows;
-    public int[] gravity;
 }
