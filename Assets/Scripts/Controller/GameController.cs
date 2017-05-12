@@ -684,8 +684,6 @@ public class GameController<M>: BaseController<M>
 		);
 		copiedGemModel.id = targetGemModel.id;
 		copiedGemModel.replacedBy = replacerID;
-		copiedGemModel.Type = targetGemModel.Type;
-		copiedGemModel.specialKey = specialKey;
 		copiedGemModel.endurance = endurance;
 		SetGemModel(copiedGemModel);
 		return copiedGemModel;
