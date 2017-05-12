@@ -109,7 +109,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 		foreach (var gemView in gemViews)
 		{
-			gemView.ReturnToPool();
+			gemView.ReturnToPool(false);
 		}
 	}
 
@@ -128,8 +128,9 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 		foreach (var tileModel in Model.TileModels)
 		{
-			if (tileModel.Type == TileType.Immovable) { continue; }
-			MakeTileView(tileModel);
+			if (tileModel.Type == TileType.Movable) {
+				MakeTileView(tileModel);
+			}
 		}
 
 		foreach (var gravityModel in Model.GravityModels)
@@ -268,7 +269,6 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.zero);
 			if (hit && hit.collider != null) {
 				gemSelected = hit.collider.gameObject.GetComponent<GemView>();
-				gemSelected.Highlight();
 				gemSelected.Squash();
 			}
 		});
@@ -328,7 +328,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	IEnumerator StartUpdateChanges(float timeOffset, Action<Int64> OnNoAnyMatches)
 	{
-		sequence = GOTween.Sequence().SetEase(GOEase.EaseIn);
+		sequence = GOTween.Sequence();
 
 		var currentFrame = 0;
 		var startTurn = Model.currentTurn;
@@ -355,10 +355,14 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				updateResult.feedResult = Controller.Feed();
 				updateResult.fallResult = Controller.Fall();
 				
-				if (passedTurn == 6 && updateResult.matchResult.Count == 0 && OnNoAnyMatches != null) {
-					OnNoAnyMatches(Model.currentTurn - startTurn);
+				if (passedTurn == 6) {
+					if (updateResult.matchResult.Count == 0 && OnNoAnyMatches != null) {
+						OnNoAnyMatches(Model.currentTurn - startTurn);
+					} else {
+						sequence.InsertCallback(currentTime, () => sequence.SetEase(GOEase.EaseIn));
+					}
 				}
-
+				
 				if (updateResult.HasAnyResult) {
 					noUpdateCount = 0;
 
