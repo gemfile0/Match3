@@ -73,19 +73,6 @@ MonoBehaviour:
       index: 0
       row: 0
       col: 0
-    positionBefore:
-      index: 0
-      row: 0
-      col: 0
-    id: 0
-    markedBy: 0
-    replacedBy: 0
-    sequence: 0
-    specialKey: 
-    endurance: 0
-    preservedFromBreak: 0
-    preservedFromMatch: 0
-    preservedFromFall: 0
 --- !u!212 &212588203141336598
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -99,7 +86,7 @@ SpriteRenderer:
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: c145bb83adbed4f4dbc6e9482e26051e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

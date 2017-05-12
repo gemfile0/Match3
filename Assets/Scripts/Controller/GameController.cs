@@ -7,13 +7,11 @@ public class BrokenGemInfo
 {
 	public GemModel gemModel;
 	public List<GemModel> gemModels;
-	public bool isNextMovable;
 
 	public void Clear()
 	{
 		gemModel = null;
 		gemModels.Clear();
-		isNextMovable = false;
 	}
 }
 
@@ -21,12 +19,14 @@ public class BlockedGemInfo
 {
 	public GemModel gemModel;
 	public List<GemModel> gemModels;
+	public bool isNextBreakable;
 	public bool isNextMovable;
 
 	public void Clear()
 	{
 		gemModel = null;
 		gemModels.Clear();
+		isNextBreakable = false;
 		isNextMovable = false;
 	}
 }
@@ -471,7 +471,10 @@ public class GameController<M>: BaseController<M>
 		
 		var emptyGemModels = 
 			from GemModel gemModel in Model.GemModels
-			where gemModel is IMovable && gemModel.Type == GemType.EmptyGem && Model.currentTurn > gemModel.preservedFromFall
+			where IsMovableTile(gemModel.Position)
+				&& gemModel is IMovable 
+				&& gemModel.Type == GemType.EmptyGem 
+				&& Model.currentTurn > gemModel.preservedFromFall
 			select gemModel;
 
 		// Only one of them will be executed between a and b.
@@ -572,8 +575,8 @@ public class GameController<M>: BaseController<M>
 		if (!sourcePosition.IsAcceptableIndex()) { return blockedGemInfo; }
 
 		var sourceGemModel = GetGemModel(sourcePosition);
-		var isMovableTile = IsMovableTile(sourcePosition);
-		if (isMovableTile
+		var isMovable = IsMovableTile(sourcePosition);
+		if (isMovable
 			&& sourceGemModel is IMovable 
 			&& sourceGemModel.Type != GemType.EmptyGem 
 			&& Model.currentTurn >= sourceGemModel.preservedFromBreak)
@@ -582,7 +585,8 @@ public class GameController<M>: BaseController<M>
 			blockedGemInfo.gemModel = CopyAsBlock(markerID, sourceGemModel);
 		}
 
-		blockedGemInfo.isNextMovable = isMovableTile;
+		blockedGemInfo.isNextBreakable = IsBreakableTile(sourcePosition);
+		blockedGemInfo.isNextMovable = isMovable;
 		
         return blockedGemInfo;
     }
@@ -704,8 +708,6 @@ public class GameController<M>: BaseController<M>
 			}
 		}
 
-		brokenGemInfo.isNextMovable = isNextMovable;
-
 		return brokenGemInfo;
 	}
 
@@ -748,6 +750,12 @@ public class GameController<M>: BaseController<M>
 	}
 
 	public bool IsMovableTile(Position position) 
+	{
+		return position.IsAcceptableIndex() 
+			&& Model.TileModels[position.row, position.col].Type == TileType.Movable;
+	}
+
+	public bool IsBreakableTile(Position position) 
 	{
 		return position.IsAcceptableIndex() 
 			&& Model.TileModels[position.row, position.col].Type != TileType.Immovable;

@@ -52,14 +52,22 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
 
         if (!isDebugging) { return; }
         DOTween.To(
-            () => mpb.GetFloat("_FlashAmount"),
-            value => {
-                mpb.SetFloat("_FlashAmount", value);
-                spriteRenderer.SetPropertyBlock(mpb);
-            }, 
+            GetFlashAmount,
+            SetFlashAmount, 
             .2f, 
             .395f
         ).SetLoops(2, LoopType.Yoyo).SetEase(Ease.InOutSine);
+    }
+
+    float GetFlashAmount()
+    {
+        return mpb.GetFloat("_FlashAmount");
+    }
+
+    void SetFlashAmount(float value)
+    {
+        mpb.SetFloat("_FlashAmount", value);
+        spriteRenderer.SetPropertyBlock(mpb);
     }
 
     public void Squash() 
