@@ -238,7 +238,6 @@ MonoBehaviour:
       moves: 0
       cols: 0
       rows: 0
-      gravity: 
 --- !u!1 &354680679
 GameObject:
   m_ObjectHideFlags: 0
@@ -454,6 +453,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84db400c79f8d42eaa36a45b6719455d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  targetFrameRate: 60
 --- !u!4 &991623910
 Transform:
   m_ObjectHideFlags: 0

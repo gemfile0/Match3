@@ -46,6 +46,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	GameObject tiles;
 	GameObject gems;
 	GameObject gravities;
+	bool isPlaying;
 
 	public void Awake()
 	{
@@ -277,6 +278,11 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			gemSelected = null;
 		});
 		swipeInput.OnSwipeEnd.AddListener(swipeInfo => {
+			if (isPlaying) { 
+				Toast.Show("A coroutine is still running.", .8f);
+				return; 
+			}
+			
 			if (gemSelected != null) {
 				var sourceGemModel = Controller.GetGemModel(gemSelected.Position);
 				ActBySwipe(sourceGemModel, swipeInfo.direction);
@@ -329,10 +335,13 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	IEnumerator StartUpdateChanges(float timeOffset, Action<Int64> OnNoAnyMatches)
 	{
-		sequence = GOTween.Sequence();
+		isPlaying = true;
+		
+		sequence = GOTween.Sequence().SetAutoKill(false);
 
 		var currentFrame = 0;
 		var startTurn = Model.currentTurn;
+		var startTime = Time.time;
 		var noUpdateCount = 0;
 		while (true)
 		{
@@ -358,7 +367,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				
 				if (passedTurn == 6) {
 					if (updateResult.matchResult.Count == 0 && OnNoAnyMatches != null) {
-						OnNoAnyMatches(Model.currentTurn - startTurn);
+						OnNoAnyMatches(passedTurn);
 					} 
 				}
 				
@@ -380,6 +389,19 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 			currentFrame += 1;
 		}
+
+		var endTime = (Model.currentTurn - startTurn - 20) * FRAME_BY_TURN * TIME_PER_FRAME;
+		var passedTime = Time.time - startTime;
+		var waitingTime = endTime - passedTime;
+		// Debug.Log("End Time : " + endTime);
+		// Debug.Log("Passed Time : " + passedTime);
+		// Debug.Log("Waiting Time : " + waitingTime);
+		if (waitingTime > 0)
+		{
+			yield return new WaitForSeconds(waitingTime);
+		}
+		sequence.Kill();
+		isPlaying = false;
 
 		yield return null;
 	}

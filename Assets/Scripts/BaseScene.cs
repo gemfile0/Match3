@@ -15,6 +15,10 @@ public class BaseScene: MonoBehaviour
 		{
 			ResourceCache.Instantiate(Literals.SceneLoader);
 		}
+		if (transform.root.Find(Literals.Toast) == null) 
+		{
+			ResourceCache.Instantiate(Literals.Toast);
+		}
 
 #if DISABLE_LOG
 		if (Application.platform == RuntimePlatform.Android

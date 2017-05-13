@@ -69,6 +69,7 @@ public class GOSequence: IUpdater
 		get { return hasCompleted; }
 	}
 	bool hasCompleted;
+	bool needToAutoKill;
 
 	public float Duration
 	{
@@ -130,6 +131,12 @@ public class GOSequence: IUpdater
 		});
 	}
 
+	public GOSequence SetAutoKill(bool value)
+	{
+		needToAutoKill = value;
+		return this;
+	}
+
 	public void Update()
 	{
 		var duration = Duration;
@@ -152,7 +159,7 @@ public class GOSequence: IUpdater
 			}
 		}
 
-		if (hasCompleted) { Kill(); }
+		if (needToAutoKill && hasCompleted) { Kill(); }
 	}
 
 	public GOSequence SetEase(Func<float, float> gEase)

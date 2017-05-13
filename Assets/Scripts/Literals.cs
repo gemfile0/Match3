@@ -3,6 +3,7 @@
 	public const string Nil = "";
 	public const string Common = "Common";
 	public const string SceneLoader = "SceneLoader";
+	public const string Toast = "Toast";
 	public const string UIView = "UIView";
 	public const string FPSPanel = "FPSPanel";
 	public const string LevelScene = "LevelScene";
