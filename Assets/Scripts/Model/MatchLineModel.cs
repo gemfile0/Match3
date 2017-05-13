@@ -86,4 +86,15 @@ public class WhereCanMatch
             }
         }
     }
+
+    public override string ToString()
+    {
+        return string.Format(
+            "({0}, {1}) => ({2}, {3})", 
+            matchOffsets[0][0], 
+            matchOffsets[0][1],
+            matchOffsets[matchOffsets.Count - 1][0],
+            matchOffsets[matchOffsets.Count - 1][1]
+        );
+    }
 }

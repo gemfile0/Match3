@@ -55,6 +55,7 @@ public class GameModel: BaseModel
     }
     public TextAsset levelData;
     public LevelModel levelModel;
+    public List<int[]> offsetsCanSwap;
 
     public GameModel() 
     {
@@ -65,8 +66,8 @@ public class GameModel: BaseModel
     {
         allwayMatchLineModels = new List<MatchLineModel> {
             new MatchLineModel(-2, 0, 3, 1),
-            new MatchLineModel(0, -2, 1, 3),
-            new MatchLineModel(-1, -1, 2, 2)
+            new MatchLineModel( 0,-2, 1, 3),
+            new MatchLineModel(-1,-1, 2, 2),
         };
 
         positiveMatchLineModels = new List<MatchLineModel> {
@@ -83,9 +84,16 @@ public class GameModel: BaseModel
 			GemType.RedGem, GemType.GreenGem, GemType.BlueGem, 
 			GemType.OrangeGem, GemType.PurpleGem, GemType.YellowGem
 		};
+
+        offsetsCanSwap = new List<int[]> {
+			new int[] { 0,  1},
+			new int[] { 0, -1},
+			new int[] { 1,  0},
+			new int[] {-1,  0}
+		};
         
         levelModel = JsonUtility.FromJson<LevelModel>(levelData.text);
-        Position.levelModel = levelModel;
+        Position.Setup(levelModel);
 
         var gems = levelModel.gems;
         var tiles = levelModel.tiles;
@@ -101,7 +109,7 @@ public class GameModel: BaseModel
 
                 var colByCount = count % Cols;
                 var rowByCount = count / Cols;
-                var position = new Position(colByCount, rowByCount);
+                var position = Position.Get(colByCount, rowByCount);
                 gemModels[rowByCount, colByCount] = GemModelFactory.Get(
                     (GemType)gems[gemIndex], position
                 );

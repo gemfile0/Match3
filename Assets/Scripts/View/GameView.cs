@@ -301,7 +301,10 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	void ActBySwipe(GemModel sourceGemModel, Vector2 direction) 
 	{
 		var sourcePosition = sourceGemModel.Position;
-		var nearPosition = new Position(sourcePosition.index, (int)direction.x, (int)direction.y);
+		var colOffset = (int)direction.x;
+		var rowOffset = (int)direction.y;
+		if (!Controller.IsAcceptableIndex(sourcePosition, colOffset, rowOffset)) { return; }
+		var nearPosition = Position.Get(sourcePosition, colOffset, rowOffset);
 		if (!Controller.IsMovableTile(nearPosition)) { return; }
 
 		var nearGemModel = Controller.GetGemModel(nearPosition);
@@ -343,6 +346,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		var startTurn = Model.currentTurn;
 		var startTime = Time.time;
 		var noUpdateCount = 0;
+		var sumOfNoUpdate = 0;
 		while (true)
 		{
 			if (currentFrame % FRAME_BY_TURN == 0)
@@ -379,6 +383,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 					FallGems(updateResult.fallResult, sequence, currentTime);
 				} else {
 					noUpdateCount++;
+					sumOfNoUpdate++;
 				}
 
 				Controller.TurnNext();
@@ -390,18 +395,22 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			currentFrame += 1;
 		}
 
-		var endTime = (Model.currentTurn - startTurn - 20) * FRAME_BY_TURN * TIME_PER_FRAME;
-		var passedTime = Time.time - startTime;
-		var waitingTime = endTime - passedTime;
+		// var endTime = (Model.currentTurn - startTurn - 20) * FRAME_BY_TURN * TIME_PER_FRAME;
+		// var passedTime = Time.time - startTime;
+		// var waitingTime = endTime - passedTime;
 		// Debug.Log("End Time : " + endTime);
 		// Debug.Log("Passed Time : " + passedTime);
 		// Debug.Log("Waiting Time : " + waitingTime);
-		if (waitingTime > 0)
-		{
-			yield return new WaitForSeconds(waitingTime);
-		}
+		// Debug.Log("sequence.Duration : " + sequence.Duration);
+		// if (waitingTime > 0)
+		// {
+		// 	yield return new WaitForSeconds(waitingTime);
+		// }
 		sequence.Kill();
 		isPlaying = false;
+		if (Controller.GetMatchablePosition().Count == 0) {
+			Toast.Show("There's doesn't have any match.", 10f);
+		}
 
 		yield return null;
 	}
@@ -687,8 +696,6 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		var count = breakingOffset;
 		while (repeat > 0)
 		{
-			var nearPosition = new Position(sourcePosition.index, colOffset, rowOffset);
-			Debug.Log("LinedRadialBreaking : " + sourcePosition + ": "+ nearPosition);
 			var markedPositionsInfo = SetRadialBlock(sourcePosition, 1, markerID, colOffset, rowOffset);
 			AddAction(Model.currentTurn + count, (GOSequence sequence, float currentTime) => {
 				foreach (var markedPosition in markedPositionsInfo.positions)
@@ -700,7 +707,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 			if (!comparingToMoveon(markedPositionsInfo)) { break; }
 			
-			sourcePosition = nearPosition;
+			sourcePosition = Position.Get(sourcePosition, colOffset, rowOffset);
 			count += breakingOffset;
 			repeat -= 1;
 		}
@@ -761,8 +768,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		var markedPositions = new List<Position>();
 		while (repeat > 0) 
 		{
-			var nearPosition = new Position(sourcePosition.index, colOffset, rowOffset);
-			var blockedGemInfo = Controller.MarkAsBlock(sourcePosition, nearPosition, markerID);
+			var blockedGemInfo = Controller.MarkAsBlock(sourcePosition, markerID);
 			var gemModel = blockedGemInfo.gemModel;
 			if (gemModel != null)
 			{
@@ -773,15 +779,21 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				}
 			}
 			
-			if (!comparingToMoveon(blockedGemInfo)) { 
-				break;
-			} else { 
-				// All positions on the same line must be included cause it would use as a timing of tweening.
-				markedPositions.Add(sourcePosition); 
+			// All positions on the same line must be included cause it would use as a timing of tweening.
+			markedPositions.Add(sourcePosition); 
+
+			var isNextAcceptable = Controller.IsAcceptableIndex(sourcePosition, colOffset, rowOffset);
+			if (isNextAcceptable)
+			{
+				var nextPosition = Position.Get(sourcePosition, colOffset, rowOffset);
+				blockedGemInfo.isNextMovable = Controller.IsMovableTile(nextPosition);
+				blockedGemInfo.isNextBreakable = Controller.IsBreakableTile(nextPosition);
+
+				sourcePosition = nextPosition;
 			}
-			
-			sourcePosition = nearPosition;
-			repeat--;
+
+			if (!isNextAcceptable || !comparingToMoveon(blockedGemInfo)) { break; } 
+			repeat -= 1;
 		}
 
 		return markedPositions;
@@ -797,9 +809,10 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				for (var col = -repeat; col <= repeat; col++) 
 				{
 					if (Math.Abs(col) < repeat && Math.Abs(row) < repeat) { continue; }
+					if (!Controller.IsAcceptableIndex(sourcePosition, col, row)) { continue; }
 
-					var nextPosition = new Position(sourcePosition.index, col, row);
-					var blockedGemInfo = Controller.MarkAsBlock(nextPosition, nextPosition, markerID);
+					var nextPosition = Position.Get(sourcePosition, col, row);
+					var blockedGemInfo = Controller.MarkAsBlock(nextPosition, markerID);
 					
 					var gemModel = blockedGemInfo.gemModel;
 					if (gemModel == null) { continue; }
@@ -816,11 +829,11 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			repeat--;
 		}
 
-		var nearPosition = new Position(sourcePosition.index, colOffset, rowOffset);
+		var isNextAcceptable = Controller.IsAcceptableIndex(sourcePosition, colOffset, rowOffset);
 		var markedPositionInfo = new MarkedPositionsInfo {
 			positions = markedPositions,
-			isNextMovable = Controller.IsMovableTile(nearPosition),
-			isNextBreakable = Controller.IsBreakableTile(nearPosition)
+			isNextMovable = isNextAcceptable && Controller.IsMovableTile(Position.Get(sourcePosition, colOffset, rowOffset)),
+			isNextBreakable = isNextAcceptable && Controller.IsBreakableTile(Position.Get(sourcePosition, colOffset, rowOffset))
 		};
 
 		return markedPositionInfo;
@@ -957,7 +970,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	void SetBlock(Position sourcePosition, Int64 markerID)
 	{
-		var blockedGemInfo = Controller.MarkAsBlock(sourcePosition, sourcePosition, markerID);
+		var blockedGemInfo = Controller.MarkAsBlock(sourcePosition, markerID);
 		var gemModel = blockedGemInfo.gemModel;
 		if (gemModel != null)
 		{
