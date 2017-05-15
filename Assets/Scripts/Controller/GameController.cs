@@ -307,7 +307,7 @@ public class GameController<M>: BaseController<M>
 		return result;
 	}
 
-	public IEnumerable<GemModel> Shuffle()
+	public IEnumerable<GemModel> Shuffle(Int64 preservedFromMatch)
 	{
 		var allGems = GetAll().ToList();
 		var random = new Random();
@@ -321,6 +321,7 @@ public class GameController<M>: BaseController<M>
 
 		foreach (var gemModel in allGems)
 		{
+			gemModel.preservedFromMatch = preservedFromMatch;
 			SetGemModel(gemModel);
 		}
 		
