@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 class UpdateResult
@@ -35,6 +36,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	Bounds sampleBounds;
 	Vector3 gemSize;
+	Bounds sizeOfField;
 	SwipeInput swipeInput;
 	GemView gemSelected;
 	UpdateResult updateResult;
@@ -199,7 +201,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	void AlignField() 
 	{
-		var sizeOfField = gameObject.GetBounds();
+		sizeOfField = gameObject.GetBounds();
 		transform.localPosition = new Vector2(
 			sampleBounds.extents.x - sizeOfField.extents.x, 
 			sampleBounds.extents.y - sizeOfField.extents.y
@@ -344,7 +346,6 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 		var currentFrame = 0;
 		var startTurn = Model.currentTurn;
-		var startTime = Time.time;
 		var noUpdateCount = 0;
 		var sumOfNoUpdate = 0;
 		while (true)
@@ -395,23 +396,42 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			currentFrame += 1;
 		}
 
-		// var endTime = (Model.currentTurn - startTurn - 20) * FRAME_BY_TURN * TIME_PER_FRAME;
-		// var passedTime = Time.time - startTime;
-		// var waitingTime = endTime - passedTime;
-		// Debug.Log("End Time : " + endTime);
-		// Debug.Log("Passed Time : " + passedTime);
-		// Debug.Log("Waiting Time : " + waitingTime);
-		// Debug.Log("sequence.Duration : " + sequence.Duration);
-		// if (waitingTime > 0)
-		// {
-		// 	yield return new WaitForSeconds(waitingTime);
-		// }
 		sequence.Kill();
-		isPlaying = false;
-		if (Controller.GetMatchablePosition().Count == 0) {
-			Toast.Show("There's doesn't have any match.", 10f);
-		}
 
+		yield return new WaitForSeconds(1f);
+		yield return StartCoroutine(CheckHasAnyMatchableGems());
+
+		isPlaying = false;
+	}
+
+	IEnumerator CheckHasAnyMatchableGems()
+	{
+		var matchableGems = Controller.GetMatchableGems();
+		if (matchableGems.Count == 0) 
+		{
+			Toast.Show("There's doesn't have any match.", 3f);
+			yield return new WaitForSeconds(1f);
+			
+			var sequence = DOTween.Sequence().SetEase(Ease.InOutSine);
+			foreach (var gemModel in Controller.Shuffle())
+			{
+				var gemView = gemViews[gemModel.id];
+				sequence.Insert(0f, gemView.transform.DOMove(Vector3.zero, 1f));
+				sequence.Insert(
+					1f, 
+					gemView.transform.DOLocalMove(
+						new Vector2(gemModel.Position.col * gemSize.x, gemModel.Position.row * gemSize.y), 
+						1f
+					)
+				);
+			}
+		} 
+		else 
+		{
+			var matchableGem = matchableGems[UnityEngine.Random.Range(0, matchableGems.Count)];
+			if (matchableGem.sourceGemModel != null) { gemViews[matchableGem.sourceGemModel.id].Highlight(); }
+			if (matchableGem.nearGemModel != null) { gemViews[matchableGem.nearGemModel.id].Highlight(); }
+		}
 		yield return null;
 	}
 
@@ -428,7 +448,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		Int64 markerID, 
 		Vector2 direction
 	) {
-		Debug.Log("ActByChaining : " + gemType + ", " + specialKey + ", " + repeat + ", " + direction);
+		// Debug.Log("ActByChaining : " + gemType + ", " + specialKey + ", " + repeat + ", " + direction);
 		switch (gemType)
 		{
 			case GemType.SuperGem:

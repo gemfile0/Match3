@@ -93,7 +93,7 @@ public class TestGameController
 		var sqaureMatch = new MatchLineModel(-1, -1, 2, 2);
 
 		//2. Act & Assert
-		Assert.AreEqual(3, horizontalMatch.wheresCanMatch[0].matchOffsets.Count);
+		Assert.AreEqual(3, horizontalMatch.wheresCanMatch[0].MatchOffsets.Count);
 
 		var position = Position.Get(0, 0);
 		Assert.AreEqual(true, gameController.GetWheresCanMatch(position, horizontalMatch, GemType.RedGem));
