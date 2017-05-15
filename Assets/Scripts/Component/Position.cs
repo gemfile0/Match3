@@ -1,4 +1,6 @@
-﻿public class PositionVector
+﻿using System;
+
+public class PositionVector
 {
 	public int colOffset;
 	public int rowOffset;
@@ -12,11 +14,13 @@
 [System.Serializable]
 public class Position
 {
+	static Position[,] cache;
 	public int index;
 	public int row;
 	public int col;
-	public static LevelModel levelModel;
-	public Position(int col, int row)
+	static LevelModel levelModel;
+
+	Position(int col, int row)
 	{
 		UnityEngine.Assertions.Assert.IsNotNull(levelModel);
 		
@@ -25,21 +29,34 @@ public class Position
 		this.index = row * Position.levelModel.cols + col;
 	}
 
-	public Position(int pivotIndex, int colOffset, int rowOffset)
+	public static void Setup(LevelModel levelModel)
 	{
-		UnityEngine.Assertions.Assert.IsNotNull(levelModel);
-		
-		row = (pivotIndex / Position.levelModel.cols) + rowOffset;
-		col = (pivotIndex % Position.levelModel.cols) + colOffset;
-		index = row * Position.levelModel.cols + col;
+		Position.levelModel = levelModel;
+		cache = new Position[levelModel.rows, levelModel.cols];
 	}
 
-	public bool IsAcceptableIndex()
+	public static Position Get(int col, int row)
 	{
-		return col >= 0
-			&& col <  Position.levelModel.cols
-			&& row >= 0
-			&& row <  Position.levelModel.rows;
+		if (col < 0
+			|| col >= Position.levelModel.cols
+			|| row < 0
+			|| row >= Position.levelModel.rows
+		) {
+			throw new ArgumentException("Bad arguments: (" + col + ", " + row + ")");
+		}
+
+		var position = cache[row, col];
+		if (position == null) 
+		{
+			position = new Position(col, row);
+			cache[row, col] = position;
+		}
+		return position;
+	}
+
+	public static Position Get(Position sourcePosition, int colOffset, int rowOffset)
+	{
+		return Get(sourcePosition.col + colOffset, sourcePosition.row + rowOffset);
 	}
 
 	public override string ToString()

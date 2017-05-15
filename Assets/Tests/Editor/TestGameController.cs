@@ -84,8 +84,8 @@ public class TestGameController
 		}
 
 		//3. Assert
-		Assert.AreEqual(GemType.EmptyGem, gameController.GetGemModel(new Position(0, 0)).Type);
-		Assert.AreEqual(GemType.RedGem, gameController.GetGemModel(new Position(0, 1)).Type);
+		Assert.AreEqual(GemType.EmptyGem, gameController.GetGemModel(Position.Get(0, 0)).Type);
+		Assert.AreEqual(GemType.RedGem, gameController.GetGemModel(Position.Get(0, 1)).Type);
 
 		//1. Arrange
 		var horizontalMatch = new MatchLineModel(-2, 0, 3, 1);
@@ -93,16 +93,16 @@ public class TestGameController
 		var sqaureMatch = new MatchLineModel(-1, -1, 2, 2);
 
 		//2. Act & Assert
-		Assert.AreEqual(3, horizontalMatch.wheresCanMatch[0].matchOffsets.Count);
+		Assert.AreEqual(3, horizontalMatch.wheresCanMatch[0].MatchOffsets.Count);
 
-		var position = new Position(0, 0);
-		Assert.AreEqual(true, gameController.ExistAnyMatches(position, horizontalMatch, GemType.RedGem));
-		Assert.AreEqual(true, gameController.ExistAnyMatches(position, verticalMatch, GemType.RedGem));
-		Assert.AreEqual(true, gameController.ExistAnyMatches(position, sqaureMatch, GemType.RedGem));
+		var position = Position.Get(0, 0);
+		Assert.AreEqual(true, gameController.GetWheresCanMatch(position, horizontalMatch, GemType.RedGem));
+		Assert.AreEqual(true, gameController.GetWheresCanMatch(position, verticalMatch, GemType.RedGem));
+		Assert.AreEqual(true, gameController.GetWheresCanMatch(position, sqaureMatch, GemType.RedGem));
 
-		Assert.AreEqual(false, gameController.ExistAnyMatches(position, horizontalMatch, GemType.GreenGem));
-		Assert.AreEqual(false, gameController.ExistAnyMatches(position, verticalMatch, GemType.PurpleGem));
-		Assert.AreEqual(false, gameController.ExistAnyMatches(position, sqaureMatch, GemType.BlueGem));
+		Assert.AreEqual(false, gameController.GetWheresCanMatch(position, horizontalMatch, GemType.GreenGem));
+		Assert.AreEqual(false, gameController.GetWheresCanMatch(position, verticalMatch, GemType.PurpleGem));
+		Assert.AreEqual(false, gameController.GetWheresCanMatch(position, sqaureMatch, GemType.BlueGem));
 	}
 
 	[Test]

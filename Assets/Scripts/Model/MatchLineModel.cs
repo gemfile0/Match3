@@ -74,16 +74,32 @@ public class MatchLineModel
 
 public class WhereCanMatch 
 {
-    public List<int[]> matchOffsets;
+    public List<int[]> MatchOffsets { get; private set; }
 
     public WhereCanMatch(int startCol, int cols, int startRow, int rows) 
     {
-        matchOffsets = new List<int[]>();
+        MatchOffsets = new List<int[]>();
         for (var row = 0; row < rows; row++) 
         {
             for (var col = 0; col < cols; col++) {
-                matchOffsets.Add(new int[2]{ startCol + col, startRow + row });
+                MatchOffsets.Add(new int[2]{ startCol + col, startRow + row });
             }
         }
+    }
+
+    public WhereCanMatch(List<int[]> matchOffsets) 
+    {
+        MatchOffsets = matchOffsets;
+    }
+
+    public override string ToString()
+    {
+        return string.Format(
+            "({0}, {1}) => ({2}, {3})", 
+            MatchOffsets[0][0], 
+            MatchOffsets[0][1],
+            MatchOffsets[MatchOffsets.Count - 1][0],
+            MatchOffsets[MatchOffsets.Count - 1][1]
+        );
     }
 }

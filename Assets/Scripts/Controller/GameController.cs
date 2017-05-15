@@ -22,6 +22,7 @@ public class BlockedGemInfo
 	public bool isNextBreakable;
 	public bool isNextMovable;
 
+	
 	public void Clear()
 	{
 		gemModel = null;
@@ -55,6 +56,21 @@ public class MergedGemInfo
 	}
 }
 
+public class MatchableGemInfo
+{
+	public GemModel sourceGemModel;
+	public GemModel nearGemModel;
+}
+
+public class MatchableTypeInfo
+{
+	public Position sourcePosition;
+	public GemModel sourceGemModel;
+	public List<WhereCanMatch> wheresCanMatch;
+	public GemType matchingType;
+	public bool isSpecialType;
+}
+
 public class GameController<M>: BaseController<M>
 	where M: GameModel 
 {
@@ -70,6 +86,9 @@ public class GameController<M>: BaseController<M>
 	List<GemModel> matchedGemModels;
 	ReplacedGemInfo replacedGemInfo;
 	MergedGemInfo mergedGemInfo;
+	List<MatchableGemInfo> matchableGemInfos;
+	List<WhereCanMatch> wheresCanMatch;
+	List<MatchableTypeInfo> matchableTypeInfos;
 	
 	public GameController()
 	{
@@ -91,13 +110,14 @@ public class GameController<M>: BaseController<M>
 			gemModels = new List<GemModel>()
 		};
 		mergedGemInfo = new MergedGemInfo();
+		matchableGemInfos = new List<MatchableGemInfo>();
+		wheresCanMatch = new List<WhereCanMatch>();
+		matchableTypeInfos = new List<MatchableTypeInfo>();
 	}
 	
 	public override void Setup(M model) 
 	{
 		base.Setup(model);
-
-		PutGems();
 	}
 	
 	public override void Destroy() 
@@ -113,6 +133,10 @@ public class GameController<M>: BaseController<M>
 		brokenGemInfo = null;
 		blockedGemInfo = null;
 		replacedGemInfo = null;
+		mergedGemInfo = null;
+		matchableGemInfos = null;
+		wheresCanMatch = null;
+		matchableTypeInfos = null;
 	}
 
 	public void PutGems() 
@@ -131,9 +155,8 @@ public class GameController<M>: BaseController<M>
 
 			foreach (var matchLineModel in matchLineModels) {
 				foreach(var matchingType in matchingTypes) {
-					if (ExistAnyMatches(emptyGemModel.Position, matchLineModel, matchingType)) {
-						gemsCantPutIn.Add(matchingType);
-					}
+					if (GetWheresCanMatch(emptyGemModel.Position, matchLineModel, matchingType).Count == 0) { continue; }
+					gemsCantPutIn.Add(matchingType);
 				}
 			}
 
@@ -150,7 +173,7 @@ public class GameController<M>: BaseController<M>
     {
         var allGemModels = 
 			from GemModel gemModel in Model.GemModels
-			where gemModel is IMovable && gemModel.Type != GemType.EmptyGem
+			where gemModel is IMovable && gemModel.Type != GemType.EmptyGem && IsMovableTile(gemModel.Position)
 			select gemModel;
 
 		return allGemModels;
@@ -161,49 +184,165 @@ public class GameController<M>: BaseController<M>
         Model.currentTurn += 1;
     }
 
-    public bool ExistAnyMatches(Position sourcePosition, MatchLineModel matchLineModel, GemType matchingType) 
+    public List<WhereCanMatch> GetWheresCanMatch(Position sourcePosition, MatchLineModel matchLineModel, GemType matchingType) 
 	{
+		wheresCanMatch.Clear();
+		
 		foreach(var whereCanMatch in matchLineModel.wheresCanMatch) 
 		{
 			var matchCount = 0;
-			foreach(var matchOffset in whereCanMatch.matchOffsets) {
-				var matchPosition = new Position(sourcePosition.index, matchOffset[0], matchOffset[1]);
+			foreach(var matchOffset in whereCanMatch.MatchOffsets) {
+				if (!IsAcceptableIndex(sourcePosition, matchOffset[0], matchOffset[1])) { break; }
+
+				var matchPosition = Position.Get(sourcePosition, matchOffset[0], matchOffset[1]);
 				if (IsMovableTile(matchPosition)
-					&& (sourcePosition.index == matchPosition.index
-						|| GetGemModel(matchPosition).CanMatch(matchingType))) {
+					&& (sourcePosition.index == matchPosition.index || GetGemModel(matchPosition).CanMatch(matchingType))) {
 					matchCount++;
 				} else {
 					break;
 				}
 			}
 			
-			if (matchCount == whereCanMatch.matchOffsets.Count) {
-				return true;
+			if (matchCount == whereCanMatch.MatchOffsets.Count) {
+				wheresCanMatch.Add(whereCanMatch);
 			}
 		}
 
-		return false;
+		return wheresCanMatch;
+	}
+
+	public List<MatchableGemInfo> GetMatchableGems()
+	{
+		matchableGemInfos.Clear();
+		matchableTypeInfos.Clear();
+
+		foreach (var gemModel in GetAll()) 
+		{
+			var sourcePosition = gemModel.Position;
+			var sourceGemModel = GetGemModel(sourcePosition);
+			
+			// Add to targets either if it is special gem
+			if (IsSpecialType(sourceGemModel)) {
+				matchableTypeInfos.Add(new MatchableTypeInfo {
+					sourcePosition = sourcePosition,
+					sourceGemModel = sourceGemModel,
+					wheresCanMatch = new List<WhereCanMatch> {
+						new WhereCanMatch(new List<int[]>{ new int[] {0, 0} }) 
+					},
+					matchingType = sourceGemModel.Type,
+					isSpecialType = true
+				});
+			}
+
+			// Or if it has a matchable line.
+			foreach (var matchLineModel in Model.allwayMatchLineModels) {
+				foreach(var matchingType in Model.MatchingTypes) {
+					var wheresCanMatch = GetWheresCanMatch(sourcePosition, matchLineModel, matchingType);
+					if (wheresCanMatch.Count == 0) { continue; }
+
+					matchableTypeInfos.Add(new MatchableTypeInfo {
+						sourcePosition = sourcePosition,
+						wheresCanMatch = wheresCanMatch.ToList(),
+						matchingType = matchingType
+					});
+				}
+			}
+		}
+
+		foreach (var matchableTypeInfo in matchableTypeInfos) 
+		{
+			var sourcePosition = matchableTypeInfo.sourcePosition;
+			if (matchableTypeInfo.isSpecialType) {
+				var sourceGemModel = matchableTypeInfo.sourceGemModel;
+				if (sourceGemModel.Type == GemType.ChocoGem || sourceGemModel.Type == GemType.SuperGem) {
+					matchableGemInfos.Add(new MatchableGemInfo { 
+						sourceGemModel = GetGemModel(sourcePosition)
+					});
+				}
+				
+				foreach (var offsetCanSwap in Model.offsetsCanSwap) {
+					if (!IsAcceptableIndex(sourcePosition, offsetCanSwap[0], offsetCanSwap[1])) { continue; }
+					var nearPosition = Position.Get(sourcePosition, offsetCanSwap[0], offsetCanSwap[1]);
+
+					if (!IsMovableTile(nearPosition)
+						|| !IsSpecialType(GetGemModel(nearPosition))) { continue; }
+
+					matchableGemInfos.Add(new MatchableGemInfo { 
+						sourceGemModel = GetGemModel(sourcePosition), nearGemModel = GetGemModel(nearPosition) 
+					});
+					// UnityEngine.Debug.Log("Possible Match Found : " + sourcePosition + " <=> " + nearPosition);
+				}
+				continue;
+			}
+			
+			foreach(var whereCanMatch in matchableTypeInfo.wheresCanMatch) {
+				foreach (var offsetCanSwap in Model.offsetsCanSwap) {
+					if (!IsAcceptableIndex(sourcePosition, offsetCanSwap[0], offsetCanSwap[1])) { continue; }
+					var nearPosition = Position.Get(sourcePosition, offsetCanSwap[0], offsetCanSwap[1]);
+
+					if (!IsMovableTile(nearPosition)
+						|| GetGemModel(nearPosition).Type != matchableTypeInfo.matchingType
+						|| IsNearPositionOnMatchLine(nearPosition, sourcePosition, whereCanMatch)) { continue; }
+
+					matchableGemInfos.Add(new MatchableGemInfo { 
+						sourceGemModel = GetGemModel(sourcePosition), nearGemModel = GetGemModel(nearPosition) 
+					});
+					// UnityEngine.Debug.Log("Possible Match Found : " + sourcePosition + " <=> " + nearPosition);
+				}
+			}
+		}
+
+		return matchableGemInfos;
+	}
+	
+	bool IsNearPositionOnMatchLine(Position nearPosition, Position sourcePosition, WhereCanMatch whereCanMatch)
+	{
+		var result = false;
+		foreach(var matchOffset in whereCanMatch.MatchOffsets) 
+		{
+			var matchPosition = Position.Get(sourcePosition, matchOffset[0], matchOffset[1]);
+			if (matchPosition.index == nearPosition.index) { result = true; break; }
+		}
+			
+		return result;
+	}
+
+	public IEnumerable<GemModel> Shuffle()
+	{
+		var allGems = GetAll().ToList();
+		var random = new Random();
+        for (int i = 0; i < allGems.Count; i++)
+        {
+            int randomIndex = random.Next(i, allGems.Count);
+			var randomPosition = allGems[randomIndex].Position;
+			allGems[randomIndex].Position = allGems[i].Position;
+			allGems[i].Position = randomPosition;
+        }
+
+		foreach (var gemModel in allGems)
+		{
+			SetGemModel(gemModel);
+		}
+		
+		return GetAll();
 	}
 
 	public List<GemModel> Swap(Position sourcePosition, Position nearPosition) 
 	{
 		swappingGemModels.Clear();
 
-		if (nearPosition.IsAcceptableIndex()) 
-		{
-			var sourceGemModel = GetGemModel(sourcePosition);
-			var nearGemModel = GetGemModel(nearPosition);
+		var sourceGemModel = GetGemModel(sourcePosition);
+		var nearGemModel = GetGemModel(nearPosition);
 
-			nearGemModel.Position = sourcePosition;
-			sourceGemModel.Position = nearPosition;
+		nearGemModel.Position = sourcePosition;
+		sourceGemModel.Position = nearPosition;
 
-			SetGemModel(nearGemModel);
-			SetGemModel(sourceGemModel);
-			sourceGemModel.preservedFromMatch = nearGemModel.preservedFromMatch 
-				= Model.currentTurn + 5;
-			swappingGemModels.Add(sourceGemModel);
-			swappingGemModels.Add(nearGemModel);
-		} 
+		SetGemModel(nearGemModel);
+		SetGemModel(sourceGemModel);
+		sourceGemModel.preservedFromMatch = nearGemModel.preservedFromMatch 
+			= Model.currentTurn + 5;
+		swappingGemModels.Add(sourceGemModel);
+		swappingGemModels.Add(nearGemModel);
 
 		return swappingGemModels;
     }
@@ -212,20 +351,17 @@ public class GameController<M>: BaseController<M>
 	{
 		mergedGemInfo.Clear();
 
-		if (nearPosition.IsAcceptableIndex()) 
-		{
-			var sourceGemModel = GetGemModel(sourcePosition);
-			var nearGemModel = GetGemModel(nearPosition);
+		var sourceGemModel = GetGemModel(sourcePosition);
+		var nearGemModel = GetGemModel(nearPosition);
 
-			nearGemModel.specialKey = MergeSpecialKey(nearGemModel, sourceGemModel);
-			nearGemModel.endurance = MergeEndurance(nearGemModel, sourceGemModel);
-			nearGemModel.positionBefore = sourcePosition;
+		nearGemModel.specialKey = MergeSpecialKey(nearGemModel, sourceGemModel);
+		nearGemModel.endurance = MergeEndurance(nearGemModel, sourceGemModel);
+		nearGemModel.positionBefore = sourcePosition;
 
-			sourceGemModel.preservedFromMatch = nearGemModel.preservedFromMatch = Model.currentTurn + 5;
+		sourceGemModel.preservedFromMatch = nearGemModel.preservedFromMatch = Model.currentTurn + 5;
 
-			mergedGemInfo.merger = nearGemModel;
-			mergedGemInfo.mergee = sourceGemModel;
-		} 
+		mergedGemInfo.merger = nearGemModel;
+		mergedGemInfo.mergee = sourceGemModel;
 
 		return mergedGemInfo;
 	}
@@ -249,7 +385,6 @@ public class GameController<M>: BaseController<M>
 			foreach (var matchLineModel in matchLineModels) 
 			{
 				var matchedGemModels = GetAnyMatches(matchableGemModel, matchLineModel);
-
 				if (matchedGemModels.Count == 0) { continue; }
 
 				var newMatchLineInfo = new MatchedLineInfo() {
@@ -310,11 +445,11 @@ public class GameController<M>: BaseController<M>
 		matchedGemModels.Clear();
 		foreach (var whereCanMatch in matchLineModel.wheresCanMatch) 
 		{
-			foreach (var matchOffset in whereCanMatch.matchOffsets) {
-				var matchingPosition = new Position(sourceGemModel.Position.index, matchOffset[0], matchOffset[1]);
-				if (!IsMovableTile(matchingPosition)) {
-					continue;
-				}
+			foreach (var matchOffset in whereCanMatch.MatchOffsets) {
+				if (!IsAcceptableIndex(sourceGemModel.Position, matchOffset[0], matchOffset[1])) { continue; }
+
+				var matchingPosition = Position.Get(sourceGemModel.Position, matchOffset[0], matchOffset[1]);
+				if (!IsMovableTile(matchingPosition)) { continue; }
 
 				var matchingGemModel = GetGemModel(matchingPosition);
 				if (sourceGemModel.CanMatch(matchingGemModel.Type)
@@ -328,7 +463,7 @@ public class GameController<M>: BaseController<M>
 				}
 			}
 			
-			if (matchedGemModels.Count == whereCanMatch.matchOffsets.Count) {
+			if (matchedGemModels.Count == whereCanMatch.MatchOffsets.Count) {
 				// Finally found!
 				break;
 			} else {
@@ -450,7 +585,9 @@ public class GameController<M>: BaseController<M>
 		while (true)
 		{
 			var gravity = GetGravityModel(sourcePosition).vector;
-			var nearPosition = new Position(sourcePosition.index, gravity[0], gravity[1]);
+			if (!IsAcceptableIndex(sourcePosition, gravity[0], gravity[1])) { break; }
+
+			var nearPosition = Position.Get(sourcePosition, gravity[0], gravity[1]);
 			if (!IsMovableTile(nearPosition)) {
 				break;
 			}
@@ -483,10 +620,11 @@ public class GameController<M>: BaseController<M>
 		{
 			var emptyGemPosition = emptyGemModel.Position;
 			var gravity = GetGravityModel(emptyGemPosition).vector;
-			var nearPosition = new Position(emptyGemPosition.index, gravity[0], -gravity[1]);
-			if (!nearPosition.IsAcceptableIndex()) { continue; }
-			
+
+			if (!IsAcceptableIndex(emptyGemPosition, gravity[0], -gravity[1])) { continue; }
+			var nearPosition = Position.Get(emptyGemPosition, gravity[0], -gravity[1]);
 			var nearGemModel = GetGemModel(nearPosition);
+			
 			if (Model.currentTurn <= nearGemModel.preservedFromMatch) { continue; }
 
 			if (nearGemModel is IMovable) {
@@ -515,8 +653,8 @@ public class GameController<M>: BaseController<M>
 					directionY = -gravity[1];
 				}
 
-				Position nearPosition = new Position(blockedGemPosition.index, directionX, directionY);
-				if (!nearPosition.IsAcceptableIndex()) { continue; }
+				if (!IsAcceptableIndex(blockedGemPosition, directionX, directionY)) { continue; }
+				Position nearPosition = Position.Get(blockedGemPosition, directionX, directionY);
 
 				var nearGemModel = GetGemModel(nearPosition);
 				if (Model.currentTurn <= nearGemModel.preservedFromMatch) { continue; }
@@ -556,7 +694,7 @@ public class GameController<M>: BaseController<M>
 		foreach (SpawnerGemModel spawnerGemModel in spawnerGemModels)
 		{
 			var gravity = GetGravityModel(spawnerGemModel.Position).vector;
-			var spawneePosition = new Position(spawnerGemModel.Position.index, gravity[0], gravity[1]);
+			var spawneePosition = Position.Get(spawnerGemModel.Position, gravity[0], gravity[1]);
 			if (GetGemModel(spawneePosition).Type == GemType.EmptyGem) {
 				var spawneeGemModel = GemModelFactory.Get(GemType.EmptyGem, spawneePosition);
 				SetGemModel(spawneeGemModel);
@@ -568,12 +706,10 @@ public class GameController<M>: BaseController<M>
 		return feedingGemModels;
     }
 
-	public BlockedGemInfo MarkAsBlock(Position sourcePosition, Position nearPosition, Int64 markerID)
+	public BlockedGemInfo MarkAsBlock(Position sourcePosition, Int64 markerID)
     {
 		blockedGemInfo.Clear();
 		
-		if (!sourcePosition.IsAcceptableIndex()) { return blockedGemInfo; }
-
 		var sourceGemModel = GetGemModel(sourcePosition);
 		var isMovable = IsMovableTile(sourcePosition);
 		if (isMovable
@@ -585,9 +721,6 @@ public class GameController<M>: BaseController<M>
 			blockedGemInfo.gemModel = CopyAsBlock(markerID, sourceGemModel);
 		}
 
-		blockedGemInfo.isNextBreakable = IsBreakableTile(sourcePosition);
-		blockedGemInfo.isNextMovable = isMovable;
-		
         return blockedGemInfo;
     }
 
@@ -693,8 +826,7 @@ public class GameController<M>: BaseController<M>
 	{
 		brokenGemInfo.Clear();
 
-		var isNextMovable = IsMovableTile(targetPosition);
-		if (isNextMovable) 
+		if (IsMovableTile(targetPosition)) 
 		{
 			var targetGemModel = GetGemModel(targetPosition);
 			if (targetGemModel.markedBy == markerID || targetGemModel.replacedBy == markerID) {
@@ -742,6 +874,14 @@ public class GameController<M>: BaseController<M>
 		return Model.GravityModels[position.row, position.col];
 	}
 
+	public bool IsAcceptableIndex(Position position, int colOffset, int rowOffset)
+	{
+		return (position.col + colOffset) >= 0
+			&& (position.col + colOffset) <  Model.Cols
+			&& (position.row + rowOffset) >= 0
+			&& (position.row + rowOffset) <  Model.Rows;
+	}
+
 	public void SetGemModel(GemModel gemModel) 
 	{
 		Model.GemModels[gemModel.Position.row, gemModel.Position.col] = gemModel;
@@ -749,14 +889,12 @@ public class GameController<M>: BaseController<M>
 
 	public bool IsMovableTile(Position position) 
 	{
-		return position.IsAcceptableIndex() 
-			&& Model.TileModels[position.row, position.col].Type == TileType.Movable;
+		return Model.TileModels[position.row, position.col].Type == TileType.Movable;
 	}
 
 	public bool IsBreakableTile(Position position) 
 	{
-		return position.IsAcceptableIndex() 
-			&& Model.TileModels[position.row, position.col].Type != TileType.Immovable;
+		return Model.TileModels[position.row, position.col].Type != TileType.Immovable;
 	}
 
 	public bool IsSpecialType(GemModel gemModel)
