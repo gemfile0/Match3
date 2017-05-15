@@ -33,6 +33,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 {
 	const Int64 FRAME_BY_TURN = 3;
 	const float TIME_PER_FRAME = 0.012f;
+	const Int64 A_QUARTER_OF_SHUFFLE = 25;
+	float startOfWaiting = 0f;
 
 	Bounds sampleBounds;
 	Vector3 gemSize;
@@ -85,6 +87,18 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		actionQueueByTurn = null;
 		sequence.Kill();
 		sequence = null;
+	}
+
+	void Update()
+	{
+		if (isPlaying) { startOfWaiting = 0f; return; }
+
+		if (startOfWaiting == 0f) { startOfWaiting = Time.time;}
+		if ((Time.time - startOfWaiting) > 3f)
+		{
+			CheckHasAnyMatchableGems();
+			startOfWaiting = 0f;
+		}
 	}
 
 	IEnumerator StartHello() 
@@ -397,34 +411,29 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		}
 
 		sequence.Kill();
-
-		yield return new WaitForSeconds(1f);
-		yield return StartCoroutine(CheckHasAnyMatchableGems());
-
 		isPlaying = false;
 	}
 
-	IEnumerator CheckHasAnyMatchableGems()
+	void CheckHasAnyMatchableGems()
 	{
 		var matchableGems = Controller.GetMatchableGems();
 		if (matchableGems.Count == 0) 
 		{
-			Toast.Show("There's doesn't have any match.", 3f);
-			yield return new WaitForSeconds(1f);
-			
-			var sequence = DOTween.Sequence().SetEase(Ease.InOutSine);
-			foreach (var gemModel in Controller.Shuffle())
-			{
-				var gemView = gemViews[gemModel.id];
-				sequence.Insert(0f, gemView.transform.DOMove(Vector3.zero, 1f));
-				sequence.Insert(
-					1f, 
-					gemView.transform.DOLocalMove(
+			AddAction(Model.currentTurn, (sequence, currentTime) => {
+				Toast.Show("There's doesn't have any match.", 3f);
+			});
+			AddAction(Model.currentTurn + A_QUARTER_OF_SHUFFLE, (sequence, currentTime) => {
+				foreach (var gemModel in Controller.Shuffle(Model.currentTurn + A_QUARTER_OF_SHUFFLE * 3)) {
+					var gemView = gemViews[gemModel.id];
+					var aQuarterOfTime = A_QUARTER_OF_SHUFFLE * (TIME_PER_FRAME * FRAME_BY_TURN);
+					sequence.Insert(currentTime, gemView.transform.GOMove(Vector3.zero, aQuarterOfTime).SetEase(GOEase.EaseIn));
+					sequence.Insert(currentTime + aQuarterOfTime, gemView.transform.GOLocalMove(
 						new Vector2(gemModel.Position.col * gemSize.x, gemModel.Position.row * gemSize.y), 
-						1f
-					)
-				);
-			}
+						aQuarterOfTime
+					).SetEase(GOEase.EaseOut));
+				}
+			});
+			UpdateChanges();
 		} 
 		else 
 		{
@@ -432,7 +441,6 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			if (matchableGem.sourceGemModel != null) { gemViews[matchableGem.sourceGemModel.id].Highlight(); }
 			if (matchableGem.nearGemModel != null) { gemViews[matchableGem.nearGemModel.id].Highlight(); }
 		}
-		yield return null;
 	}
 
 	void UpdateChanges(float latestTime = 0f, Action<Int64> OnNoAnyMatches = null) 
