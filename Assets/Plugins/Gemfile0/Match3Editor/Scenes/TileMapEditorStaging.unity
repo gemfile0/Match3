@@ -1,0 +1,497 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!29 &1
+OcclusionCullingSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_OcclusionBakeSettings:
+    smallestOccluder: 5
+    smallestHole: 0.25
+    backfaceThreshold: 100
+  m_SceneGUID: 00000000000000000000000000000000
+  m_OcclusionCullingData: {fileID: 0}
+--- !u!104 &2
+RenderSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 7
+  m_Fog: 0
+  m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_FogMode: 3
+  m_FogDensity: 0.01
+  m_LinearFogStart: 0
+  m_LinearFogEnd: 300
+  m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
+  m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
+  m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
+  m_AmbientIntensity: 1
+  m_AmbientMode: 3
+  m_SkyboxMaterial: {fileID: 0}
+  m_HaloStrength: 0.5
+  m_FlareStrength: 1
+  m_FlareFadeSpeed: 3
+  m_HaloTexture: {fileID: 0}
+  m_SpotCookie: {fileID: 10001, guid: 0000000000000000e000000000000000, type: 0}
+  m_DefaultReflectionMode: 0
+  m_DefaultReflectionResolution: 128
+  m_ReflectionBounces: 1
+  m_ReflectionIntensity: 1
+  m_CustomReflection: {fileID: 0}
+  m_Sun: {fileID: 0}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+--- !u!157 &3
+LightmapSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 7
+  m_GIWorkflowMode: 1
+  m_GISettings:
+    serializedVersion: 2
+    m_BounceScale: 1
+    m_IndirectOutputScale: 1
+    m_AlbedoBoost: 1
+    m_TemporalCoherenceThreshold: 1
+    m_EnvironmentLightingMode: 0
+    m_EnableBakedLightmaps: 0
+    m_EnableRealtimeLightmaps: 0
+  m_LightmapEditorSettings:
+    serializedVersion: 4
+    m_Resolution: 2
+    m_BakeResolution: 40
+    m_TextureWidth: 1024
+    m_TextureHeight: 1024
+    m_AO: 0
+    m_AOMaxDistance: 1
+    m_CompAOExponent: 1
+    m_CompAOExponentDirect: 0
+    m_Padding: 2
+    m_LightmapParameters: {fileID: 0}
+    m_LightmapsBakeMode: 1
+    m_TextureCompression: 1
+    m_DirectLightInLightProbes: 1
+    m_FinalGather: 0
+    m_FinalGatherFiltering: 1
+    m_FinalGatherRayCount: 256
+    m_ReflectionCompression: 2
+  m_LightingDataAsset: {fileID: 0}
+  m_RuntimeCPUUsage: 25
+--- !u!196 &4
+NavMeshSettings:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_BuildSettings:
+    serializedVersion: 2
+    agentTypeID: 0
+    agentRadius: 0.5
+    agentHeight: 2
+    agentSlope: 45
+    agentClimb: 0.4
+    ledgeDropHeight: 0
+    maxJumpAcrossDistance: 0
+    minRegionArea: 2
+    manualCellSize: 0
+    cellSize: 0.16666667
+    accuratePlacement: 0
+  m_NavMeshData: {fileID: 0}
+--- !u!1 &18427761
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 18427763}
+  - component: {fileID: 18427762}
+  m_Layer: 0
+  m_Name: Level1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &18427762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 18427761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e22caa228feca428d8c274adaa18f901, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mapSize: {x: 5, y: 7}
+  mapName: Level1
+  gemItems:
+  - id: 0
+    name: BlockedGem
+    texture2D: {fileID: 2800000, guid: 7b1887072b8a041cd8299b5312ce9696, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/transparent.png
+  - id: 4
+    name: ChocoGem
+    texture2D: {fileID: 2800000, guid: 53eaa273d693f4f358f2afe410be1dba, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy10_choco.png
+  - id: 5
+    name: SuperGem
+    texture2D: {fileID: 2800000, guid: 7b15cd08e2af4463eb070b124fae4b4c, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/zephyr.png
+  - id: 7
+    name: SpawneeGem
+    texture2D: {fileID: 2800000, guid: 48d20d02def054d48b0fb2b7c89848dd, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/Quad-Semi-1px.png
+  - id: 8
+    name: SpawnerGem
+    texture2D: {fileID: 2800000, guid: 0d6f273a95ffb4a57bb88ab6e36fa3da, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/Quad-FilledSemi-1px.png
+  - id: 10
+    name: RedGem
+    texture2D: {fileID: 2800000, guid: ab30f768e69b84f0aa65adeb9e9d291c, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_red_01.png
+  - id: 11
+    name: RedGemC
+    texture2D: {fileID: 2800000, guid: 6641703ac893f4ff6b9dca51f82500a0, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy8_red_bomb.png
+  - id: 12
+    name: RedGemH
+    texture2D: {fileID: 2800000, guid: cb4d60cac8f1b4a15ae3d80384b56eab, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_red_02.png
+  - id: 13
+    name: RedGemV
+    texture2D: {fileID: 2800000, guid: 807bbc748aa1641798455155c94eb76a, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_red_03.png
+  - id: 20
+    name: BlueGem
+    texture2D: {fileID: 2800000, guid: dd219a31dd1c847098557b253382aa05, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_blue_01.png
+  - id: 21
+    name: BlueGemC
+    texture2D: {fileID: 2800000, guid: 74b66b1a7c35644b89e26b61fbf3a764, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy8_blue_bomb.png
+  - id: 22
+    name: BlueGemH
+    texture2D: {fileID: 2800000, guid: d4ff2dd969988454596d0040f68bcfb0, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_blue_02.png
+  - id: 23
+    name: BlueGemV
+    texture2D: {fileID: 2800000, guid: b5b7b50593a2443daad86f9ca3f018c1, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_blue_03.png
+  - id: 30
+    name: GreenGem
+    texture2D: {fileID: 2800000, guid: 728a89b3022534b4eafc3a38ecac10b6, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_green_01.png
+  - id: 31
+    name: GreenGemC
+    texture2D: {fileID: 2800000, guid: b48930836e07c4eaea12751b7eec5c6d, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy8_green_bomb.png
+  - id: 32
+    name: GreenGemH
+    texture2D: {fileID: 2800000, guid: 287b3896c7f53480885cf3486f49e1e9, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_green_02.png
+  - id: 33
+    name: GreenGemV
+    texture2D: {fileID: 2800000, guid: 8734ff7466f8044e9b4a0d8069b51ce3, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_green_03.png
+  - id: 40
+    name: PurpleGem
+    texture2D: {fileID: 2800000, guid: ab13ddc37ca744e1fb76d01391a6155b, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_purple_01.png
+  - id: 41
+    name: PurpleGemC
+    texture2D: {fileID: 2800000, guid: 02b32c616132b46abbc21ce175d8b518, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy8_purple_bomb.png
+  - id: 42
+    name: PurpleGemH
+    texture2D: {fileID: 2800000, guid: 00f35b399655845fc9814654b823f531, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_purple_02.png
+  - id: 43
+    name: PurpleGemV
+    texture2D: {fileID: 2800000, guid: 6864dff959cc747179b9c25658a5cc2a, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_purple_03.png
+  - id: 50
+    name: OrangeGem
+    texture2D: {fileID: 2800000, guid: 216d3ef52332446ada8ddc556ebf0591, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_orange_01.png
+  - id: 51
+    name: OrangeGemC
+    texture2D: {fileID: 2800000, guid: aa08a6d2031c44b078a4ead51e2a6c97, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy8_orange_bomb.png
+  - id: 52
+    name: OrangeGemH
+    texture2D: {fileID: 2800000, guid: 1a2c87fb6756d41ba9fc98bc1bf4a1c9, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_orange_02.png
+  - id: 53
+    name: OrangeGemV
+    texture2D: {fileID: 2800000, guid: b8c8b80bba82041f19560589e95a1091, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_orange_03.png
+  - id: 60
+    name: YellowGem
+    texture2D: {fileID: 2800000, guid: 9fb6bb4b13f0946fc94658cc290952e4, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_yellow_01.png
+  - id: 61
+    name: YellowGemC
+    texture2D: {fileID: 2800000, guid: 13508bb52512e47a0a46c5813e547ad1, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy8_yellow_bomb.png
+  - id: 62
+    name: YellowGemH
+    texture2D: {fileID: 2800000, guid: 10048777085a24b44863fdd6b4827901, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_yellow_02.png
+  - id: 63
+    name: YellowGemV
+    texture2D: {fileID: 2800000, guid: 55d13fcf4cbd64570bf07bb697fc0258, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/candy1_yellow_03.png
+  tileItems:
+  - id: 0
+    name: Immovable
+    texture2D: {fileID: 2800000, guid: 0d6f273a95ffb4a57bb88ab6e36fa3da, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/Quad-FilledSemi-1px.png
+  - id: 1
+    name: Movable
+    texture2D: {fileID: 2800000, guid: 48d20d02def054d48b0fb2b7c89848dd, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/Quad-Semi-1px.png
+  - id: 2
+    name: Breakable
+    texture2D: {fileID: 2800000, guid: 7b1887072b8a041cd8299b5312ce9696, type: 3}
+    path: Assets/Plugins/Gemfile0/Match3Editor/Textures/transparent.png
+  gemSize: {x: 128, y: 128}
+  gridSize: {x: 640, y: 896}
+  pixelsToUnits: 1
+  selectedGemID: 2
+  gems: {fileID: 500260831}
+  tiles: {fileID: 787321162}
+--- !u!4 &18427763
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 18427761}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 500260832}
+  - {fileID: 787321163}
+  - {fileID: 1351025342}
+  m_Father: {fileID: 0}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &268862619
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 268862624}
+  - component: {fileID: 268862623}
+  - component: {fileID: 268862622}
+  - component: {fileID: 268862621}
+  - component: {fileID: 268862620}
+  m_Layer: 0
+  m_Name: Main Camera
+  m_TagString: MainCamera
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!81 &268862620
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 268862619}
+  m_Enabled: 1
+--- !u!124 &268862621
+Behaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 268862619}
+  m_Enabled: 1
+--- !u!92 &268862622
+Behaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 268862619}
+  m_Enabled: 1
+--- !u!20 &268862623
+Camera:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 268862619}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 1000
+  field of view: 60
+  orthographic: 1
+  orthographic size: 5
+  m_Depth: -1
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
+  m_StereoMirrorMode: 0
+--- !u!4 &268862624
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 268862619}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &500260831
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 500260832}
+  m_Layer: 0
+  m_Name: Gems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &500260832
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 500260831}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 18427763}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &787321162
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 787321163}
+  m_Layer: 0
+  m_Name: Tiles
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &787321163
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 787321162}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 18427763}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1351025341
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1351025342}
+  - component: {fileID: 1351025344}
+  - component: {fileID: 1351025343}
+  m_Layer: 0
+  m_Name: Brush
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1351025342
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1351025341}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 18427763}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &1351025343
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1351025341}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
+  m_Materials:
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingOrder: 1000
+  m_Sprite: {fileID: 21300000, guid: 7b1887072b8a041cd8299b5312ce9696, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+--- !u!114 &1351025344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1351025341}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de58f9170fe634f8b848cbc5add9415f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  brushSize: {x: 128, y: 128}
+  positionID: 0
+  gemID: 2
+  renderer2D: {fileID: 1351025343}
