@@ -20,7 +20,6 @@ GameObject:
   m_Component:
   - component: {fileID: 224041546347145542}
   - component: {fileID: 114269598853690038}
-  - component: {fileID: 222734378990827712}
   m_Layer: 0
   m_Name: EmptyGem
   m_TagString: Untagged
@@ -45,12 +44,6 @@ MonoBehaviour:
       index: 0
       row: 0
       col: 0
---- !u!222 &222734378990827712
-CanvasRenderer:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1553304833528366}
 --- !u!224 &224041546347145542
 RectTransform:
   m_ObjectHideFlags: 1

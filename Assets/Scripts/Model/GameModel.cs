@@ -92,7 +92,6 @@ public class GameModel: BaseModel
 			new int[] {-1,  0}
 		};
         
-        levelModel = JsonUtility.FromJson<LevelModel>(levelData.text);
         Position.Setup(levelModel);
 
         var gems = levelModel.gems;

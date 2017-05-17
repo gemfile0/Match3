@@ -114,12 +114,7 @@ public class GameController<M>: BaseController<M>
 		wheresCanMatch = new List<WhereCanMatch>();
 		matchableTypeInfos = new List<MatchableTypeInfo>();
 	}
-	
-	public override void Setup(M model) 
-	{
-		base.Setup(model);
-	}
-	
+
 	public override void Destroy() 
 	{
 		base.Destroy();

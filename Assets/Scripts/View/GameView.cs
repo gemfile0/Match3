@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Events;
 
 class UpdateResult
 {
@@ -29,8 +30,14 @@ struct ReplacedPositionsInfo
 	public int latestCount;
 }
 
+[System.SerializableAttribute]
+public class GemRemovedEvent: UnityEvent<int> {}
+
 public class GameView: BaseView<GameModel, GameController<GameModel>>  
 {
+	public UnityEvent OnPhaseNext = new UnityEvent();
+	public GemRemovedEvent OnGemRemoved = new GemRemovedEvent();
+	
 	const Int64 FRAME_BY_TURN = 3;
 	const float TIME_PER_FRAME = 0.012f;
 	const Int64 A_QUARTER_OF_SHUFFLE = 25;
@@ -51,6 +58,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	GameObject gems;
 	GameObject gravities;
 	bool isPlaying;
+	bool isPlayingBefore;
 
 	public void Awake()
 	{
@@ -91,14 +99,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	void Update()
 	{
-		if (isPlaying) { startOfWaiting = 0f; return; }
-
-		if (startOfWaiting == 0f) { startOfWaiting = Time.time;}
-		if ((Time.time - startOfWaiting) > 3f)
-		{
-			CheckHasAnyMatchableGems();
-			startOfWaiting = 0f;
-		}
+		WatchPhase();
+		WatchMatchables();
 	}
 
 	IEnumerator StartHello() 
@@ -108,6 +110,28 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		{
 			gemViews[gemModel.id].Squash();
 		}
+	}
+
+	void WatchMatchables()
+	{
+		if (isPlaying) { startOfWaiting = 0f; return; }
+		if (startOfWaiting == 0f) { startOfWaiting = Time.time;}
+		if ((Time.time - startOfWaiting) > 3f)
+		{
+			CheckHasAnyMatchableGems();
+			startOfWaiting = 0f;
+		}
+	}
+
+	void WatchPhase()
+	{
+		if (isPlayingBefore != isPlaying) 
+		{
+			if (isPlayingBefore == false && isPlaying == true) {
+				OnPhaseNext.Invoke();
+			}
+		}
+		isPlayingBefore = isPlaying;
 	}
 
 	void MakePoolOfGems()
@@ -232,6 +256,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				if (gemView == null) { continue; }
 				sequence.InsertCallback(currentTime, () => {
 					gemView.ReturnToPool();
+					OnGemRemoved.Invoke((int)gemModel.Type);
 				});
 			}
 
@@ -782,6 +807,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 		sequence.InsertCallback(currentTime, () => {
 			gemView.ReturnToPool();
+			OnGemRemoved.Invoke((int)gemModel.Type);
 		});
 	}
 
@@ -887,6 +913,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				sequence.InsertCallback(currentTime, () => {
 					gemViewRemoving.ReturnToPool();
 					gemViewCreating.SetActive(true);
+					OnGemRemoved.Invoke((int)gemModel.Type);
 				});
 			});
 			
@@ -1022,8 +1049,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		existingActionQueue.Enqueue(action);
 	}
 
-    public void PassTheLevelData(TextAsset levelData)
+    public void PassTheLevelModel(LevelModel levelModel)
     {
-        Model.levelData = levelData;
+        Model.levelModel = levelModel;
     }
 }

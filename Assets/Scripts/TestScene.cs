@@ -1,9 +1,16 @@
-﻿public class TestScene: BaseScene 
+﻿public class TestScene: LevelScene 
 {
+	public int testingLevel;
+	
 	protected override void Awake()
 	{
-		ResourceCache.LoadAll("");
+		ResourceCache.LoadAll("LevelScene");
 
 		base.Awake();
+	}
+
+	protected override int ReadLevelIndex()
+	{
+		return testingLevel;
 	}
 }
