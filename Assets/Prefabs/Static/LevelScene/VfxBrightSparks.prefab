@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 198981620030308454}
   - component: {fileID: 199687738513180466}
   m_Layer: 0
-  m_Name: VfxBrightSparks 1
+  m_Name: VfxBrightSparks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -99,6 +99,12 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		}
 	}
 
+	public void OnModalVisibleChanged(bool visible)
+	{
+		var curretPosition = transform.localPosition;
+		transform.localPosition = new Vector3(curretPosition.x, curretPosition.y, (visible) ? -9 : 0);
+	}
+
 	void Update()
 	{
 		WatchPhase();

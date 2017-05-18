@@ -23,7 +23,7 @@ GameObject:
   - component: {fileID: 114102313122290234}
   - component: {fileID: 114382207096432550}
   m_Layer: 5
-  m_Name: Button
+  m_Name: CancelButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -110,7 +110,7 @@ GameObject:
   - component: {fileID: 114777212389404280}
   - component: {fileID: 114730395109273816}
   m_Layer: 5
-  m_Name: Button
+  m_Name: YesButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -199,18 +199,18 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 12396df8696717c45bf7b5b6fe92bcd7, type: 3}
-    m_FontSize: 38
+    m_FontSize: 48
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
-    m_MaxSize: 40
+    m_MaxSize: 48
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Ok
+  m_Text: Cancel
 --- !u!114 &114327381880849700
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -222,10 +222,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6c16f9569e29401c8e5d5090596cbd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OnVisbileChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_MethodName: OnModalVisibleChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_TypeName: ModalVisibleChangedEvent, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
   titleLabel: {fileID: 114632678911985240}
-  yesLabel: {fileID: 114202290148410050}
-  yesButton: {fileID: 114382207096432550}
-  cancelButton: {fileID: 114730395109273816}
+  yesLabel: {fileID: 114524319140794460}
+  yesButton: {fileID: 114730395109273816}
+  cancelButton: {fileID: 114382207096432550}
 --- !u!114 &114382207096432550
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -288,18 +304,18 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 12396df8696717c45bf7b5b6fe92bcd7, type: 3}
-    m_FontSize: 38
+    m_FontSize: 48
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 2
-    m_MaxSize: 40
+    m_MaxSize: 48
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Cancel
+  m_Text: Ok
 --- !u!114 &114611334178293792
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -335,11 +351,11 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 4c86ab283af48d346af639dd8f68a857, type: 3}
-    m_FontSize: 48
+    m_FontSize: 60
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 2
-    m_MaxSize: 48
+    m_MaxSize: 60
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -578,8 +594,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -170, y: 100}
-  m_SizeDelta: {x: 280, y: 80}
+  m_AnchoredPosition: {x: 190, y: 100}
+  m_SizeDelta: {x: 310, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224395453218007782
 RectTransform:
@@ -597,8 +613,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 170, y: 100}
-  m_SizeDelta: {x: 280, y: 80}
+  m_AnchoredPosition: {x: -190, y: 100}
+  m_SizeDelta: {x: 310, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224560912892779658
 RectTransform:
@@ -671,8 +687,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -8.1}
-  m_SizeDelta: {x: 250, y: 80}
+  m_AnchoredPosition: {x: 0, y: -8.100006}
+  m_SizeDelta: {x: 270, y: 90}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!224 &224893676969738046
 RectTransform:
@@ -693,5 +709,5 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 165}
-  m_SizeDelta: {x: 880, y: 490}
+  m_SizeDelta: {x: 960, y: 540}
   m_Pivot: {x: 0.5, y: 0.5}
