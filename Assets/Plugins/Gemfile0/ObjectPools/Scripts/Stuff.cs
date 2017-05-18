@@ -24,7 +24,7 @@ public class Stuff: PooledObject
 		SceneManager.sceneLoaded += OnSceneLoaded;
 	}
 
-	void Destroy()
+	void OnDestroy()
 	{
 		SceneManager.sceneLoaded -= OnSceneLoaded;
 	}

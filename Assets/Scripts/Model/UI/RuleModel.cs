@@ -6,8 +6,8 @@ using UnityEngine;
 public class RuleModel: BaseModel  
 {
     public LevelModel levelModel;
-    public int leftMoves;
-    public List<MissionModel> leftMissions;
+    public int movesLeft;
+    public List<MissionModel> missionsLeft;
 
     public RuleModel()
     {
@@ -16,12 +16,13 @@ public class RuleModel: BaseModel
 
     public override void Setup()
     {
-        leftMoves = levelModel.moves;
-        leftMissions = new List<MissionModel>(levelModel.missions);
+        movesLeft = levelModel.moves;
+        missionsLeft = new List<MissionModel>(levelModel.missions);
     }
 
-    public override void Destroy()
+    public override void Kill()
     {
-
+        levelModel = null;
+        missionsLeft = null;
     }
 }

@@ -16,7 +16,7 @@ public class LevelItem: MonoBehaviour
 		});
 	}
 
-	void Destroy()
+	void OnDestroy()
 	{
 		button.onClick.RemoveAllListeners();
 		callback = null;

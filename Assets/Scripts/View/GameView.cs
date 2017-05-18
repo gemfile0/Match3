@@ -85,16 +85,18 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		StartCoroutine(StartHello());
 	}
 
-	public override void Destroy() 
+	public override void OnDestroy() 
 	{
-		base.Destroy();
+		base.OnDestroy();
 
 		UnsubscribeInput();
 
 		gemViews = null;
 		actionQueueByTurn = null;
-		sequence.Kill();
-		sequence = null;
+		if (sequence != null) {
+			sequence.Kill();
+			sequence = null;
+		}
 	}
 
 	void Update()
@@ -110,6 +112,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		{
 			gemViews[gemModel.id].Squash();
 		}
+		Controller.TakeSnapshot();
 	}
 
 	void WatchMatchables()

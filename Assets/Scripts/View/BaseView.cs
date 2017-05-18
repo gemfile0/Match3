@@ -14,9 +14,11 @@ public class BaseView<M, C>: PooledObject
 		Controller.Setup(Model);
 	}
 
-	public virtual void Destroy()
+	public virtual void OnDestroy()
 	{
-		Controller.Destroy();
+		if (Controller == null) { return; }
+		
+		Controller.Kill();
 		Controller = null;
 	}
 

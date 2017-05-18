@@ -12,6 +12,7 @@ public class LevelModel
     public int[] tiles;
     public int[] gravities;
     public MissionModel[] missions;
+    public int[] availableGemTypes;
     public int moves;
     public int cols;
     public int rows;

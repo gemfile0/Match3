@@ -4,8 +4,10 @@ using UnityEngine.UI;
 
 public class LevelSelectionPanel: MonoBehaviour 
 {
-	public ScrollRectSnap scrollRectSnap;
-	public Sprite[] levelTextures;
+	[SerializeField]
+	ScrollRectSnap scrollRectSnap;
+	[SerializeField]
+	Sprite[] levelTextures;
 	const float GAP_OF_ITEM = 800f;
 
 	public void Setup() 

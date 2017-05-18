@@ -1,4 +1,4 @@
-﻿public class TestScene: LevelScene 
+﻿public class TestLevelScene: LevelScene 
 {
 	public int testingLevel;
 	

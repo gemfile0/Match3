@@ -8,29 +8,29 @@ public class RuleController<M> : BaseController<M>
 {
     internal void ShowMissions()
     {
-		foreach (var mission in Model.levelModel.missions)
-		{
-        	Debug.Log("Mission : " + mission.gemID + ", " + mission.howMany);
-		}
+		// foreach (var mission in Model.levelModel.missions)
+		// {
+        // 	Debug.Log("Mission : " + mission.gemID + ", " + mission.howMany);
+		// }
     }
 
     public void OnPhaseNext()
     {
-        if (Model.leftMoves > 0) { Model.leftMoves -= 1; }
+        if (Model.movesLeft > 0) { Model.movesLeft -= 1; }
     }
 
     internal void OnGemRemoved(int gemID)
     {
-        var leftMissions = Model.leftMissions;
-        for (var i = 0; i < leftMissions.Count; i++)
+        var missionsLeft = Model.missionsLeft;
+        for (var i = 0; i < missionsLeft.Count; i++)
         {
-            var leftMission = leftMissions[i];
-            if (leftMission.gemID == gemID) { 
-                if (leftMission.howMany > 0) { leftMission.howMany -= 1; }
-                leftMissions[i] = leftMission;
+            var missionLeft = missionsLeft[i];
+            if (missionLeft.gemID == gemID) { 
+                if (missionLeft.howMany > 0) { missionLeft.howMany -= 1; }
+                missionsLeft[i] = missionLeft;
             }
         }
 
-        Model.leftMissions = leftMissions;
+        Model.missionsLeft = missionsLeft;
     }
 }

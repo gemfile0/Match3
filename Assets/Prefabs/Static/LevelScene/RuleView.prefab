@@ -2699,13 +2699,15 @@ MonoBehaviour:
       moves: 0
       cols: 0
       rows: 0
-    leftMoves: 0
-    leftMissions: []
+    movesLeft: 0
+    missionsLeft: []
   moves: {fileID: 114011053106540634}
   missions:
   - {fileID: 114868424093303750}
   - {fileID: 114049167390015328}
   - {fileID: 114212810576267162}
+  modalPanel: {fileID: 0}
+  firework: {fileID: 0}
 --- !u!114 &114382435751917130
 MonoBehaviour:
   m_ObjectHideFlags: 1

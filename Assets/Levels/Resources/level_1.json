@@ -29,6 +29,9 @@
     "missions": [
         {"gemID": 10, "howMany": 9}
     ],
+    "availableGemTypes": [
+        10, 20, 30, 60
+    ],
     "cols": 5,
     "rows": 7,
     "moves": 9

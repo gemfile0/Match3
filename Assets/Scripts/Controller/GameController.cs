@@ -115,9 +115,9 @@ public class GameController<M>: BaseController<M>
 		matchableTypeInfos = new List<MatchableTypeInfo>();
 	}
 
-	public override void Destroy() 
+	public override void Kill() 
 	{
-		base.Destroy();
+		base.Kill();
 
 		matchedLineInfos = null;
 		feedingGemModels = null;
@@ -132,6 +132,11 @@ public class GameController<M>: BaseController<M>
 		matchableGemInfos = null;
 		wheresCanMatch = null;
 		matchableTypeInfos = null;
+	}
+
+	public void TakeSnapshot()
+	{
+
 	}
 
 	public void PutGems() 

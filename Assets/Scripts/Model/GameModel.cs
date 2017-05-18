@@ -13,7 +13,14 @@ public class GameModel: BaseModel
         } 
     }
     GemModel[,] gemModels;
-
+    public List<GemModel[,]> HistoryOfGemModels 
+    { 
+        get {
+            UnityEngine.Assertions.Assert.IsNotNull(historyOfGemModels);
+            return historyOfGemModels; 
+        } 
+    }
+    List<GemModel[,]> historyOfGemModels;
     public TileModel[,] TileModels 
     { 
         get {
@@ -80,11 +87,6 @@ public class GameModel: BaseModel
             new MatchLineModel(0, 0, 1, 3),
         };
 
-        matchingTypes = new List<GemType> {
-			GemType.RedGem, GemType.GreenGem, GemType.BlueGem, 
-			GemType.OrangeGem, GemType.PurpleGem, GemType.YellowGem
-		};
-
         offsetsCanSwap = new List<int[]> {
 			new int[] { 0,  1},
 			new int[] { 0, -1},
@@ -94,10 +96,19 @@ public class GameModel: BaseModel
         
         Position.Setup(levelModel);
 
+        matchingTypes = new List<GemType>();
+        foreach (var availableGemType in levelModel.availableGemTypes)
+        {
+            matchingTypes.Add((GemType)availableGemType);
+        }
+
         var gems = levelModel.gems;
         var tiles = levelModel.tiles;
         var gravities = levelModel.gravities;
         var count = 0;
+
+        historyOfGemModels = new List<GemModel[,]>();
+        
         gemModels = new GemModel[Rows, Cols];
         tileModels = new TileModel[Rows, Cols];
         gravityModels = new GravityModel[Rows, Cols];
@@ -123,7 +134,7 @@ public class GameModel: BaseModel
         }
     }
 
-    public override void Destroy()
+    public override void Kill()
     {
         allwayMatchLineModels = null;
         positiveMatchLineModels = null;
@@ -133,5 +144,6 @@ public class GameModel: BaseModel
         gemModels = null;
         tileModels = null;
         gravityModels = null;
+        historyOfGemModels = null;
     }
 }
