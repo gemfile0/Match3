@@ -28,6 +28,7 @@ public class LevelScene: BaseScene
 		gameView.OnGemRemoved.AddListener(ruleView.OnGemRemoved);
 		gameView.OnPhaseNext.AddListener(ruleView.OnPhaseNext);
 		modalPanel.OnVisbileChanged.AddListener(gameView.OnModalVisibleChanged);
+		ruleView.OnAllMissionAchieved.AddListener(gameView.OnAllMissionAchieved);
 	}
 
 	void OnDestroy()

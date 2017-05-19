@@ -146,6 +146,17 @@ public class GameController<M>: BaseController<M>
 		return !gemModelsCurrent.ContentEquals<GemModel>(gemModelsBefore);
 	}
 
+	public bool HasAnySpecialGems()
+	{
+		var specialGemModels = 
+			from GemModel gemModel in Model.GemModels
+			where IsMovableTile(gemModel.Position)
+				&& gemModel.IsSpecialType()
+			select gemModel;
+
+		return specialGemModels.Any();
+	}
+
 	public void PutGems() 
 	{
 		var matchLineModels = Model.allwayMatchLineModels;
@@ -229,7 +240,7 @@ public class GameController<M>: BaseController<M>
 			var sourceGemModel = GetGemModel(sourcePosition);
 			
 			// Add to targets either if it is special gem
-			if (IsSpecialType(sourceGemModel)) {
+			if (sourceGemModel.IsSpecialType()) {
 				matchableTypeInfos.Add(new MatchableTypeInfo {
 					sourcePosition = sourcePosition,
 					sourceGemModel = sourceGemModel,
@@ -272,7 +283,7 @@ public class GameController<M>: BaseController<M>
 					var nearPosition = Position.Get(sourcePosition, offsetCanSwap[0], offsetCanSwap[1]);
 
 					if (!IsMovableTile(nearPosition)
-						|| !IsSpecialType(GetGemModel(nearPosition))) { continue; }
+						|| !GetGemModel(nearPosition).IsSpecialType()) { continue; }
 
 					matchableGemInfos.Add(new MatchableGemInfo { 
 						sourceGemModel = GetGemModel(sourcePosition), nearGemModel = GetGemModel(nearPosition) 
@@ -748,13 +759,38 @@ public class GameController<M>: BaseController<M>
 				&& gemModel is IMovable 
 				&& gemModel.CanMatch(gemType)
 				&& Model.currentTurn >= gemModel.preservedFromBreak
-				// && Model.currentTurn >= gemModel.preservedFromMatch
 			select gemModel;
 
 		foreach (var gemModel in sameGemModels)
 		{
 			replacedGemInfo.gemModels.Add(
 				CopyAsSpecial(replacerID, gemModel, specialKeys[RANDOM.Next(specialKeys.Length)], endurance)
+			);
+		}
+		
+        return replacedGemInfo;
+    }
+
+	public ReplacedGemInfo ReplaceAnyTypeAsSpecial(
+		Int64 replacerID, 
+		string[] specialKeys, 
+		int endurance
+	) {
+		replacedGemInfo.Clear();
+		
+		var chosenGemModels = 
+			from GemModel gemModel in Model.GemModels
+			where IsMovableTile(gemModel.Position)
+				&& gemModel is IMovable 
+				&& gemModel.IsPrimitiveType()
+				&& Model.currentTurn >= gemModel.preservedFromBreak
+			select gemModel;
+
+		chosenGemModels = chosenGemModels.OrderBy(s => Guid.NewGuid()).Take(endurance);
+		foreach (var gemModel in chosenGemModels)
+		{
+			replacedGemInfo.gemModels.Add(
+				CopyAsSpecial(replacerID, gemModel, specialKeys[RANDOM.Next(specialKeys.Length)], int.MaxValue)
 			);
 		}
 		
@@ -783,6 +819,24 @@ public class GameController<M>: BaseController<M>
         return blockedGemInfo;
     }
 
+	public BlockedGemInfo MarkSpecialTypeAsBlock(Int64 markerID)
+    {
+		blockedGemInfo.Clear();
+		
+		var specialGemModels = 
+			from GemModel gemModel in Model.GemModels
+			where IsMovableTile(gemModel.Position)
+				&& gemModel.IsSpecialType()
+			select gemModel;
+
+		foreach (var gemModel in specialGemModels)
+		{
+			blockedGemInfo.gemModels.Add(CopyAsBlock(markerID, gemModel));
+		}
+		
+        return blockedGemInfo;
+    }
+
 	public BlockedGemInfo MarkAllGemsAsBlock(Position sourcePosition, Int64 markerID)
 	{
 		blockedGemInfo.Clear();
@@ -792,7 +846,6 @@ public class GameController<M>: BaseController<M>
 			where IsMovableTile(gemModel.Position)
 				&& gemModel is IMovable 
 				&& Model.currentTurn >= gemModel.preservedFromBreak
-				// && Model.currentTurn >= gemModel.preservedFromMatch
 			select gemModel;
 
 		foreach (var gemModel in sameGemModels)
@@ -825,7 +878,6 @@ public class GameController<M>: BaseController<M>
 		);
 		copiedGemModel.id = targetGemModel.id;
 		copiedGemModel.replacedBy = replacerID;
-		copiedGemModel.endurance = endurance;
 		SetGemModel(copiedGemModel);
 		return copiedGemModel;
 	}
@@ -834,7 +886,7 @@ public class GameController<M>: BaseController<M>
 	{
 		brokenGemInfo.Clear();
 
-		if (IsMovableTile(targetPosition)) 
+		if (IsMovableTile(targetPosition))
 		{
 			var targetGemModel = GetGemModel(targetPosition);
 			if (targetGemModel.markedBy == markerID || targetGemModel.replacedBy == markerID) {
@@ -905,21 +957,4 @@ public class GameController<M>: BaseController<M>
 		return Model.TileModels[position.row, position.col].Type != TileType.Immovable;
 	}
 
-	public bool IsSpecialType(GemModel gemModel)
-	{
-		// "H": "H", "V", "C", Choco, Super
-		// "V': "H", "V", "C", Choco, Super
-		// "C": "H", "V", "C", Choco, Super
-		// Choco: "H", "V", "C", Choco, Super
-		// Super: "H", "V", "C", Choco, Super
-		var gemType = gemModel.Type;
-		var specialKey = gemModel.specialKey;
-		return (
-			gemType == GemType.SuperGem 
-			|| gemType == GemType.ChocoGem 
-			|| specialKey == Literals.H
-			|| specialKey == Literals.V
-			|| specialKey == Literals.C
-		);
-	}
 }

@@ -86,6 +86,22 @@ public class GemModel: BaseModel, IComparable
         return type >= GemType.RedGem && type <= GemType.YellowGemV && type == matchingType;
     }
 
+    public bool IsPrimitiveType()
+    {
+        return type >= GemType.RedGem && specialKey == "";
+    }
+
+    public bool IsSpecialType()
+	{
+		return (
+			Type == GemType.SuperGem 
+			|| Type == GemType.ChocoGem 
+			|| specialKey == Literals.H
+			|| specialKey == Literals.V
+			|| specialKey == Literals.C
+		);
+	}
+
     public int CompareTo(object obj)
     {
         if (obj == null) return 1;

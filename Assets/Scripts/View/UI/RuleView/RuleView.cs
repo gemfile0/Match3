@@ -1,10 +1,23 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Events;
+
+public class EventAllMissionAchieved: UnityEvent<CompletedRuleInfo> {};
+
+public class CompletedRuleInfo
+{
+    public RuleModel ruleModel;
+    public Action onShowGotoNext;
+    public Action onMovesComsumed;
+}
 
 public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>  
 {
+    public EventAllMissionAchieved OnAllMissionAchieved = new EventAllMissionAchieved();
+    
     [SerializeField]
 	Moves moves;
     [SerializeField]
@@ -17,6 +30,7 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
     string levelText;
     SceneLoader sceneLoader;
     const int END_OF_LEVEL = 8;
+    CompletedRuleInfo completedRuleInfo;
     
     public override void Start()
 	{
@@ -31,6 +45,15 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
 		levelText = sb.ToString();
 
         sceneLoader = GameObject.Find(Literals.SceneLoader).GetComponent<SceneLoader>();
+        completedRuleInfo = new CompletedRuleInfo {
+            onMovesComsumed = () => {
+                OnPhaseNext();
+            },
+            onShowGotoNext = () => {
+                firework.Play();
+                Invoke("GoToNext", 2);
+            }
+        };
     }
 
     public override void OnDestroy()
@@ -38,6 +61,7 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
         base.OnDestroy();
         
         missions = null;
+        completedRuleInfo = null;
     }
 
 	public void PassTheLevelModel(LevelModel levelModel)
@@ -49,7 +73,7 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
     {
         Controller.OnPhaseNext();
         ValidateInfomation();
-        if (Model.movesLeft == 0) 
+        if (!Model.hasCompleted && Model.movesLeft == 0) 
         {
             SuggestRetry();
         }
@@ -57,12 +81,14 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
 
     public void OnGemRemoved(int gemID)
     {
+        if (Model.hasCompleted) { return; }
+
         Controller.OnGemRemoved(gemID);
         ValidateInfomation();
-        if (IsAllMissionAchieved()) 
+        if (Model.hasCompleted) 
         {
-            firework.Play();
-            Invoke("GoToNext", 2);
+            completedRuleInfo.ruleModel = Model;
+            OnAllMissionAchieved.Invoke(completedRuleInfo);
         }
     }
 
@@ -95,17 +121,6 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
                 sceneLoader.Load(Literals.LobbyScene);
             }
         );
-    }
-
-    bool IsAllMissionAchieved()
-    {
-        var result = true;
-        var missionLefts = Model.missionsLeft;
-        foreach (var missionLeft in missionLefts)
-        {
-            if (missionLeft.howMany > 0) { result = false; }
-        }
-        return result;
     }
 
     void ValidateInfomation()
