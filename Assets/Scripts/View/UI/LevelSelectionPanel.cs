@@ -25,7 +25,7 @@ public class LevelSelectionPanel: MonoBehaviour
 			levelItem.GetComponent<Image>().sprite = levelTextures[i];
 
 			sb = new StringBuilder();
-			sb.AppendFormat(Literals.Level0, levelIndex);
+			sb.AppendFormat(Literals.LEVEL0, levelIndex);
 			levelItem.GetComponent<LevelItem>().title.text = sb.ToString();
 
 			levelItems[i] = levelItem;

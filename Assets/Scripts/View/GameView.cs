@@ -30,11 +30,11 @@ struct ReplacedPositionsInfo
 	public int latestCount;
 }
 
-[System.SerializableAttribute]
 public class GemRemovedEvent: UnityEvent<int> {}
 
 public class GameView: BaseView<GameModel, GameController<GameModel>>  
 {
+	[NonSerializedAttribute]
 	public UnityEvent OnPhaseNext = new UnityEvent();
 	public GemRemovedEvent OnGemRemoved = new GemRemovedEvent();
 	

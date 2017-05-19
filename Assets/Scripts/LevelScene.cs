@@ -9,6 +9,9 @@ public class LevelScene: BaseScene
 	[SerializeField]
 	RuleView ruleView;
 
+	[SerializeField]
+	ModalPanel modalPanel;
+
 	protected override void Awake()
 	{
 		base.Awake();
@@ -21,6 +24,17 @@ public class LevelScene: BaseScene
 
 		gameView.PassTheLevelModel(levelModel);
 		ruleView.PassTheLevelModel(levelModel);
+
+		gameView.OnGemRemoved.AddListener(ruleView.OnGemRemoved);
+		gameView.OnPhaseNext.AddListener(ruleView.OnPhaseNext);
+		modalPanel.OnVisbileChanged.AddListener(gameView.OnModalVisibleChanged);
+	}
+
+	void OnDestroy()
+	{
+		gameView.OnGemRemoved.RemoveAllListeners();
+		gameView.OnPhaseNext.RemoveAllListeners();
+		modalPanel.OnVisbileChanged.RemoveAllListeners();
 	}
 
 	public void LoadLobbyScene()

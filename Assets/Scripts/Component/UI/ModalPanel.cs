@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-[System.SerializableAttribute]
 public class ModalVisibleChangedEvent: UnityEvent<bool> {}
 
 public class ModalPanel: MonoBehaviour 
