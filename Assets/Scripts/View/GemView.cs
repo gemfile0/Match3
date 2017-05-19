@@ -10,6 +10,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     bool isDebugging = true;
     MaterialPropertyBlock mpb;
     Sequence squash;
+    Tween shrink;
     
     void Awake()
     {
@@ -25,9 +26,25 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         squash.Pause();
         squash.SetAutoKill(false);
 
+        shrink = transform.DOScale(new Vector3(0, 0, 0), .295f).OnComplete(() => {
+            base.ReturnToPool();
+            transform.localScale = new Vector3(1, 1, 1);    
+        }).SetEase(Ease.OutCirc);
+        shrink.SetAutoKill(false);
+        shrink.Pause();
+
 #if DISABLE_DEBUG
         isDebugging = false;
 #endif
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        
+        mpb = null;
+        squash = null;
+        shrink = null;
     }
     
     public Position Position 
@@ -120,16 +137,21 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         gameObject.SetActive(visible);
     }
 
-    public void ReturnToPool(bool withAnimation = true)
+    public void ReturnToPool(bool withAnimation = true, Vector2 combiningPosition = default(Vector2))
     {   
         markerIdText.gameObject.SetActive(false);
 
         if (withAnimation)
         {
-            transform.DOScale(new Vector3(0, 0, 0), .295f).OnComplete(() => {
-                base.ReturnToPool();
-                transform.localScale = new Vector3(1, 1, 1);    
-            }).SetEase(Ease.OutCirc);
+            if (object.Equals(combiningPosition, default(Vector2))) { shrink.Restart(); } 
+            else {
+                var sequence = DOTween.Sequence().OnComplete(() => {
+                    base.ReturnToPool();
+                    transform.localScale = new Vector3(1, 1, 1); 
+                });
+                sequence.Insert(0, transform.DOScale(new Vector3(0, 0, 0), .295f).SetEase(Ease.OutCirc));
+                sequence.Insert(0, transform.DOLocalMove(combiningPosition, .295f));
+            }
         }
         else
         {

@@ -259,12 +259,20 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	{
 		foreach (var matchedLineInfo in matchedLineInfos)
 		{
+			var newAdded = matchedLineInfo.newAdded;
+			var combindedLocation = default(Vector2);
+			if (newAdded != null) 
+			{
+				combindedLocation = new Vector2(newAdded.Position.col * gemSize.x, newAdded.Position.row * gemSize.y);
+			}
+
 			foreach (var gemModel in matchedLineInfo.gemModels)
 			{
 				var gemView = RemoveGemView(gemModel, true);
 				if (gemView == null) { continue; }
+				
 				sequence.InsertCallback(currentTime, () => {
-					gemView.ReturnToPool();
+					gemView.ReturnToPool(true, combindedLocation);
 					OnGemRemoved.Invoke((int)gemModel.Type);
 				});
 			}
