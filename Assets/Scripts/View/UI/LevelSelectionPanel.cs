@@ -4,8 +4,10 @@ using UnityEngine.UI;
 
 public class LevelSelectionPanel: MonoBehaviour 
 {
-	public ScrollRectSnap scrollRectSnap;
-	public Sprite[] levelTextures;
+	[SerializeField]
+	ScrollRectSnap scrollRectSnap;
+	[SerializeField]
+	Sprite[] levelTextures;
 	const float GAP_OF_ITEM = 800f;
 
 	public void Setup() 
@@ -23,7 +25,7 @@ public class LevelSelectionPanel: MonoBehaviour
 			levelItem.GetComponent<Image>().sprite = levelTextures[i];
 
 			sb = new StringBuilder();
-			sb.AppendFormat(Literals.Level0, levelIndex);
+			sb.AppendFormat(Literals.LEVEL0, levelIndex);
 			levelItem.GetComponent<LevelItem>().title.text = sb.ToString();
 
 			levelItems[i] = levelItem;

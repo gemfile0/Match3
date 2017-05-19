@@ -1,9 +1,0 @@
-﻿public class TestScene: BaseScene 
-{
-	protected override void Awake()
-	{
-		ResourceCache.LoadAll("");
-
-		base.Awake();
-	}
-}

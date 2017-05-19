@@ -11,11 +11,11 @@ public class BaseScene: MonoBehaviour
 
 		ResourceCache.LoadAll(Literals.Common);
 		ResourceCache.LoadAll(SceneManager.GetActiveScene().name);
-		if (transform.root.Find(Literals.SceneLoader) == null) 
+		if (GameObject.Find(Literals.SceneLoader) == null) 
 		{
 			ResourceCache.Instantiate(Literals.SceneLoader);
 		}
-		if (transform.root.Find(Literals.Toast) == null) 
+		if (GameObject.Find(Literals.Toast) == null) 
 		{
 			ResourceCache.Instantiate(Literals.Toast);
 		}

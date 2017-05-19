@@ -97,6 +97,8 @@ public class GOSequence: IUpdater
 	
 	public void Kill()
 	{
+		if (items == null) { return; }
+		
 		foreach(var item in items.Values)
 		{
 			item.watcher.Kill();

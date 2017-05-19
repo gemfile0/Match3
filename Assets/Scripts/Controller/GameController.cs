@@ -114,15 +114,10 @@ public class GameController<M>: BaseController<M>
 		wheresCanMatch = new List<WhereCanMatch>();
 		matchableTypeInfos = new List<MatchableTypeInfo>();
 	}
-	
-	public override void Setup(M model) 
+
+	public override void Kill() 
 	{
-		base.Setup(model);
-	}
-	
-	public override void Destroy() 
-	{
-		base.Destroy();
+		base.Kill();
 
 		matchedLineInfos = null;
 		feedingGemModels = null;
@@ -137,6 +132,11 @@ public class GameController<M>: BaseController<M>
 		matchableGemInfos = null;
 		wheresCanMatch = null;
 		matchableTypeInfos = null;
+	}
+
+	public void TakeSnapshot()
+	{
+
 	}
 
 	public void PutGems() 

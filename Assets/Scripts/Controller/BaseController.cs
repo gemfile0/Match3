@@ -9,9 +9,9 @@
         Model.Setup();
     }
 
-    public virtual void Destroy()
+    public virtual void Kill()
     {
-        Model.Destroy();
+        Model.Kill();
         Model = null;
     }
 }

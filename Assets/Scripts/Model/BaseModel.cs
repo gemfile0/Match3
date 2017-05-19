@@ -6,7 +6,7 @@ public class BaseModel
 
     }
 
-    public virtual void Destroy()
+    public virtual void Kill()
     {
         
     }

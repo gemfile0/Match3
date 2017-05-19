@@ -32,6 +32,14 @@
          2,  2,  2,  2,  2,  2,  2,  2,  2,
          2,  2,  0,  2,  2,  2,  0,  2,  2
     ],
+    "missions": [
+        {"gemID": 30, "howMany": 35},
+        {"gemID": 10, "howMany": 45},
+        {"gemID": 60, "howMany": 35}
+    ],
+    "availableGemTypes": [
+        10, 20, 30, 60
+    ],
     "cols": 9,
     "rows": 9,
     "moves": 18

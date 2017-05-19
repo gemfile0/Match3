@@ -12,7 +12,8 @@
 	public const string level = "level";
 	public const string level_0 = "level_{0}";
 	public const string LevelItem0 = "LevelItem{0}";
-	public const string Level0 = "LEVEL {0}";
+	public const string LEVEL0 = "LEVEL {0}";
+	public const string Level0 = "Level {0}";
 	public const string LevelItem = "LevelItem";
 	public const string ID = "ID";
 	public const string MarkerID = "MarkerID";
@@ -52,4 +53,6 @@
 	public const string CSP = "CSP";
 	public const string SPSQ = "SPSQ";
 	public const string SQSP = "SQSP";
+	public const string Next = "Next";
+	public const string Retry = "Retry";
 }
