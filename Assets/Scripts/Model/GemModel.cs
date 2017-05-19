@@ -14,7 +14,7 @@ public enum GemType
 }
 
 [System.Serializable]
-public class GemModel: BaseModel 
+public class GemModel: BaseModel, IComparable
 {
     static Int64 GEM_ID = 0;
     static Int64 SEQUENCE_ID = 0;
@@ -84,6 +84,14 @@ public class GemModel: BaseModel
     public bool CanMatch(GemType matchingType) 
     {
         return type >= GemType.RedGem && type <= GemType.YellowGemV && type == matchingType;
+    }
+
+    public int CompareTo(object obj)
+    {
+        if (obj == null) return 1;
+
+        GemModel comparing = obj as GemModel;
+        return (id == comparing.id) ? 0 : 1;
     }
 }
 
