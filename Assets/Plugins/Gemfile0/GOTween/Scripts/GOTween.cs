@@ -142,22 +142,27 @@ public class GOSequence: IUpdater
 	public void Update()
 	{
 		var duration = Duration;
-		if (duration == 0) { return; } 
-
-		var currentTime = (Time.time - startTime) / duration;
-		// Debug.Log(Time.time + ", " + startTime + ", " + duration + ", " + currentTime);
-		if (currentTime > 1) 
+		if (duration == 0) 
+		{ 
+			hasCompleted = true; 
+		} 
+		else
 		{
-			currentTime = 1;
-			hasCompleted = true;
-		}
+			var currentTime = (Time.time - startTime) / duration;
+			// Debug.Log(Time.time + ", " + startTime + ", " + duration + ", " + currentTime);
+			if (currentTime > 1) 
+			{
+				currentTime = 1;
+				hasCompleted = true;
+			}
 
-		currentTime = Ease(currentTime) * duration;
-		for(var i = 0; i < items.Count; i++)
-		{
-			var item = items[i];
-			if (currentTime >= item.atTime) {
-				item.watcher.Lerp(currentTime - item.atTime);
+			currentTime = Ease(currentTime) * duration;
+			for(var i = 0; i < items.Count; i++)
+			{
+				var item = items[i];
+				if (currentTime >= item.atTime) {
+					item.watcher.Lerp(currentTime - item.atTime);
+				}
 			}
 		}
 

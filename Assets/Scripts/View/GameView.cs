@@ -82,7 +82,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		MakeField();
 		AlignField();
 		SubscribeInput();
-		StartCoroutine(StartHello());
+		GetReady();
 	}
 
 	public override void OnDestroy() 
@@ -105,20 +105,34 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		transform.localPosition = new Vector3(curretPosition.x, curretPosition.y, (visible) ? -9 : 0);
 	}
 
-	void Update()
+	void GetReady()
 	{
-		WatchPhase();
-		WatchMatchables();
+		UpdateChanges((Int64 passedTurn) => {
+			AddAction(Model.currentTurn + passedTurn, (sequence, currentTime) => {
+				sequence.InsertCallback(
+					currentTime,
+					() => {
+						// Hello, Player!
+						foreach (var gemModel in Controller.GetAll())
+						{
+							gemViews[gemModel.id].Squash();
+						}
+					}
+				);
+			});
+		});
+		StartCoroutine(StartWatch());
 	}
 
-	IEnumerator StartHello() 
+	IEnumerator StartWatch()
 	{
-		yield return new WaitForSeconds(TIME_PER_FRAME * FRAME_BY_TURN);
-		foreach (var gemModel in Controller.GetAll())
+		yield return new WaitForSeconds(FRAME_BY_TURN * TIME_PER_FRAME * 25);
+		while (true)
 		{
-			gemViews[gemModel.id].Squash();
+			WatchPhase();
+			WatchMatchables();
+			yield return null;
 		}
-		Controller.TakeSnapshot();
 	}
 
 	void WatchMatchables()
@@ -136,7 +150,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	{
 		if (isPlayingBefore != isPlaying) 
 		{
-			if (isPlayingBefore == false && isPlaying == true) {
+			if (isPlayingBefore == false && isPlaying == true && Controller.HasAnyChange()) {
 				OnPhaseNext.Invoke();
 			}
 		}
@@ -259,12 +273,20 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	{
 		foreach (var matchedLineInfo in matchedLineInfos)
 		{
+			var newAdded = matchedLineInfo.newAdded;
+			var combindedLocation = default(Vector2);
+			if (newAdded != null) 
+			{
+				combindedLocation = new Vector2(newAdded.Position.col * gemSize.x, newAdded.Position.row * gemSize.y);
+			}
+
 			foreach (var gemModel in matchedLineInfo.gemModels)
 			{
 				var gemView = RemoveGemView(gemModel, true);
 				if (gemView == null) { continue; }
+				
 				sequence.InsertCallback(currentTime, () => {
-					gemView.ReturnToPool();
+					gemView.ReturnToPool(true, combindedLocation);
 					OnGemRemoved.Invoke((int)gemModel.Type);
 				});
 			}
@@ -380,13 +402,13 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		else 
 		{
 			Swap(sourcePosition, nearPosition);
-			UpdateChanges(0, (Int64 passedTurn) => {
+			UpdateChanges((Int64 passedTurn) => {
 				Swap(nearPosition, sourcePosition, 1);
 			});
 		}
 	}
 
-	IEnumerator StartUpdateChanges(float timeOffset, Action<Int64> OnNoAnyMatches)
+	IEnumerator StartUpdateChanges(Action<Int64> OnNoAnyMatches)
 	{
 		isPlaying = true;
 		
@@ -401,7 +423,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			if (currentFrame % FRAME_BY_TURN == 0)
 			{
 				var passedTurn = Model.currentTurn - startTurn;
-				var currentTime = timeOffset + FRAME_BY_TURN * TIME_PER_FRAME * passedTurn;
+				var currentTime = FRAME_BY_TURN * TIME_PER_FRAME * passedTurn;
 				// Debug.Log("currentTime : " + Model.currentTurn + ", " + currentTime);
 				var countOfAction = actionQueueByTurn.Count;
 
@@ -437,6 +459,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 				Controller.TurnNext();
 
+				// Debug.Log(noUpdateCount + ", " + sequence.IsComplete + ", " + countOfAction);
 				if (passedTurn > 20) { yield return null; }
 				if (noUpdateCount > 20 && sequence.IsComplete && countOfAction == 0) { break; }
 			}
@@ -477,9 +500,10 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		}
 	}
 
-	void UpdateChanges(float latestTime = 0f, Action<Int64> OnNoAnyMatches = null) 
+	void UpdateChanges(Action<Int64> OnNoAnyMatches = null) 
 	{
-		StartCoroutine(StartUpdateChanges(latestTime, OnNoAnyMatches));
+		Controller.TakeSnapshot();
+		StartCoroutine(StartUpdateChanges(OnNoAnyMatches));
 	}
 
 	void ActByChaining(

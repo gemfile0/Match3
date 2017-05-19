@@ -136,7 +136,14 @@ public class GameController<M>: BaseController<M>
 
 	public void TakeSnapshot()
 	{
+		Model.HistoryOfGemModels.Add((GemModel[,])Model.GemModels.Clone());
+	}
 
+	public bool HasAnyChange()
+	{
+		var gemModelsCurrent = Model.GemModels;
+		var gemModelsBefore = Model.HistoryOfGemModels[Model.HistoryOfGemModels.Count - 1];
+		return !gemModelsCurrent.ContentEquals<GemModel>(gemModelsBefore);
 	}
 
 	public void PutGems() 
