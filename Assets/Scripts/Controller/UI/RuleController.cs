@@ -19,7 +19,18 @@ public class RuleController<M> : BaseController<M>
         if (Model.movesLeft > 0) { Model.movesLeft -= 1; }
     }
 
-    internal void OnGemRemoved(int gemID)
+    bool IsAllMissionAchieved()
+    {
+        var result = true;
+        var missionLefts = Model.missionsLeft;
+        foreach (var missionLeft in missionLefts)
+        {
+            if (missionLeft.howMany > 0) { result = false; }
+        }
+        return result;
+    }
+
+    public void OnGemRemoved(int gemID)
     {
         var missionsLeft = Model.missionsLeft;
         for (var i = 0; i < missionsLeft.Count; i++)
@@ -32,5 +43,6 @@ public class RuleController<M> : BaseController<M>
         }
 
         Model.missionsLeft = missionsLeft;
+        Model.hasCompleted = IsAllMissionAchieved();
     }
 }

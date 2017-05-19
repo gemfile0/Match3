@@ -7,6 +7,7 @@ public class RuleModel: BaseModel
 {
     public LevelModel levelModel;
     public int movesLeft;
+    public bool hasCompleted;
     public List<MissionModel> missionsLeft;
 
     public RuleModel()
