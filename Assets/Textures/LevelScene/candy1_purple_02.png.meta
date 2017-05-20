@@ -84,7 +84,7 @@ TextureImporter:
     serializedVersion: 2
     sprites: []
     outline: []
-  spritePackingTag: GameView
+  spritePackingTag: LevelScene
   userData: 
   assetBundleName: 
   assetBundleVariant: 

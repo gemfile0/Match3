@@ -8,7 +8,7 @@ public class LevelSelectionPanel: MonoBehaviour
 	ScrollRectSnap scrollRectSnap;
 	[SerializeField]
 	Sprite[] levelTextures;
-	const float GAP_OF_ITEM = 800f;
+	const float GAP_OF_ITEM = 1080f;
 
 	public void Setup() 
 	{
@@ -16,7 +16,7 @@ public class LevelSelectionPanel: MonoBehaviour
 		for (var i = 0; i < levelTextures.Length; i++)
 		{
 			var levelIndex = i + 1;
-			var levelItem = ResourceCache.Instantiate(Literals.LevelItem, scrollRectSnap.transform).GetComponent<RectTransform>();
+			var levelItem = ResourceCache.Instantiate(Literals.LevelItem, scrollRectSnap.transform, false).GetComponent<RectTransform>();
 
 			var sb = new StringBuilder();
 			sb.AppendFormat(Literals.LevelItem0, levelIndex);

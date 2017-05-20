@@ -51,7 +51,7 @@ public class ObjectPool: MonoBehaviour
 		if (root == null) 
 		{ 
 			root = new GameObject("ObjectPool"); 
-			// DontDestroyOnLoad(root);
+			DontDestroyOnLoad(root);
 		}
 
 		gameObject = new GameObject(prefab.name + "Pool");

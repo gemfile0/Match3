@@ -1,8 +1,8 @@
 ﻿using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-[RequireComponent(typeof(Canvas))]
 public class SceneLoader: MonoBehaviour
 {
 	public LoadingCover loadingCoverPrefab;
@@ -25,6 +25,7 @@ public class SceneLoader: MonoBehaviour
 			yield return loadingCover.Progress(asyncOpeartion.progress);
 		}
 
+		DOTween.Clear();
 		System.GC.Collect();
 
 		yield return loadingCover.Progress(1);

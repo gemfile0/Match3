@@ -104,23 +104,17 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		completedRuleInfo = null;
 	}
 
-	public void OnModalVisibleChanged(bool visible)
-	{
-		var curretPosition = transform.localPosition;
-		transform.localPosition = new Vector3(curretPosition.x, curretPosition.y, (visible) ? -9 : 0);
-	}
-
 	public void OnAllMissionAchieved(CompletedRuleInfo completedRuleInfo)
 	{
 		this.completedRuleInfo = completedRuleInfo;
 	}
 
-	bool SpecialTypeBreaking(Int64 markerID, bool isChaining)
+	bool SpecialTypeBreaking(Int64 markerID, bool isChaining, int latestCount = 1)
 	{
 		var markedPositions = SetSpecialTypeAsBlock(markerID);
 		if (markedPositions.Count > 0)
 		{
-			AddAction(Model.currentTurn + 1, (GOSequence sequence, float currentTime) => {
+			AddAction(Model.currentTurn + latestCount, (GOSequence sequence, float currentTime) => {
 				foreach (var markedPosition in markedPositions)
 				{
 					var brokenGemInfo = Controller.Break(markedPosition, markerID);
@@ -169,7 +163,6 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		yield return null;
 	}
 
-	bool needToWrapup = false;
 	IEnumerator WatchPhase()
 	{
 		if (isPlayingBefore != isPlaying) 
@@ -182,15 +175,15 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				yield return null;
 				
 				if (completedRuleInfo.ruleModel != null) {
-					AnyTypeReplacing(
-						-1, 
+					var latestCount = SetAnyTypeAsSpecial(
+						-1,
 						new string[]{ Literals.H, Literals.V, Literals.C }, 
 						completedRuleInfo.ruleModel.movesLeft, 
-						true,
 						completedRuleInfo.onMovesComsumed
-					);
-					UpdateChanges();
+					).latestCount;
 
+					SpecialTypeBreaking(-1, true, latestCount);
+					UpdateChanges();
  					completedRuleInfo.ruleModel = null;
  					completedRuleInfo.onMovesComsumed = null;
 
@@ -461,7 +454,6 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 	IEnumerator StartUpdateChanges(Action<Int64> OnNoAnyMatches)
 	{
-		Debug.Log("StartUpdateChanges");
 		isPlaying = true;
 		
 		sequence = GOTween.Sequence().SetAutoKill(false);
@@ -770,22 +762,6 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		}
 	}
 
-	void AnyTypeReplacing(Int64 replacerID, string[] specialKeys, int endurance, bool isChaining, Action onGemReplaced)
-	{
-		var replacedPositionsInfo = SetAnyTypeAsSpecial(replacerID, specialKeys, endurance, onGemReplaced);
-
-		AddAction(
-			Model.currentTurn + replacedPositionsInfo.latestCount, 
-			(GOSequence sequence, float currentTime) => {
-				foreach (var replacedPosition in replacedPositionsInfo.positions)
-				{
-					var brokenGemInfo = Controller.Break(replacedPosition, replacerID);
-					BreakGems(brokenGemInfo.gemModel, isChaining, sequence, currentTime);
-				}
-			}
-		);
-	}
-
 	void SameTypeReplacing(
 		Position sourcePosition, 
 		GemType gemType, 
@@ -1025,6 +1001,22 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 		return replacedPositionInfo;
 	}
+
+	void AnyTypeReplacing(Int64 replacerID, string[] specialKeys, int endurance, bool isChaining, Action onGemReplaced)
+    {
+        var replacedPositionsInfo = SetAnyTypeAsSpecial(replacerID, specialKeys, endurance, onGemReplaced);
+
+        AddAction(
+            Model.currentTurn + replacedPositionsInfo.latestCount, 
+            (GOSequence sequence, float currentTime) => {
+                foreach (var replacedPosition in replacedPositionsInfo.positions)
+                {
+                    var brokenGemInfo = Controller.Break(replacedPosition, replacerID);
+                    BreakGems(brokenGemInfo.gemModel, isChaining, sequence, currentTime);
+                }
+            }
+        );
+    }
 
 	ReplacedPositionsInfo SetAnyTypeAsSpecial(Int64 replacerID, string[] specialKeys, int endurance, Action onGemReplaced) 
 {

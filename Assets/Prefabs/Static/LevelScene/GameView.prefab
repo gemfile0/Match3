@@ -20,7 +20,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4220172354877376}
   - component: {fileID: 114264197821196742}
-  - component: {fileID: 114410755215106354}
   - component: {fileID: 114091051940328510}
   m_Layer: 0
   m_Name: GameView
@@ -78,55 +77,3 @@ MonoBehaviour:
       moves: 0
       cols: 0
       rows: 0
-  OnPhaseNext:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_MethodName: OnPhaseNext
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  OnGemRemoved:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_MethodName: OnGemRemoved
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_TypeName: GemRemovedEvent, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
---- !u!114 &114410755215106354
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1527672638954476}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e7aca8f9d3ec425d8aff162f974b9b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  edges:
-  - {x: 0, y: -860, z: 0}
-  - {x: 0, y: -860, z: 0}
-  - {x: 0, y: -860, z: 0}
-  - {x: 0, y: -860, z: 0}
-  - {x: 0, y: -860, z: 0}
-  latestBounds:
-    m_Center: {x: 0, y: 0, z: 0}
-    m_Extent: {x: 0, y: 0, z: 0}

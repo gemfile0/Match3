@@ -4,7 +4,8 @@
 	public const string Common = "Common";
 	public const string SceneLoader = "SceneLoader";
 	public const string Toast = "Toast";
-	public const string UIView = "UIView";
+	public const string ModalCanvas = "ModalCanvas";
+	public const string RootCanvas = "RootCanvas";
 	public const string FPSPanel = "FPSPanel";
 	public const string LevelScene = "LevelScene";
 	public const string LobbyScene = "LobbyScene";
