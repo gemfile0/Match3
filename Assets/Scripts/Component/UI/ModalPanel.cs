@@ -19,16 +19,33 @@ public class ModalPanel: MonoBehaviour
 	Button yesButton;
 	[SerializeField]
 	Button cancelButton;
-	Sequence pop;
+	
+	public static ModalPanel Instance;
 
 	void Awake()
 	{
+		Instance = this;
+
 		gameObject.SetActive(false);
 		yesButton.gameObject.SetActive(false);
 		cancelButton.gameObject.SetActive(false);	
+	}
 
-		pop = DOTween.Sequence();
-		pop.Insert(0, transform.DOScale(new Vector2(.2f, .2f), .295f).From().SetEase(Ease.OutBack));
+	void OnDestroy()
+	{
+		yesButton.onClick.RemoveAllListeners();
+		cancelButton.onClick.RemoveAllListeners();
+	}
+
+	void OnEnable()
+	{
+		titleLabel.gameObject.SetActive(false);
+
+		var pop = DOTween.Sequence();
+		pop.InsertCallback(.0f, () => {
+			titleLabel.gameObject.SetActive(true);
+		});
+		pop.Insert(.0f, transform.DOScale(new Vector2(.2f, .2f), .295f).From().SetEase(Ease.OutBack));
 		pop.InsertCallback(.2f, () => {
 			yesButton.gameObject.SetActive(true);
 			cancelButton.gameObject.SetActive(true);
@@ -36,20 +53,7 @@ public class ModalPanel: MonoBehaviour
 			yesButton.transform.DOScale(new Vector2(.2f, .2f), .295f).From().SetEase(Ease.OutBack);
 			cancelButton.transform.DOScale(new Vector2(.2f, .2f), .295f).From().SetEase(Ease.OutBack);
 		});	
-		pop.SetAutoKill(false);
-		pop.Pause();
-	}
 
-	void OnDestroy()
-	{
-		yesButton.onClick.RemoveAllListeners();
-		cancelButton.onClick.RemoveAllListeners();
-		pop = null;
-	}
-
-	void OnEnable()
-	{
-		pop.Restart();
 		OnVisbileChanged.Invoke(true);
 	}
 
@@ -57,10 +61,16 @@ public class ModalPanel: MonoBehaviour
 	{
 		yesButton.gameObject.SetActive(false);
 		cancelButton.gameObject.SetActive(false);
+		titleLabel.gameObject.SetActive(false);
 		OnVisbileChanged.Invoke(false);
 	}
+	
+	public static void Show(string titleText, string yesText, UnityAction yesEvent, UnityAction cancelEvent = null)
+	{
+		Instance.Choice(titleText, yesText, yesEvent, cancelEvent);
+	}
 
-	public void Choice(string titleText, string yesText, UnityAction yesEvent, UnityAction cancelEvent = null)
+	void Choice(string titleText, string yesText, UnityAction yesEvent, UnityAction cancelEvent = null)
 	{
 		titleLabel.text = titleText;
 		yesLabel.text = yesText;

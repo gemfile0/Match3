@@ -5,34 +5,19 @@ using UnityEngine;
 public class GemView: BaseView<GemModel, GemController<GemModel>>
 {
     SpriteRenderer spriteRenderer;
-    TextMesh idText;
-    TextMesh markerIdText;
+    // TextMesh idText;
+    // TextMesh markerIdText;
     bool isDebugging = true;
     MaterialPropertyBlock mpb;
-    Sequence squash;
-    Tween shrink;
     
     void Awake()
     {
-        idText = ResourceCache.Instantiate(Literals.ID, transform).GetComponent<TextMesh>();
-        markerIdText = ResourceCache.Instantiate(Literals.MarkerID, transform).GetComponent<TextMesh>();
-        markerIdText.gameObject.SetActive(false);
+        // idText = ResourceCache.Instantiate(Literals.ID, transform).GetComponent<TextMesh>();
+        // markerIdText = ResourceCache.Instantiate(Literals.MarkerID, transform).GetComponent<TextMesh>();
+        // markerIdText.gameObject.SetActive(false);
         mpb = new MaterialPropertyBlock();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        squash = DOTween.Sequence();
-        squash.OnStart(() => transform.localScale = Vector3.one);
-        squash.Append(transform.DOScale(new Vector3(1.08f, 0.92f, 1), 0.12f));
-        squash.Append(transform.DOScale(new Vector3(1, 1, 1), 0.68f).SetEase(Ease.OutElastic));
-        squash.Pause();
-        squash.SetAutoKill(false);
-
-        shrink = transform.DOScale(new Vector3(0, 0, 0), .295f).OnComplete(() => {
-            base.ReturnToPool();
-            transform.localScale = new Vector3(1, 1, 1);    
-        }).SetEase(Ease.OutCirc);
-        shrink.SetAutoKill(false);
-        shrink.Pause();
-
+        
 #if DISABLE_DEBUG
         isDebugging = false;
 #endif
@@ -43,8 +28,6 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         base.OnDestroy();
         
         mpb = null;
-        squash = null;
-        shrink = null;
     }
     
     public Position Position 
@@ -61,12 +44,15 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     {
         base.UpdateModel(gemModel);
 
-        idText.text = gemModel.id.ToString();
+        // idText.text = gemModel.id.ToString();
     }
     
     public void Squash() 
     {
-        squash.Restart();
+        var squash = DOTween.Sequence();
+        squash.OnStart(() => transform.localScale = Vector3.one);
+        squash.Append(transform.DOScale(new Vector3(1.08f, 0.92f, 1), 0.12f));
+        squash.Append(transform.DOScale(new Vector3(1, 1, 1), 0.68f).SetEase(Ease.OutElastic));
         
         if (!isDebugging) { return; }
         spriteRenderer.GetPropertyBlock(mpb);
@@ -99,14 +85,15 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
 
     public void SetBlock(Int64 markerID) 
     {
+        if (!isDebugging) { return; }
+
         spriteRenderer.GetPropertyBlock(mpb);
         mpb.SetFloat("_FlashAmount", 0.4f);
         mpb.SetColor("_FlashColor", new Color32(255, 0, 0, 255));
         spriteRenderer.SetPropertyBlock(mpb);
 
-        if (!isDebugging) { return; }
-        markerIdText.text = markerID.ToString();
-        markerIdText.gameObject.SetActive(true);
+        // markerIdText.text = markerID.ToString();
+        // markerIdText.gameObject.SetActive(true);
     }
 
     public void Highlight() 
@@ -139,11 +126,16 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
 
     public void ReturnToPool(bool withAnimation = true, Vector2 combiningPosition = default(Vector2))
     {   
-        markerIdText.gameObject.SetActive(false);
+        // markerIdText.gameObject.SetActive(false);
 
         if (withAnimation)
         {
-            if (object.Equals(combiningPosition, default(Vector2))) { shrink.Restart(); } 
+            if (object.Equals(combiningPosition, default(Vector2))) { 
+                transform.DOScale(new Vector3(0, 0, 0), .295f).OnComplete(() => {
+                    base.ReturnToPool();
+                    transform.localScale = new Vector3(1, 1, 1);    
+                }).SetEase(Ease.OutCirc);
+            } 
             else {
                 var sequence = DOTween.Sequence().OnComplete(() => {
                     base.ReturnToPool();

@@ -11,13 +11,9 @@ public class BaseScene: MonoBehaviour
 
 		ResourceCache.LoadAll(Literals.Common);
 		ResourceCache.LoadAll(SceneManager.GetActiveScene().name);
-		if (GameObject.Find(Literals.SceneLoader) == null) 
+		if (GameObject.Find(Literals.RootCanvas) == null) 
 		{
-			ResourceCache.Instantiate(Literals.SceneLoader);
-		}
-		if (GameObject.Find(Literals.Toast) == null) 
-		{
-			ResourceCache.Instantiate(Literals.Toast);
+			ResourceCache.Instantiate(Literals.RootCanvas);
 		}
 
 #if DISABLE_LOG
@@ -30,18 +26,13 @@ public class BaseScene: MonoBehaviour
 
 #if DISABLE_FPS
 #else
-		var uiView = transform.Find(Literals.UIView);
-		if (uiView != null)
+		var rootCanvas = GameObject.Find(Literals.RootCanvas);
+		if (rootCanvas != null)
 		{
 			ResourceCache.Load(Literals.FPSPanel);
 			var fpsPanel = ResourceCache.Instantiate(Literals.FPSPanel);
-			fpsPanel.transform.SetParent(uiView, false);
+			fpsPanel.transform.SetParent(rootCanvas.transform, false);
 		}
 #endif
-	}
-
-	public virtual void Init(object param)
-	{
-		
 	}
 }

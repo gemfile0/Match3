@@ -52,9 +52,10 @@ public class ScrollRectSnap: MonoBehaviour
 		for (int i = 0; i < items.Length; i++)
 		{
 			distances[i] = center.position.x - items[i].position.x;
+			Debug.Log(distances[i]);
 			positiveDistances[i] = Mathf.Abs(distances[i]);
 
-			if (distances[i] > 2000)
+			if (distances[i] > 50)
 			{
 				float currentX = items[i].anchoredPosition.x;
 				float currentY = items[i].anchoredPosition.y;
@@ -63,7 +64,7 @@ public class ScrollRectSnap: MonoBehaviour
 				items[i].anchoredPosition = newAnchoredPosition;
 			}
 
-			if (distances[i] < -2000)
+			if (distances[i] < -50)
 			{
 				float currentX = items[i].anchoredPosition.x;
 				float currentY = items[i].anchoredPosition.y;
@@ -95,14 +96,14 @@ public class ScrollRectSnap: MonoBehaviour
 	{
 		float newX = Mathf.Lerp(panel.anchoredPosition.x, position, Time.deltaTime * 5f);
 		Vector2 newPosition = new Vector2(newX, panel.anchoredPosition.y);
-		if (Mathf.Abs(position - newX) < 3f)
+		if (Mathf.Abs(position - newX) < 3)
 		{
 			newX = position;
 		}
 
 		var positiveNewX = Mathf.Abs(newX);
 		var positivePosition = Mathf.Abs(position);
-		if (positiveNewX >= positivePosition - 1f 
+		if (positiveNewX >= positivePosition - 1
 			&& positiveNewX <= positivePosition + 1 
 			&& !hasMessageSended) 
 		{

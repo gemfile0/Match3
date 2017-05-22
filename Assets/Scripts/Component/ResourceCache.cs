@@ -23,11 +23,11 @@ public static class ResourceCache
 		cache[resource.name] = (GameObject)resource;
 	}
 
-	static public GameObject Instantiate(string key, Transform parent = null)
+	static public GameObject Instantiate(string key, Transform parent = null, bool worldPositionStays = true)
 	{
 		var instance = Object.Instantiate<GameObject>(cache[key]);
 		instance.name = key;
-		if (parent) { instance.transform.SetParent(parent); }
+		if (parent) { instance.transform.SetParent(parent, worldPositionStays); }
 		return instance;
 	}
 

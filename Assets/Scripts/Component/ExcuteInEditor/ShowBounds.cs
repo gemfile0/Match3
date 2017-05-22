@@ -23,6 +23,6 @@ public class ShowBounds: MonoBehaviour {
 	}
 
 	void Update() {
-		MakeEdges();
+		// MakeEdges();
 	}
 }

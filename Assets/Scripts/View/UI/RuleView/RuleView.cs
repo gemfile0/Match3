@@ -51,7 +51,7 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
             },
             onShowGotoNext = () => {
                 firework.Play();
-                Invoke("GoToNext", 2);
+                Invoke("GoToNext", 2f);
             }
         };
     }
@@ -92,9 +92,9 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
         }
     }
 
-    void SuggestRetry()
+    public void SuggestRetry()
     {
-        modalPanel.Choice(
+        ModalPanel.Show(
             levelText, 
             Literals.Retry,
             () => {
@@ -108,7 +108,7 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
 
     void GoToNext()
     {
-        modalPanel.Choice(
+        ModalPanel.Show(
             levelText,
             Literals.Next,
             () => {

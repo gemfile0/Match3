@@ -10,8 +10,6 @@ public class Mission: MonoBehaviour
 	public RectTransform Icon;
 	public Text label;
 	Image image;
-	Sequence squash;
-	Tween scale;
 
 	void Awake()
 	{
@@ -28,17 +26,6 @@ public class Mission: MonoBehaviour
 		{
 			image = finding.GetComponent<Image>();
 			image.gameObject.SetActive(true);
-
-			squash = DOTween.Sequence();
-			squash.OnStart(() => image.rectTransform.localScale = Vector3.one);
-			squash.Append(image.rectTransform.DOScale(new Vector3(1.22f, 0.78f, 1), 0.24f));
-			squash.Append(image.rectTransform.DOScale(new Vector3(1, 1, 1), 1.36f).SetEase(Ease.OutElastic));
-			squash.Pause();
-        	squash.SetAutoKill(false);
-
-			scale = label.rectTransform.DOScale(1.25f, .5f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBack);
-			scale.Pause();
-			scale.SetAutoKill(false);
 		}
 		
 		var sb = new StringBuilder();
@@ -49,8 +36,12 @@ public class Mission: MonoBehaviour
 			label.text = nextText;
 
 			label.rectTransform.localScale = Vector3.one;
-			scale.Restart();
-			squash.Restart();
+			label.rectTransform.DOScale(1.18f, .5f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBack);
+
+			var squash = DOTween.Sequence();
+			squash.OnStart(() => image.rectTransform.localScale = Vector3.one);
+			squash.Append(image.rectTransform.DOScale(new Vector3(1.18f, 0.82f, 1), 0.24f));
+			squash.Append(image.rectTransform.DOScale(new Vector3(1, 1, 1), 1.36f).SetEase(Ease.OutElastic));
 		}
 	}
 
@@ -58,7 +49,5 @@ public class Mission: MonoBehaviour
 	{
 		Icon.gameObject.SetActive(false);
 		label.gameObject.SetActive(false);
-		squash = null;
-		scale = null;
 	}
 }
