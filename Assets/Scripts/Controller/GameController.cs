@@ -735,7 +735,6 @@ public class GameController<M>: BaseController<M>
 			&& sourceGemModel is IMovable 
 			&& sourceGemModel.Type != GemType.EmptyGem 
 			&& Model.currentTurn >= sourceGemModel.preservedFromBreak)
-			// && Model.currentTurn >= sourceGemModel.preservedFromMatch) 
 		{
 			blockedGemInfo.gemModel = CopyAsBlock(markerID, sourceGemModel);
 		}

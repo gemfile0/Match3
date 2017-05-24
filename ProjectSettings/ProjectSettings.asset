@@ -505,7 +505,7 @@ PlayerSettings:
   webGLUseWasm: 0
   webGLCompressionFormat: 1
   scriptingDefineSymbols:
-    7: DISABLE_LOG;DISABLE_DEBUG
+    7: DISABLE_LOG;DISABLE_DEBUG;DISABLE_FPS
   platformArchitecture: {}
   scriptingBackend:
     Android: 1

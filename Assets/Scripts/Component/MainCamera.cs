@@ -14,6 +14,11 @@ public class MainCamera : MonoBehaviour
 
 		ModalPanel.Instance.OnVisbileChanged.AddListener(OnModalVisibleChanged);
 	}
+	
+	void OnDestroy()
+	{
+		ModalPanel.Instance.OnVisbileChanged.RemoveListener(OnModalVisibleChanged);
+	}
 
 	void OnModalVisibleChanged(bool isVisible)
 	{

@@ -495,15 +495,17 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 					MatchGems(updateResult.matchResult, sequence, currentTime);
 					FeedGems(updateResult.feedResult, sequence, currentFrame);
 					FallGems(updateResult.fallResult, sequence, currentTime);
+				} else if (countOfAction > 0) {
+					noUpdateCount = 0;
 				} else {
-					noUpdateCount++;
+					noUpdateCount += 1;
 				}
 
 				Controller.TurnNext();
 
 				// Debug.Log(noUpdateCount + ", " + sequence.IsComplete + ", " + countOfAction);
 				if (passedTurn > 20) { yield return null; }
-				if (noUpdateCount > 20 && sequence.IsComplete && countOfAction == 0) { break; }
+				if (noUpdateCount > 20 && sequence.IsComplete) { break; }
 			}
 
 			currentFrame += 1;
