@@ -9,6 +9,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     // TextMesh markerIdText;
     bool isDebugging = true;
     MaterialPropertyBlock mpb;
+    Tween highlight;
     
     void Awake()
     {
@@ -28,6 +29,10 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         base.OnDestroy();
         
         mpb = null;
+        if (highlight != null) 
+        { 
+            highlight.Kill(); highlight = null; 
+        }
     }
     
     public Position Position 
@@ -100,12 +105,12 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     {
         spriteRenderer.GetPropertyBlock(mpb);
 
-        DOTween.To(
+        highlight = DOTween.To(
             GetFlashAmount,
             SetFlashAmount, 
             .4f, 
             .395f
-        ).SetLoops(2, LoopType.Yoyo).SetEase(Ease.InOutSine);
+        ).SetLoops(2, LoopType.Yoyo).SetEase(Ease.InOutSine).OnComplete(() => highlight = null);
     }
 
     float GetFlashAmount()
