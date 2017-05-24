@@ -988,7 +988,6 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				sequence.InsertCallback(currentTime, () => {
 					gemViewRemoving.ReturnToPool();
 					gemViewCreating.SetActive(true);
-					OnGemRemoved.Invoke((int)gemModel.Type);
 				});
 			});
 			
@@ -1035,7 +1034,6 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				sequence.InsertCallback(currentTime, () => {
 					gemViewRemoving.ReturnToPool();
 					gemViewCreating.SetActive(true);
-					OnGemRemoved.Invoke((int)gemModel.Type);
 					onGemReplaced();
 				});
 			});

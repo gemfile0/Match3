@@ -645,6 +645,7 @@ public class GameController<M>: BaseController<M>
 			var nearGemModel = GetGemModel(nearPosition);
 			
 			if (Model.currentTurn <= nearGemModel.preservedFromMatch) { continue; }
+			if (nearGemModel.markedBy != 0) { continue; }
 
 			if (nearGemModel is IMovable) {
 				fallingGemModels.AddRange(Swap(emptyGemPosition, nearPosition));
