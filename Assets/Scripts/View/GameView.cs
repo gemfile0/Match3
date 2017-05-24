@@ -131,6 +131,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			AddAction(Model.currentTurn + passedTurn, (sequence, currentTime) => {
 				sequence.InsertCallback(currentTime, () => {
 					// Hello, Player!
+					MatchSound.Instance.Play("Intro");
 					foreach (var gemModel in Controller.GetAll())
 					{
 						gemViews[gemModel.id].Squash();

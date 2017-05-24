@@ -16,6 +16,11 @@ public class BaseScene: MonoBehaviour
 			ResourceCache.Instantiate(Literals.RootCanvas);
 		}
 
+		if (GameObject.Find(Literals.MatchSound) == null) 
+		{
+			ResourceCache.Instantiate(Literals.MatchSound);
+		}
+
 #if DISABLE_LOG
 		if (Application.platform == RuntimePlatform.Android
 			|| Application.platform == RuntimePlatform.IPhonePlayer)

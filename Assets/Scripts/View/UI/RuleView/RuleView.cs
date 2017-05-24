@@ -51,6 +51,8 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
             },
             onShowGotoNext = () => {
                 firework.Play();
+                MatchSound.Instance.Play("Win");
+                MatchSound.Instance.Play("Firework", .59f);
                 Invoke("GoToNext", 2f);
             }
         };
@@ -99,9 +101,10 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
             Literals.Retry,
             () => {
                 sceneLoader.Load(Literals.LevelScene);
+                MatchSound.Instance.Play("Confirm");
             },
             () => {
-                sceneLoader.Load(Literals.LobbyScene);
+                MatchSound.Instance.Play("Cancel");
             }
         );
     }
@@ -116,9 +119,10 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
                 if (nextLevel > END_OF_LEVEL) { nextLevel = 1; }
                 PlayerPrefs.SetInt(Literals.LatestLevel, nextLevel);
                 sceneLoader.Load(Literals.LevelScene);
+                MatchSound.Instance.Play("Confirm");
             },
             () => {
-                sceneLoader.Load(Literals.LobbyScene);
+                MatchSound.Instance.Play("Cancel");
             }
         );
     }

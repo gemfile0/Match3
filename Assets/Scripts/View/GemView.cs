@@ -140,6 +140,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
                     base.ReturnToPool();
                     transform.localScale = new Vector3(1, 1, 1);    
                 }).SetEase(Ease.OutCirc);
+                MatchSound.Instance.Play("Pop");
             } 
             else {
                 var sequence = DOTween.Sequence().OnComplete(() => {
@@ -148,6 +149,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
                 });
                 sequence.Insert(0, transform.DOScale(new Vector3(0, 0, 0), .295f).SetEase(Ease.OutCirc));
                 sequence.Insert(0, transform.DOLocalMove(combiningPosition, .295f));
+                MatchSound.Instance.Play("Bite");
             }
         }
         else
