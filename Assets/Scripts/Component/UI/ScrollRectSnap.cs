@@ -12,8 +12,7 @@ public class ScrollRectSnap: MonoBehaviour
 	bool dragging = false;
 	int itemDistance;
 	int minItemIndex;
-	bool hasMessageSended;
-	bool targetNearestItem = true;
+	float waitingForStop = 0;
 
 	public void Setup(RectTransform[] items, int latestLevelIndex = -1)
 	{
@@ -35,24 +34,40 @@ public class ScrollRectSnap: MonoBehaviour
 	public void StartDrag()
 	{
 		dragging = true;
-		hasMessageSended = false;
-		targetNearestItem = true;
 	}
 
 	public void EndDrag()
 	{
 		dragging = false;
-		hasMessageSended = true;
 	}
 
 	void Update()
 	{
 		if (items.Length == 0) { return; }
 
+		Arrange();
+
+		// float minDistance = Mathf.Min(positiveDistances);
+
+		// for (int j = 0; j < items.Length; j++)
+		// {
+		// 	if (minDistance == positiveDistances[j]) {
+		// 		minItemIndex = j;
+		// 	}
+		// }
+
+		// if (!dragging) { waitingForStop += Time.deltaTime; }
+		// if (waitingForStop > .4f)
+		// {
+		// 	LerpToItem(-items[minItemIndex].anchoredPosition.x);
+		// }
+	}
+
+	void Arrange()
+	{
 		for (int i = 0; i < items.Length; i++)
 		{
 			distances[i] = center.position.x - items[i].position.x;
-			Debug.Log(distances[i]);
 			positiveDistances[i] = Mathf.Abs(distances[i]);
 
 			if (distances[i] > 50)
@@ -73,23 +88,6 @@ public class ScrollRectSnap: MonoBehaviour
 				items[i].anchoredPosition = newAnchoredPosition;
 			}
 		}
-
-		if (targetNearestItem)
-		{
-			float minDistance = Mathf.Min(positiveDistances);
-
-			for (int j = 0; j < items.Length; j++)
-			{
-				if (minDistance == positiveDistances[j]) {
-					minItemIndex = j;
-				}
-			}
-
-			if (!dragging)
-			{
-				LerpToItem(-items[minItemIndex].anchoredPosition.x);
-			}
-		}
 	}
 
 	void LerpToItem(float position)
@@ -99,26 +97,10 @@ public class ScrollRectSnap: MonoBehaviour
 		if (Mathf.Abs(position - newX) < 3)
 		{
 			newX = position;
-		}
-
-		var positiveNewX = Mathf.Abs(newX);
-		var positivePosition = Mathf.Abs(position);
-		if (positiveNewX >= positivePosition - 1
-			&& positiveNewX <= positivePosition + 1 
-			&& !hasMessageSended) 
-		{
-			hasMessageSended = true;
-			SendMessageFromItem(minItemIndex);
+			waitingForStop = 0;
 		}
 
 		panel.anchoredPosition = newPosition;
-	}
-
-	void SendMessageFromItem(int itemIndex)
-	{
-		if (itemIndex - 1 == 3) {
-
-		}
 	}
 
 }

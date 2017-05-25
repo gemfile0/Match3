@@ -8,7 +8,7 @@ public class LevelSelectionPanel: MonoBehaviour
 	ScrollRectSnap scrollRectSnap;
 	[SerializeField]
 	Sprite[] levelTextures;
-	const float GAP_OF_ITEM = 1080f;
+	const float GAP_OF_ITEM = 1000f;
 
 	public void Setup() 
 	{
