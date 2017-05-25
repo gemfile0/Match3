@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class LevelSelectionPanel: MonoBehaviour 
 {
 	[SerializeField]
-	ScrollRectSnap scrollRectSnap;
+	ScrollContentCanSnap scrollContent;
 	[SerializeField]
 	Sprite[] levelTextures;
 	const float GAP_OF_ITEM = 1000f;
@@ -16,7 +16,7 @@ public class LevelSelectionPanel: MonoBehaviour
 		for (var i = 0; i < levelTextures.Length; i++)
 		{
 			var levelIndex = i + 1;
-			var levelItem = ResourceCache.Instantiate(Literals.LevelItem, scrollRectSnap.transform, false).GetComponent<RectTransform>();
+			var levelItem = ResourceCache.Instantiate(Literals.LevelItem, scrollContent.transform, false).GetComponent<RectTransform>();
 
 			var sb = new StringBuilder();
 			sb.AppendFormat(Literals.LevelItem0, levelIndex);
@@ -35,14 +35,14 @@ public class LevelSelectionPanel: MonoBehaviour
 		if (PlayerPrefs.HasKey(Literals.LatestLevel)) {
 			latestLevelIndex = PlayerPrefs.GetInt(Literals.LatestLevel);
 		}
-		scrollRectSnap.Setup(levelItems, latestLevelIndex);
+		scrollContent.Setup(levelItems, latestLevelIndex);
 	}
 	
 	public LevelItem GetLevelItem(int levelIndex)
 	{
 		var sb = new StringBuilder();
 		sb.AppendFormat(Literals.LevelItem0, levelIndex);
-		var levelItem = scrollRectSnap.transform.Find(sb.ToString());
+		var levelItem = scrollContent.transform.Find(sb.ToString());
 		
 		return levelItem != null ? levelItem.GetComponent<LevelItem>() : null;
 	}

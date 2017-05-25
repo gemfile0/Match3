@@ -41,13 +41,15 @@ public class SwipeInput: MonoBehaviour, ISwipeInput
         Vector2.left, 
         Vector2.right
     };
+    public bool allowedInGUI = false;
+    public bool isCancelable = true;
+    public float threshold = 40;
     float timeBegin = 0;
     float timeEnd = 0;
     Vector2 touchBegin = Vector2.zero;
     Vector2 touchEnd = Vector2.zero;
     Vector2 directionFirst = Vector2.zero;
     bool isTouchDown = false;
-    const float THRESHOLD = 40;
 
     void Update () 
     {
@@ -55,9 +57,9 @@ public class SwipeInput: MonoBehaviour, ISwipeInput
         TouchUpdate();
     }
 
-    void TouchUpdate() 
+    void TouchUpdate()
     {
-        bool isPointerOverGui = (EventSystem.current) ? EventSystem.current.IsPointerOverGameObject() : false;
+        bool isPointerOverGui = (!allowedInGUI && EventSystem.current) ? EventSystem.current.IsPointerOverGameObject() : false;
 #if UNITY_IOS || UNITY_ANDROID
         ReadTouchInput(isPointerOverGui);
 #endif
@@ -91,10 +93,10 @@ public class SwipeInput: MonoBehaviour, ISwipeInput
                     hasFreePass = false,
                 };
 
-                if (directionFirst != direction) {
+                if (isCancelable && directionFirst != direction) {
                     onSwipeCancel.Invoke();
                     Reset();
-                } else if (Math.Max(Math.Abs(touchDelta.x), Math.Abs(touchDelta.y)) > THRESHOLD) {
+                } else if (Math.Max(Math.Abs(touchDelta.x), Math.Abs(touchDelta.y)) > threshold) {
                     onSwipeEnd.Invoke(swipeInfo);
                     Reset();
                 } else if (isTouchDown) {
