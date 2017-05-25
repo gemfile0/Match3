@@ -25,7 +25,7 @@ public class BaseScene: MonoBehaviour
 		if (Application.platform == RuntimePlatform.Android
 			|| Application.platform == RuntimePlatform.IPhonePlayer)
 		{
-			Debug.logger.logEnabled=false;
+			Debug.logger.logEnabled = false;
 		}
 #endif
 

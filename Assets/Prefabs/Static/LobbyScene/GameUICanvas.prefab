@@ -38,8 +38,9 @@ GameObject:
   - component: {fileID: 222874165672534708}
   - component: {fileID: 114404027752807022}
   - component: {fileID: 114516864285247030}
+  - component: {fileID: 114198533809794370}
   m_Layer: 5
-  m_Name: ScrollPanel
+  m_Name: ScrollContent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -109,7 +110,7 @@ GameObject:
   m_Component:
   - component: {fileID: 224446875418716774}
   m_Layer: 5
-  m_Name: CenterToCompare
+  m_Name: CenterPositionForComparing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -175,6 +176,20 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &114198533809794370
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1587048002972306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 216598d58f2934d068aed654e9e91620, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allowedInGUI: 0
+  isCancelable: 1
+  threshold: 40
 --- !u!114 &114338179741878982
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -293,7 +308,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2cde08d7814b446bb3780a931fcf863, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scrollRectSnap: {fileID: 114516864285247030}
+  scrollContent: {fileID: 114516864285247030}
   levelTextures:
   - {fileID: 21300000, guid: f3c51f1483a8a164bb9ddbf0b0c61ffb, type: 3}
   - {fileID: 21300000, guid: 14628b7a671e1f3499d6a78942983a3a, type: 3}
@@ -317,7 +332,7 @@ MonoBehaviour:
   panel: {fileID: 224268796096098594}
   items: []
   center: {fileID: 224446875418716774}
-  startItem: 1
+  itemIndex: 3
 --- !u!114 &114565662848123222
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -334,7 +349,7 @@ MonoBehaviour:
   m_Vertical: 0
   m_MovementType: 0
   m_Elasticity: 0.1
-  m_Inertia: 1
+  m_Inertia: 0
   m_DecelerationRate: 0.1
   m_ScrollSensitivity: 8
   m_Viewport: {fileID: 0}
