@@ -480,9 +480,9 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 					actionQueueByTurn.Remove(Model.currentTurn);
 				}
 				
-				updateResult.matchResult = Controller.Match();
 				updateResult.feedResult = Controller.Feed();
 				updateResult.fallResult = Controller.Fall();
+				updateResult.matchResult = Controller.Match();
 				
 				if (passedTurn == 6) {
 					if (updateResult.matchResult.Count == 0 && OnNoAnyMatches != null) {
