@@ -155,9 +155,11 @@ MonoBehaviour:
     value: {fileID: 8300000, guid: 86586b5dc35e814419359cd28b072540, type: 3}
   - key: Intro
     value: {fileID: 8300000, guid: 85c9e0492d885ec4fa4844fbdeb6a866, type: 3}
-  - key: Confirm
+  - key: Accept
     value: {fileID: 8300000, guid: e2330c1e52d91a049b687a98aefbd01d, type: 3}
-  - key: Cancel
+  - key: Back
     value: {fileID: 8300000, guid: 0f50b5463df03464394ac138edaf98a3, type: 3}
   - key: Firework
     value: {fileID: 8300000, guid: 1adf792a69bcc4a4eb75b01109e0c0b0, type: 3}
+  - key: Merge
+    value: {fileID: 8300000, guid: c8b716dfe07a9de489b22bcd17661521, type: 3}

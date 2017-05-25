@@ -1152,6 +1152,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 			mergeeNextPosition, 
 			gapOfTurn * (TIME_PER_FRAME * FRAME_BY_TURN)
 		).SetEase(GOEase.EaseOut));
+		sequence.InsertCallback(currentTime, () => MatchSound.Instance.Play("Merge"));
 		
 		var markerID = mergerGemModel.id;
 		

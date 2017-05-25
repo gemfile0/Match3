@@ -101,10 +101,10 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
             Literals.Retry,
             () => {
                 sceneLoader.Load(Literals.LevelScene);
-                MatchSound.Instance.Play("Confirm");
+                MatchSound.Instance.Play("Accept");
             },
             () => {
-                MatchSound.Instance.Play("Cancel");
+                MatchSound.Instance.Play("Back");
             }
         );
     }
@@ -119,10 +119,10 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
                 if (nextLevel > END_OF_LEVEL) { nextLevel = 1; }
                 PlayerPrefs.SetInt(Literals.LatestLevel, nextLevel);
                 sceneLoader.Load(Literals.LevelScene);
-                MatchSound.Instance.Play("Confirm");
+                MatchSound.Instance.Play("Accept");
             },
             () => {
-                MatchSound.Instance.Play("Cancel");
+                MatchSound.Instance.Play("Back");
             }
         );
     }
