@@ -38,6 +38,7 @@ public class LevelScene: BaseScene
 	{
 		var sceneLoader = GameObject.Find(Literals.SceneLoader).GetComponent<SceneLoader>();
 		sceneLoader.Load(Literals.LobbyScene);
+		MatchSound.Instance.Play("Back");
 	}
 
 	protected virtual int ReadLevelIndex()

@@ -6,6 +6,7 @@
 	public const string Toast = "Toast";
 	public const string ModalCanvas = "ModalCanvas";
 	public const string RootCanvas = "RootCanvas";
+	public const string MatchSound = "MatchSound";
 	public const string FPSPanel = "FPSPanel";
 	public const string LevelScene = "LevelScene";
 	public const string LobbyScene = "LobbyScene";
