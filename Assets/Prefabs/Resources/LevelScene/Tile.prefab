@@ -52,6 +52,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dabdebc86b094b05afe0db50dfa7106, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  particleAttractor: {fileID: 0}
+  targetSphere: {fileID: 0}
 --- !u!212 &212127777066797848
 SpriteRenderer:
   m_ObjectHideFlags: 1

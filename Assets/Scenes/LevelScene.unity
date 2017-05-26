@@ -402,6 +402,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 216598d58f2934d068aed654e9e91620, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  allowedInGUI: 0
+  isCancelable: 1
+  threshold: 40
 --- !u!198 &1053734059 stripped
 ParticleSystem:
   m_PrefabParentObject: {fileID: 198561478605209904, guid: f0314930d4f5479478be7f46e7114924,
@@ -414,11 +417,6 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 723568412}
     m_Modifications:
-    - target: {fileID: 114470757764328354, guid: fd2d02a95c27642bd8e1fa0dd93ab747,
-        type: 2}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 224974378809584666, guid: fd2d02a95c27642bd8e1fa0dd93ab747,
         type: 2}
       propertyPath: m_LocalPosition.x
@@ -519,11 +517,6 @@ Prefab:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 723568413}
-    - target: {fileID: 114191509950028820, guid: fd2d02a95c27642bd8e1fa0dd93ab747,
-        type: 2}
-      propertyPath: modalPanel
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 114191509950028820, guid: fd2d02a95c27642bd8e1fa0dd93ab747,
         type: 2}
       propertyPath: firework
@@ -654,6 +647,11 @@ Prefab:
       propertyPath: m_SizeDelta.x
       value: 216
       objectReference: {fileID: 0}
+    - target: {fileID: 223005753761758764, guid: fd2d02a95c27642bd8e1fa0dd93ab747,
+        type: 2}
+      propertyPath: m_PlaneDistance
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 224142914188999532, guid: fd2d02a95c27642bd8e1fa0dd93ab747,
         type: 2}
       propertyPath: m_AnchorMin.y
@@ -708,16 +706,6 @@ Prefab:
         type: 2}
       propertyPath: m_SizeDelta.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114470757764328354, guid: fd2d02a95c27642bd8e1fa0dd93ab747,
-        type: 2}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114470757764328354, guid: fd2d02a95c27642bd8e1fa0dd93ab747,
-        type: 2}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
-      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: fd2d02a95c27642bd8e1fa0dd93ab747, type: 2}

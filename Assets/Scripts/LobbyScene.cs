@@ -24,6 +24,7 @@ public class LobbyScene: BaseScene
 			levelItem.callback = () => {
 				PlayerPrefs.SetInt(Literals.LatestLevel, currentLevel);
 				sceneLoader.Load(Literals.LevelScene);
+				MatchSound.Instance.Play("Accept");
 			};
 
 			levelIndex++;

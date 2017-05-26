@@ -31,7 +31,8 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         mpb = null;
         if (highlight != null) 
         { 
-            highlight.Kill(); highlight = null; 
+            highlight.Kill(); 
+            highlight = null; 
         }
     }
     
