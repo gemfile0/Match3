@@ -31,7 +31,7 @@ struct ReplacedPositionsInfo
 	public int latestCount;
 }
 
-public class GemRemovedEvent: UnityEvent<int> {}
+public class GemRemovedEvent: UnityEvent<int, Vector3, Transform> {}
 
 public class GameView: BaseView<GameModel, GameController<GameModel>>  
 {
@@ -58,6 +58,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	GameObject tiles;
 	GameObject gems;
 	GameObject gravities;
+	GameObject effects;
 	bool isPlaying;
 	bool isPlayingBefore;
 
@@ -74,6 +75,10 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		gems = new GameObject(Literals.Gems);
 		gems.transform.SetParent(transform);
 
+		effects = new GameObject(Literals.Effects);
+		effects.transform.SetParent(transform);
+		effects.transform.localPosition = new Vector3(0, 0, -1);
+
 		updateResult = new UpdateResult();
 	}
 
@@ -82,6 +87,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		base.Start();
 		
 		MakePoolOfGems();
+		MakePoolOfEffect();
 		MakeField();
 		AlignField();
 		SubscribeInput();
@@ -200,6 +206,20 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 		}
 		isPlayingBefore = isPlaying;
 		yield return null;
+	}
+
+	void MakePoolOfEffect()
+	{
+		var effects = new List<ParticleAttractor>();
+		
+		var countOfPool = 50;
+		while (countOfPool > 0)
+		{
+			effects.Add(ResourceCache.Instantiate<ParticleAttractor>(Literals.ParticleAttractor));
+			countOfPool -= 1;
+		}
+
+		foreach (var effect in effects) { effect.ReturnToPool(); }
 	}
 
 	void MakePoolOfGems()
@@ -332,7 +352,8 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 				
 				sequence.InsertCallback(currentTime, () => {
 					gemView.ReturnToPool(true, combindedLocation);
-					OnGemRemoved.Invoke((int)gemModel.Type);
+					OnGemRemoved.Invoke((int)gemModel.Type, gemView.transform.position, effects.transform);
+
 				});
 			}
 
@@ -883,7 +904,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 
 		sequence.InsertCallback(currentTime, () => {
 			gemView.ReturnToPool();
-			OnGemRemoved.Invoke((int)gemModel.Type);
+			OnGemRemoved.Invoke((int)gemModel.Type, gemView.transform.position, effects.transform);
 		});
 	}
 

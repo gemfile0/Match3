@@ -23,6 +23,8 @@
 	public const string Tile = "Tile";
 	public const string Tiles = "Tiles";
 	public const string Gems = "Gems";
+	public const string Effects = "Effects";
+	public const string ParticleAttractor = "ParticleAttractor";
 	public const string RedGem = "RedGem";
 	public const string Model = "Model";
 	public const string SP = "SP";

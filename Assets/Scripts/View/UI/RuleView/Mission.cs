@@ -36,11 +36,11 @@ public class Mission: MonoBehaviour
 			label.text = nextText;
 
 			label.rectTransform.localScale = Vector3.one;
-			label.rectTransform.DOScale(1.18f, .5f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBack);
+			// label.rectTransform.DOScale(1.25f, .5f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBack);
 
 			var squash = DOTween.Sequence();
 			squash.OnStart(() => image.rectTransform.localScale = Vector3.one);
-			squash.Append(image.rectTransform.DOScale(new Vector3(1.18f, 0.82f, 1), 0.24f));
+			squash.Append(image.rectTransform.DOScale(new Vector3(1.08f, 0.92f, 1), 0.24f));
 			squash.Append(image.rectTransform.DOScale(new Vector3(1, 1, 1), 1.36f).SetEase(Ease.OutElastic));
 		}
 	}

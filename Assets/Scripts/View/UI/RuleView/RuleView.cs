@@ -18,25 +18,21 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
 {
     public EventAllMissionAchieved OnAllMissionAchieved = new EventAllMissionAchieved();
     
-    [SerializeField]
-	Moves moves;
-    [SerializeField]
-	List<Mission> missions;
-    [SerializeField]
-    ModalPanel modalPanel;
-    [SerializeField]
-    ParticleSystem firework;
+    [SerializeField] Moves movesView;
+    [SerializeField] List<Mission> missionViews;
+    [SerializeField] ParticleSystem firework;
+
     int currentLevel;
     string levelText;
     SceneLoader sceneLoader;
     const int END_OF_LEVEL = 8;
     CompletedRuleInfo completedRuleInfo;
+    Dictionary<int, Color32> colorByGemType;
     
     public override void Start()
 	{
 		base.Start();
 
-        Controller.ShowMissions();
         ValidateInfomation();
         currentLevel = PlayerPrefs.GetInt(Literals.LatestLevel);
 
@@ -56,13 +52,22 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
                 Invoke("GoToNext", 2f);
             }
         };
+
+        colorByGemType = new Dictionary<int, Color32>() {
+            { 10, new Color32(191,   0,   9, 255) },
+            { 20, new Color32(  0,  71, 172, 255) },
+            { 30, new Color32( 61, 171,   0, 255) },
+            { 40, new Color32(168,  49, 185, 255) },
+            { 50, new Color32(249, 160,  16, 255) },
+            { 60, new Color32(243, 217,  16, 255) },
+        };
     }
 
     public override void OnDestroy()
     {
         base.OnDestroy();
         
-        missions = null;
+        missionViews = null;
         completedRuleInfo = null;
     }
 
@@ -81,12 +86,28 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
         }
     }
 
-    public void OnGemRemoved(int gemID)
+    public void OnGemRemoved(int gemType, Vector3 sourcePosition, Transform parent)
     {
         if (Model.hasCompleted) { return; }
 
-        Controller.OnGemRemoved(gemID);
-        ValidateInfomation();
+        var indexOfGemRemoved = Controller.OnGemRemoved(gemType);
+        var durationOfEffect = 0f;
+        
+        if (indexOfGemRemoved != -1) 
+        {
+            var particleAttractor = ResourceCache.Instantiate<ParticleAttractor>(Literals.ParticleAttractor, parent);
+            particleAttractor.SetPositions(
+                sourcePosition, 
+                missionViews[indexOfGemRemoved].Icon.transform.position
+            );
+            particleAttractor.SetColor(colorByGemType[gemType]);
+            particleAttractor.Play();
+            particleAttractor.OnComplete(() => {
+                ValidateInfomation();
+            });
+            durationOfEffect = particleAttractor.Duration;
+        }
+        
         if (Model.hasCompleted) 
         {
             completedRuleInfo.ruleModel = Model;
@@ -129,12 +150,12 @@ public class RuleView: BaseView<RuleModel, RuleController<RuleModel>>
 
     void ValidateInfomation()
     {
-        moves.SetMoves(Model.movesLeft);
+        movesView.SetMoves(Model.movesLeft);
 
         var missionLefts = Model.missionsLeft;
-        for (var i = 0; i < missions.Count; i++)
+        for (var i = 0; i < missionViews.Count; i++)
         {
-            var missionView = missions[i];
+            var missionView = missionViews[i];
 
             if (i < missionLefts.Count) {
                 missionView.SetMission(missionLefts[i]);
