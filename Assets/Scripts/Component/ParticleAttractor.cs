@@ -6,10 +6,10 @@ using UnityEngine;
 public class ParticleAttractor: PooledObject 
 {
 	public float Duration {
-		get { return ps.main.duration; }
+		get { return rootPS.main.duration; }
 	}
 	Action onComplete;
-	ParticleSystem ps;
+	ParticleSystem rootPS;
 	ParticleSystem.Particle[] m_Particles;
 	public Transform target;
 	public float speed = 5f;
@@ -19,12 +19,12 @@ public class ParticleAttractor: PooledObject
 	
 	void Awake () 
 	{
-		ps = GetComponent<ParticleSystem>();
+		rootPS = GetComponent<ParticleSystem>();
 		if (!GetComponent<Transform>())
 		{
 			GetComponent<Transform>();
 		}
-		m_Particles = new ParticleSystem.Particle[ps.main.maxParticles];
+		m_Particles = new ParticleSystem.Particle[rootPS.main.maxParticles];
 	}
 
 	void OnDestroy()
@@ -36,7 +36,7 @@ public class ParticleAttractor: PooledObject
     public void SetPositions(Vector3 sourcePosition, Vector3 targetPosition)
     {
 		transform.position = new Vector3(sourcePosition.x, sourcePosition.y, sourcePosition.z - 1);
-		target.position = new Vector3(targetPosition.x, targetPosition.y, targetPosition.z - 1);
+		target.position = new Vector3(targetPosition.x, targetPosition.y, sourcePosition.z - 1);
     }
 
 	public void SetColor(Color color)
@@ -57,24 +57,35 @@ public class ParticleAttractor: PooledObject
 
 	IEnumerator StartPlay()
 	{
-		ps.Play();
-		
-		currentTime = 0;
+		rootPS.Play();
+
+		var totalDuration = 0f;
+		foreach (var ps in GetComponentsInChildren<ParticleSystem>())
+		{
+			totalDuration += ps.main.duration;
+		}
+
+		var currentTime = 0f;
 		while (true)
 		{
-			float progress = currentTime / ps.main.duration;
-			
-			numParticlesAlive = ps.GetParticles(m_Particles);
+			float progressOfRoot = currentTime / rootPS.main.duration;
+			float progressOfAll = currentTime / totalDuration;
+
+			numParticlesAlive = rootPS.GetParticles(m_Particles);
 			for (int i = 0; i < numParticlesAlive; i++)
 			{
 				m_Particles[i].position = Vector3.LerpUnclamped(
-					m_Particles[i].position, target.position, progress
+					m_Particles[i].position, target.position, progressOfRoot
 				);
 			}
-			ps.SetParticles(m_Particles, numParticlesAlive);
+			rootPS.SetParticles(m_Particles, numParticlesAlive);
 
-			if (progress >= 1.4) {
-				if (onComplete != null) { onComplete(); }
+			if (progressOfRoot >= 1.0 && onComplete != null) {
+				onComplete();
+				onComplete = null;
+			}
+
+			if (progressOfAll >= 1.0) {
 				ReturnToPool();
 				yield break;
 			}
