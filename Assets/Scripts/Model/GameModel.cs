@@ -97,9 +97,9 @@ public class GameModel: BaseModel
         Position.Setup(levelModel);
 
         matchingTypes = new List<GemType>();
-        foreach (var availableGemType in levelModel.availableGemTypes)
+        foreach (var gemTypeAvailable in levelModel.gemTypesAvailable)
         {
-            matchingTypes.Add((GemType)availableGemType);
+            matchingTypes.Add((GemType)gemTypeAvailable);
         }
 
         var gems = levelModel.gems;
