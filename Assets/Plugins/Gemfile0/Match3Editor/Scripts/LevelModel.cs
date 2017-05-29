@@ -8,12 +8,12 @@ public struct MissionModel
 [System.Serializable]
 public class LevelModel 
 {
+    public int cols;
+    public int rows;
+    public int moves;
     public int[] gems;
     public int[] tiles;
     public int[] gravities;
     public MissionModel[] missions;
     public int[] gemTypesAvailable;
-    public int moves;
-    public int cols;
-    public int rows;
 }

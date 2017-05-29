@@ -1,0 +1,1 @@
+0,  Immovable,Assets/Plugins/Gemfile0/Match3Editor/Textures/Tiles/Immovable.png;1,  Movable,Assets/Plugins/Gemfile0/Match3Editor/Textures/Tiles/Movable.png;2,  Breakable,Assets/Plugins/Gemfile0/Match3Editor/Textures/Tiles/Breakable.png
