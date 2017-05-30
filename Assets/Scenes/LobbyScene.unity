@@ -221,61 +221,6 @@ Prefab:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 1451974990}
-    - target: {fileID: 224749359887969418, guid: 1ef0346ea01f32f419f1c30329291237,
-        type: 2}
-      propertyPath: m_AnchorMin.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 224749359887969418, guid: 1ef0346ea01f32f419f1c30329291237,
-        type: 2}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 224749359887969418, guid: 1ef0346ea01f32f419f1c30329291237,
-        type: 2}
-      propertyPath: m_AnchoredPosition.x
-      value: 540
-      objectReference: {fileID: 0}
-    - target: {fileID: 224749359887969418, guid: 1ef0346ea01f32f419f1c30329291237,
-        type: 2}
-      propertyPath: m_SizeDelta.x
-      value: 1080
-      objectReference: {fileID: 0}
-    - target: {fileID: 224749359887969418, guid: 1ef0346ea01f32f419f1c30329291237,
-        type: 2}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224733719485588920, guid: 1ef0346ea01f32f419f1c30329291237,
-        type: 2}
-      propertyPath: m_AnchorMin.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 224733719485588920, guid: 1ef0346ea01f32f419f1c30329291237,
-        type: 2}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 224733719485588920, guid: 1ef0346ea01f32f419f1c30329291237,
-        type: 2}
-      propertyPath: m_AnchoredPosition.x
-      value: 540
-      objectReference: {fileID: 0}
-    - target: {fileID: 224733719485588920, guid: 1ef0346ea01f32f419f1c30329291237,
-        type: 2}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224733719485588920, guid: 1ef0346ea01f32f419f1c30329291237,
-        type: 2}
-      propertyPath: m_SizeDelta.x
-      value: 1080
-      objectReference: {fileID: 0}
-    - target: {fileID: 224733719485588920, guid: 1ef0346ea01f32f419f1c30329291237,
-        type: 2}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 1ef0346ea01f32f419f1c30329291237, type: 2}
   m_IsPrefabParent: 0

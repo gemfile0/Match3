@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿#if UNITY_EDITOR
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEditor;
@@ -63,6 +64,7 @@ public class BaseMap: MonoBehaviour
 
 		if (mapItems.Count > 0) 
 		{
+			// Draw a guideline
 			Gizmos.color = Color.gray;
 			var row = 0;
 			var maxColumns = mapSize.x;
@@ -84,6 +86,14 @@ public class BaseMap: MonoBehaviour
 			var centerX = pos.x + (gridSize.x / 2);
 			var centerY = pos.y - (gridSize.y / 2);
 			Gizmos.DrawWireCube(new Vector2(centerX, centerY), gridSize);
+
+			// Draw each items
+			Gizmos.color = Color.cyan;
+			foreach (var child in root.GetComponentsInChildren<ItemInfo>())
+			{
+				Gizmos.DrawWireCube(child.transform.localPosition, item);
+			}
 		}
 	}
 }
+#endif

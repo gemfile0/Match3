@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿#if UNITY_EDITOR
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,3 +14,4 @@ public class Level: MonoBehaviour
 	public MissionModel[] missions;
     public int[] gemTypesAvailable;
 }
+#endif

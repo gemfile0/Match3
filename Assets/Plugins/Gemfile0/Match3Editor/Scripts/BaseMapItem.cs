@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEngine;
 
 [System.Serializable]
 public class BaseMapItem
@@ -13,3 +14,4 @@ public class BaseMapItem
 		return string.Format("{0},{1},{2}", id, name, path);
 	}
 }
+#endif

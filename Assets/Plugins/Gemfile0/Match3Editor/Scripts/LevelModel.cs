@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 [System.Serializable]
 public struct MissionModel
 {
@@ -17,3 +18,4 @@ public class LevelModel
     public MissionModel[] missions;
     public int[] gemTypesAvailable;
 }
+#endif
