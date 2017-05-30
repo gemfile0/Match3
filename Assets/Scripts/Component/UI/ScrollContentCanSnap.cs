@@ -11,7 +11,6 @@ public class ScrollContentCanSnap: MonoBehaviour
 
 	float[] positiveDistances;
 	float[] distances;
-	bool dragging;
 	int itemDistance;
 
 	SwipeInput swipeInput;
@@ -35,16 +34,6 @@ public class ScrollContentCanSnap: MonoBehaviour
 	void Update()
 	{
 		Rearrange();
-	}
-	
-	public void StartDrag()
-	{
-		dragging = true;
-	}
-
-	public void EndDrag()
-	{
-		dragging = false;
 	}
 
 	void SubscribeInput()

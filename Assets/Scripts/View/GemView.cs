@@ -69,6 +69,7 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     public void Reveal() 
     {
         gameObject.SetActive(true);
+        transform.DOScale(new Vector3(0.92f, 1.08f, 1), 0.12f);
 
         if (!isDebugging) { return; }
         var color = spriteRenderer.color;

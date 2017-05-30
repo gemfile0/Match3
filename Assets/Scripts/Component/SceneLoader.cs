@@ -17,6 +17,7 @@ public class SceneLoader: MonoBehaviour
 		var loadingCover = Object.Instantiate<LoadingCover>(loadingCoverPrefab);
 		loadingCover.transform.SetParent(transform, false);
 		
+		DOTween.Clear();
 		yield return loadingCover.Show(sceneName);
 
 		AsyncOperation asyncOpeartion = SceneManager.LoadSceneAsync(sceneName);
@@ -25,7 +26,6 @@ public class SceneLoader: MonoBehaviour
 			yield return loadingCover.Progress(asyncOpeartion.progress);
 		}
 
-		DOTween.Clear();
 		System.GC.Collect();
 
 		yield return loadingCover.Progress(1);
