@@ -59,6 +59,7 @@ public class GameView: BaseView<GameModel, GameController<GameModel>>
 	GameObject gems;
 	GameObject gravities;
 	GameObject effects;
+	public bool IsPlaying { get { return isPlaying; } }
 	bool isPlaying;
 	bool isPlayingBefore;
 

@@ -11,9 +11,11 @@ public class BaseScene: MonoBehaviour
 
 		ResourceCache.LoadAll(Literals.Common);
 		ResourceCache.LoadAll(SceneManager.GetActiveScene().name);
-		if (GameObject.Find(Literals.RootCanvas) == null) 
+
+		var rootCanvas = GameObject.Find(Literals.RootCanvas);
+		if (rootCanvas == null) 
 		{
-			ResourceCache.Instantiate(Literals.RootCanvas);
+			rootCanvas = ResourceCache.Instantiate(Literals.RootCanvas);
 		}
 
 		if (GameObject.Find(Literals.MatchSound) == null) 
@@ -31,8 +33,7 @@ public class BaseScene: MonoBehaviour
 
 #if DISABLE_FPS
 #else
-		var rootCanvas = GameObject.Find(Literals.RootCanvas);
-		if (rootCanvas != null)
+		if (rootCanvas != null && GameObject.Find(Literals.FPSPanel) == null)
 		{
 			ResourceCache.Load(Literals.FPSPanel);
 			var fpsPanel = ResourceCache.Instantiate(Literals.FPSPanel);

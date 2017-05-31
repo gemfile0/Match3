@@ -8,10 +8,10 @@ public class RuleController<M> : BaseController<M>
 {
     internal void ShowMissions()
     {
-		foreach (var mission in Model.missionsLeft)
-		{
-        	Debug.Log("Mission : " + mission.gemID + ", " + mission.howMany + ", " + Model.hasCompleted);
-		}
+		// foreach (var mission in Model.missionsLeft)
+		// {
+        	// Debug.Log("Mission : " + mission.gemID + ", " + mission.howMany + ", " + Model.hasCompleted);
+		// }
     }
 
     public void OnPhaseNext()

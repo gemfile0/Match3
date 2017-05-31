@@ -62,7 +62,6 @@ public class ScrollContentCanSnap: MonoBehaviour
 		{
 			distances[i] = center.position.x - items[i].position.x;
 			positiveDistances[i] = Mathf.Abs(distances[i]);
-
 			if (distances[i] > 50)
 			{
 				float currentX = items[i].anchoredPosition.x;

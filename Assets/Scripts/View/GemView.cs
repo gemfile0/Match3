@@ -55,10 +55,13 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
     
     public void Squash() 
     {
+        // if it does in disappearing already
+        if (transform.localScale.x < .9f && transform.localScale.y < .9f) { return; }
+
         var squash = DOTween.Sequence();
         squash.OnStart(() => transform.localScale = Vector3.one);
         squash.Append(transform.DOScale(new Vector3(1.08f, 0.92f, 1), 0.12f));
-        squash.Append(transform.DOScale(new Vector3(1, 1, 1), 0.68f).SetEase(Ease.OutElastic));
+        squash.Append(transform.DOScale(Vector3.one, 0.68f).SetEase(Ease.OutElastic));
         
         if (!isDebugging) { return; }
         spriteRenderer.GetPropertyBlock(mpb);
@@ -138,18 +141,18 @@ public class GemView: BaseView<GemModel, GemController<GemModel>>
         if (withAnimation)
         {
             if (object.Equals(combiningPosition, default(Vector2))) { 
-                transform.DOScale(new Vector3(0, 0, 0), .295f).OnComplete(() => {
+                transform.DOScale(Vector3.zero, .295f).OnComplete(() => {
                     base.ReturnToPool();
-                    transform.localScale = new Vector3(1, 1, 1);    
+                    transform.localScale = Vector3.one;    
                 }).SetEase(Ease.OutCirc);
                 MatchSound.Instance.Play("Pop");
             } 
             else {
                 var sequence = DOTween.Sequence().OnComplete(() => {
                     base.ReturnToPool();
-                    transform.localScale = new Vector3(1, 1, 1); 
+                    transform.localScale = Vector3.one; 
                 });
-                sequence.Insert(0, transform.DOScale(new Vector3(0, 0, 0), .295f).SetEase(Ease.OutCirc));
+                sequence.Insert(0, transform.DOScale(Vector3.zero, .295f).SetEase(Ease.OutCirc));
                 sequence.Insert(0, transform.DOLocalMove(combiningPosition, .295f));
                 MatchSound.Instance.Play("Bite");
             }

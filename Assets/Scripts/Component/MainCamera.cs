@@ -10,7 +10,7 @@ public class MainCamera : MonoBehaviour
 	void Start()
 	{
 		postProcessingBehaviour = GetComponent<PostProcessingBehaviour>();
-		postProcessingBehaviour.enabled = false;
+		postProcessingBehaviour.profile.depthOfField.enabled = false;
 
 		ModalPanel.Instance.OnVisbileChanged.AddListener(OnModalVisibleChanged);
 	}
@@ -22,6 +22,6 @@ public class MainCamera : MonoBehaviour
 
 	void OnModalVisibleChanged(bool isVisible)
 	{
-		postProcessingBehaviour.enabled = isVisible;
+		postProcessingBehaviour.profile.depthOfField.enabled = isVisible;
 	}
 }

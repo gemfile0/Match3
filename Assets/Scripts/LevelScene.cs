@@ -36,6 +36,11 @@ public class LevelScene: BaseScene
 
 	public void LoadLobbyScene()
 	{
+		if (gameView.IsPlaying) {
+			Toast.Show("A coroutine is still running.", .8f);
+			return;
+		}
+		
 		var sceneLoader = GameObject.Find(Literals.SceneLoader).GetComponent<SceneLoader>();
 		sceneLoader.Load(Literals.LobbyScene);
 		MatchSound.Instance.Play("Back");

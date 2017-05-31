@@ -72,9 +72,9 @@ MonoBehaviour:
     m_Enabled: 1
     m_Settings:
       focusDistance: 1
-      aperture: 4
-      focalLength: 50
-      useCameraFov: 1
+      aperture: 5
+      focalLength: 20
+      useCameraFov: 0
       kernelSize: 0
   motionBlur:
     m_Enabled: 0

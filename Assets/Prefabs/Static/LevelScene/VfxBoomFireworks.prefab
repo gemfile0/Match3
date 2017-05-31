@@ -79,7 +79,7 @@ ParticleSystem:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1583660792495680}
   serializedVersion: 5
-  lengthInSec: 5
+  lengthInSec: 4
   simulationSpeed: 1
   looping: 1
   prewarm: 0
@@ -129,14 +129,14 @@ ParticleSystem:
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 1109201725
+  randomSeed: 465866052
   InitialModule:
     serializedVersion: 3
     enabled: 1
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 5
+      scalar: 4
       minScalar: 0.10000001
       maxCurve:
         serializedVersion: 2
@@ -807,7 +807,7 @@ ParticleSystem:
     x:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0
+      scalar: 2.0676339
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -848,7 +848,7 @@ ParticleSystem:
     y:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0
+      scalar: 2.0676339
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -889,7 +889,7 @@ ParticleSystem:
     curve:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 6.2029
+      scalar: 6.1959186
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -1514,7 +1514,7 @@ ParticleSystem:
     magnitude:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 1
+      scalar: 0.6
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -1554,13 +1554,13 @@ ParticleSystem:
         m_RotationOrder: 4
     separateAxis: 0
     inWorldSpace: 0
-    dampen: 0.25
+    dampen: 0.4
   NoiseModule:
     enabled: 1
     strength:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.6
+      scalar: 1.5
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -1681,7 +1681,7 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     separateAxes: 0
-    frequency: 0.5
+    frequency: 0.8
     damping: 1
     octaves: 1
     octaveMultiplier: 0.5
@@ -2066,7 +2066,7 @@ ParticleSystem:
     curve:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.7853982
+      scalar: 1.7453293
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -3164,7 +3164,7 @@ ParticleSystem:
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 68007272
+  randomSeed: -1451816928
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -3200,8 +3200,8 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 88
-      minScalar: 55
+      scalar: 70
+      minScalar: 50
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -3512,7 +3512,7 @@ ParticleSystem:
     serializedVersion: 4
     enabled: 1
     type: 4
-    angle: 15
+    angle: 12
     length: 5
     boxX: 1
     boxY: 1
@@ -4589,7 +4589,7 @@ ParticleSystem:
         m_RotationOrder: 4
     separateAxis: 0
     inWorldSpace: 0
-    dampen: 0.07
+    dampen: 0.05
   NoiseModule:
     enabled: 1
     strength:

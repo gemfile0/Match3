@@ -38,7 +38,7 @@ public class Mission: MonoBehaviour
 			squash = DOTween.Sequence();
 			squash.OnStart(() => image.rectTransform.localScale = Vector3.one);
 			squash.Append(image.rectTransform.DOScale(new Vector3(1.08f, 0.92f, 1), 0.24f));
-			squash.Append(image.rectTransform.DOScale(new Vector3(1, 1, 1), 1.36f).SetEase(Ease.OutElastic));
+			squash.Append(image.rectTransform.DOScale(Vector3.one, 1.36f).SetEase(Ease.OutElastic));
 			squash.SetAutoKill(false);
 			squash.Pause();
 		}
