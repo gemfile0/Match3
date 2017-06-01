@@ -155,6 +155,10 @@ public class GOSequence: IUpdater
 				currentTime = 1;
 				hasCompleted = true;
 			}
+			else 
+			{
+				hasCompleted = false;
+			}
 
 			currentTime = Ease(currentTime) * duration;
 			for(var i = 0; i < items.Count; i++)
